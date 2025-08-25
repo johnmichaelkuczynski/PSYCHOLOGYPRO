@@ -6,6 +6,38 @@ import { Progress } from "@/components/ui/progress";
 import { useStreaming } from "@/hooks/use-streaming";
 import { apiRequest } from "@/lib/queryClient";
 
+// Strip markdown formatting from text
+function stripMarkdown(text: string): string {
+  return text
+    // Remove headers (### ## #)
+    .replace(/^#{1,6}\s*/gm, '')
+    // Remove bold (**text** or __text__)
+    .replace(/\*\*(.*?)\*\*/g, '$1')
+    .replace(/__(.*?)__/g, '$1')
+    // Remove italic (*text* or _text_)
+    .replace(/\*(.*?)\*/g, '$1')
+    .replace(/_(.*?)_/g, '$1')
+    // Remove strikethrough (~~text~~)
+    .replace(/~~(.*?)~~/g, '$1')
+    // Remove inline code (`text`)
+    .replace(/`(.*?)`/g, '$1')
+    // Remove code blocks (```text```)
+    .replace(/```[\s\S]*?```/g, '')
+    // Remove links [text](url)
+    .replace(/\[([^\]]+)\]\([^)]+\)/g, '$1')
+    // Remove horizontal rules (--- or ***)
+    .replace(/^[-*]{3,}$/gm, '')
+    // Remove list markers (- or * or +)
+    .replace(/^[\s]*[-*+]\s*/gm, '')
+    // Remove numbered lists (1. 2. etc)
+    .replace(/^[\s]*\d+\.\s*/gm, '')
+    // Remove block quotes (>)
+    .replace(/^>\s*/gm, '')
+    // Clean up extra whitespace
+    .replace(/\n\s*\n\s*\n/g, '\n\n')
+    .trim();
+}
+
 interface ResultsPanelProps {
   analysisId: string | null;
   onDiscussionToggle: () => void;
@@ -53,13 +85,13 @@ export default function ResultsPanel({ analysisId, onDiscussionToggle }: Results
   useEffect(() => {
     if (streamData) {
       if (streamData.type === "summary") {
-        setSummary(streamData.content || "");
+        setSummary(stripMarkdown(streamData.content || ""));
       } else if (streamData.type === "raw_stream") {
         // Show pure raw streaming content immediately - NO FILTERING
         if (streamData.batchNumber && streamData.rawContent) {
           setStreamingContent(prev => ({
             ...prev,
-            [streamData.batchNumber!]: streamData.rawContent!
+            [streamData.batchNumber!]: stripMarkdown(streamData.rawContent!)
           }));
           setCurrentBatch(streamData.batchNumber);
         }
@@ -71,7 +103,7 @@ export default function ResultsPanel({ analysisId, onDiscussionToggle }: Results
               batchNumber: streamData.batchNumber!,
               questions: [{ 
                 question: `Batch ${streamData.batchNumber} - Raw LLM Response`,
-                response: streamData.finalRawResponse!,
+                response: stripMarkdown(streamData.finalRawResponse!),
                 score: 0,
                 isComplete: true 
               }],
