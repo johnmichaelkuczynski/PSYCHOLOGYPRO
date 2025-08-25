@@ -9,9 +9,9 @@ interface LLMSelectorProps {
 
 const LLM_OPTIONS: { key: LLMProviderType; label: string; available: boolean }[] = [
   { key: "zhi1", label: "ZHI 1", available: true },
-  { key: "zhi2", label: "ZHI 2", available: false },
-  { key: "zhi3", label: "ZHI 3", available: false },
-  { key: "zhi4", label: "ZHI 4", available: false },
+  { key: "zhi2", label: "ZHI 2", available: true },
+  { key: "zhi3", label: "ZHI 3", available: true },
+  { key: "zhi4", label: "ZHI 4", available: true },
 ];
 
 export default function LLMSelector({ selectedLLM, onLLMChange }: LLMSelectorProps) {
@@ -25,18 +25,12 @@ export default function LLMSelector({ selectedLLM, onLLMChange }: LLMSelectorPro
           <Button
             key={option.key}
             variant={selectedLLM === option.key ? "default" : "outline"}
-            className={`btn-llm ${!option.available ? "opacity-50 cursor-not-allowed" : ""}`}
-            onClick={() => option.available && onLLMChange(option.key)}
-            disabled={!option.available}
+            className="btn-llm"
+            onClick={() => onLLMChange(option.key)}
             data-testid={`llm-${option.key}`}
           >
             <Bot className="mr-2 h-4 w-4" />
             {option.label}
-            {!option.available && (
-              <span className="ml-auto text-xs bg-gray-200 px-2 py-1 rounded">
-                Soon
-              </span>
-            )}
           </Button>
         ))}
       </div>
