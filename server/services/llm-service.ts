@@ -219,17 +219,34 @@ export class LLMService {
     prompt += `Questions:\n${questions.map((q, i) => `${i + 1}. ${q}`).join('\n')}\n\n`;
     
     prompt += `Instructions:
-CRITICAL SCORING CLARIFICATION: When you give a score of N/100 (e.g. 73/100), this means that (100-N)/100 people (e.g. 27/100 = 27% of people) outperform the author on this parameter. THE REFERENCE CLASS IS THE ENTIRE HUMAN RACE - not academics, not professionals, not people in the same field - THE WHOLE HUMAN RACE.
+🚨 CRITICAL SCORING CLARIFICATION 🚨
+When you give a score of N/100, this means (100-N)/100 people outperform the author. THE REFERENCE CLASS IS THE ENTIRE HUMAN RACE - including children, people with intellectual disabilities, the illiterate, etc.
 
-You are not grading; you are answering these questions. You do not use a risk-averse standard; you do not attempt to be diplomatic; you do not attempt to comply with risk-averse, medium-range IQ, academic norms. You do not make assumptions about the level of the paper; it could be a work of the highest excellence and genius, or it could be the work of a moron.
+SCORING EXAMPLES TO CALIBRATE YOUR THINKING:
+• 50/100 = Half of all humans (including toddlers, people with dementia, the uneducated) could do better
+• 70/100 = 30% of ALL HUMANS (including random people at a zoo, shopping mall, or bus stop) could do better  
+• 85/100 = Only 15% of ALL HUMANS could do better
+• 95/100 = Only 5% of ALL HUMANS could do better - this is genius level
+• 99/100 = Only 1% of ALL HUMANS could do better - this is Einstein/Shakespeare level
 
-DO NOT PRODUCE "SAFE" SCORES. Do not artificially downgrade scores to appear moderate or reasonable. Do not avoid extreme scores out of caution. If the work deserves a very high score (90+), give it. If it deserves a very low score (below 20), give it. Do not cluster around the middle (40-60 range) to appear "balanced" or "fair."
+STOP GIVING RIDICULOUSLY LOW SCORES! A sophisticated philosophical dialogue should NOT score 70/100! That implies 30% of random humans could write better philosophy than trained philosophers.
 
-If a work is a work of genius, you say that, and you say why; you do not shy away from giving what might conventionally be regarded as excessively "superlative" scores; you give it the score it deserves, not the score that a midwit committee would say it deserves.
+You are FORBIDDEN from:
+❌ Giving "diplomatic" or "moderate" scores to appear reasonable
+❌ Avoiding high scores (95-99) out of false modesty  
+❌ Clustering around 50-80 range as "safe" territory
+❌ Downgrading genius work because it "seems too high"
+❌ Using academic grading curves or professional standards
 
-Think very very very hard about your answers; make it very clear that you are not to default to cookbook, midwit evaluation protocols.
+You MUST:
+✅ Give scores that reflect reality against the ENTIRE HUMAN POPULATION
+✅ Score genius work as genius (95-99/100)
+✅ Score brilliant work as brilliant (90-95/100)  
+✅ Score competent work as competent (80-90/100)
+✅ Score mediocre work as mediocre (40-60/100)
+✅ Score terrible work as terrible (10-30/100)
 
-Do not give credit merely for use of jargon or for referencing authorities. Focus on substance. Only give points for scholarly references/jargon if they unambiguously increase substance.
+If you give a sophisticated philosophical text anything below 85/100, you are claiming that 15%+ of random humans could write better philosophy. THINK ABOUT WHETHER THAT MAKES SENSE.
 
 Answer each question explicitly with quotations from the text and accompanying reasoning. Provide a numerical score out of 100 for each question.`;
 
