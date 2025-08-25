@@ -16,7 +16,7 @@ export class LLMService {
     zhi2: {
       apiKey: process.env.ANTHROPIC_API_KEY || process.env.API_KEY || "",
       baseUrl: "https://api.anthropic.com", 
-      model: "claude-sonnet-4-20250514",
+      model: "claude-3-5-sonnet-20241022",
     },
     zhi3: {
       apiKey: process.env.DEEPSEEK_API_KEY || process.env.API_KEY || "",
