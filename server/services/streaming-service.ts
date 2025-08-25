@@ -154,14 +154,11 @@ export class StreamingService {
       (chunk) => {
         fullResponse += chunk;
         
-        // Parse the response to extract individual question answers
-        const parsedResponse = this.parseQuestionResponses(fullResponse, questions);
-        
+        // Stream the raw response immediately as it comes in
         this.broadcastToStream(analysis.id, {
-          type: "batch",
+          type: "streaming_response",
           batchNumber,
-          questions: parsedResponse,
-          isComplete: false,
+          rawContent: fullResponse,
           timestamp: new Date().toLocaleTimeString("en-US", {
             hour: "numeric",
             minute: "2-digit", 
@@ -174,7 +171,7 @@ export class StreamingService {
       // Stream is handled by the onChunk callback
     }
 
-    // Mark batch as complete
+    // Mark batch as complete with final parsed response
     const finalParsed = this.parseQuestionResponses(fullResponse, questions);
     this.broadcastToStream(analysis.id, {
       type: "batch",
