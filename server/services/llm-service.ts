@@ -41,24 +41,72 @@ export class LLMService {
       throw new Error(`API key not configured for ${provider}`);
     }
 
-    // For now, only implement OpenAI (ZHI 1) - the others will be added later
-    if (provider !== "zhi1") {
-      throw new Error(`Provider ${provider} not yet implemented. Please use ZHI 1 for now.`);
-    }
-
     try {
-      const headers = {
-        "Authorization": `Bearer ${config.apiKey}`,
-        "Content-Type": "application/json",
-      };
-      
-      const requestBody = {
-        model: config.model,
-        messages,
-        stream: true,
-      };
+      let headers: Record<string, string>;
+      let requestBody: any;
+      let endpoint: string;
 
-      const response = await fetch(`${config.baseUrl}/chat/completions`, {
+      // Configure request based on provider
+      switch (provider) {
+        case "zhi1": // OpenAI
+          headers = {
+            "Authorization": `Bearer ${config.apiKey}`,
+            "Content-Type": "application/json",
+          };
+          requestBody = {
+            model: config.model,
+            messages,
+            stream: true,
+          };
+          endpoint = `${config.baseUrl}/chat/completions`;
+          break;
+
+        case "zhi2": // Anthropic
+          headers = {
+            "x-api-key": config.apiKey,
+            "Content-Type": "application/json",
+            "anthropic-version": "2023-06-01",
+          };
+          requestBody = {
+            model: config.model,
+            messages,
+            stream: true,
+            max_tokens: 4000,
+          };
+          endpoint = `${config.baseUrl}/v1/messages`;
+          break;
+
+        case "zhi3": // DeepSeek
+          headers = {
+            "Authorization": `Bearer ${config.apiKey}`,
+            "Content-Type": "application/json",
+          };
+          requestBody = {
+            model: config.model,
+            messages,
+            stream: true,
+          };
+          endpoint = `${config.baseUrl}/chat/completions`;
+          break;
+
+        case "zhi4": // Perplexity
+          headers = {
+            "Authorization": `Bearer ${config.apiKey}`,
+            "Content-Type": "application/json",
+          };
+          requestBody = {
+            model: config.model,
+            messages,
+            stream: true,
+          };
+          endpoint = `${config.baseUrl}/chat/completions`;
+          break;
+
+        default:
+          throw new Error(`Unsupported provider: ${provider}`);
+      }
+
+      const response = await fetch(endpoint, {
         method: "POST",
         headers,
         body: JSON.stringify(requestBody),
@@ -93,7 +141,7 @@ export class LLMService {
 
               try {
                 const parsed = JSON.parse(data);
-                const content = parsed.choices?.[0]?.delta?.content || null;
+                const content = this.extractContentFromResponse(parsed, provider);
                 
                 if (content) {
                   onChunk?.(content);
@@ -118,12 +166,16 @@ export class LLMService {
   private extractContentFromResponse(parsed: any, provider: LLMProviderType): string | null {
     switch (provider) {
       case "zhi1": // OpenAI
-      case "zhi3": // DeepSeek
+      case "zhi3": // DeepSeek  
       case "zhi4": // Perplexity
         return parsed.choices?.[0]?.delta?.content || null;
         
       case "zhi2": // Anthropic
-        return parsed.delta?.text || parsed.content_block?.text || null;
+        // Anthropic has different response format
+        if (parsed.type === "content_block_delta") {
+          return parsed.delta?.text || null;
+        }
+        return null;
         
       default:
         return null;
