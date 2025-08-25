@@ -1,7 +1,7 @@
 import { useState, useEffect, useRef } from "react";
 
 interface StreamData {
-  type: "summary" | "batch" | "question" | "delay" | "complete" | "error" | "streaming_response";
+  type: "summary" | "batch" | "question" | "delay" | "complete" | "error" | "streaming_response" | "stopped" | "raw_stream" | "batch_complete";
   content?: string;
   batchNumber?: number;
   questions?: any[];
@@ -9,6 +9,8 @@ interface StreamData {
   progress?: number;
   error?: string;
   rawContent?: string;
+  finalRawResponse?: string;
+  message?: string;
   [key: string]: any;
 }
 

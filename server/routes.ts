@@ -69,6 +69,18 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // Stop analysis
+  app.delete("/api/analyses/:id", async (req, res) => {
+    try {
+      const analysisId = req.params.id;
+      streamingService.stopAnalysis(analysisId);
+      res.json({ message: "Analysis stopped" });
+    } catch (error) {
+      console.error("Stop analysis error:", error);
+      res.status(500).json({ error: "Failed to stop analysis" });
+    }
+  });
+
   // Stream analysis results
   app.get("/api/analyses/:id/stream", (req, res) => {
     const analysisId = req.params.id;
