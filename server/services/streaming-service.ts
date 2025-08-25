@@ -86,10 +86,27 @@ export class StreamingService {
     await this.storage.updateAnalysisStatus(analysisId, "streaming");
 
     try {
-      if (analysis.type === "cognitive") {
-        await this.processCognitiveAnalysis(analysis);
-      } else {
-        throw new Error(`Analysis type ${analysis.type} not yet implemented`);
+      switch (analysis.type) {
+        case "cognitive":
+          await this.processCognitiveAnalysis(analysis);
+          break;
+        case "comprehensive-cognitive":
+          await this.processComprehensiveCognitiveAnalysis(analysis);
+          break;
+        case "psychological":
+          await this.processPsychologicalAnalysis(analysis);
+          break;
+        case "comprehensive-psychological":
+          await this.processComprehensivePsychologicalAnalysis(analysis);
+          break;
+        case "psychopathological":
+          await this.processPsychopathologicalAnalysis(analysis);
+          break;
+        case "comprehensive-psychopathological":
+          await this.processComprehensivePsychopathologicalAnalysis(analysis);
+          break;
+        default:
+          throw new Error(`Analysis type ${analysis.type} not implemented`);
       }
 
       await this.storage.updateAnalysisStatus(analysisId, "completed");
@@ -306,5 +323,68 @@ export class StreamingService {
     }
     
     return content;
+  }
+
+  // Process Comprehensive Cognitive Analysis
+  private async processComprehensiveCognitiveAnalysis(analysis: Analysis): Promise<void> {
+    await this.streamSummary(analysis);
+    const questions = this.llmService.getComprehensiveCognitiveQuestions();
+    const batches = this.createBatches(questions, 5);
+    await this.processBatches(analysis, batches);
+  }
+
+  // Process Psychological Analysis  
+  private async processPsychologicalAnalysis(analysis: Analysis): Promise<void> {
+    await this.streamSummary(analysis);
+    const questions = this.llmService.getPsychologicalQuestions();
+    const batches = this.createBatches(questions, 5);
+    await this.processBatches(analysis, batches);
+  }
+
+  // Process Comprehensive Psychological Analysis
+  private async processComprehensivePsychologicalAnalysis(analysis: Analysis): Promise<void> {
+    await this.streamSummary(analysis);
+    const questions = this.llmService.getComprehensivePsychologicalQuestions();
+    const batches = this.createBatches(questions, 5);
+    await this.processBatches(analysis, batches);
+  }
+
+  // Process Psychopathological Analysis
+  private async processPsychopathologicalAnalysis(analysis: Analysis): Promise<void> {
+    await this.streamSummary(analysis);
+    const questions = this.llmService.getPsychopathologicalQuestions();
+    const batches = this.createBatches(questions, 5);
+    await this.processBatches(analysis, batches);
+  }
+
+  // Process Comprehensive Psychopathological Analysis
+  private async processComprehensivePsychopathologicalAnalysis(analysis: Analysis): Promise<void> {
+    await this.streamSummary(analysis);
+    const questions = this.llmService.getComprehensivePsychopathologicalQuestions();
+    const batches = this.createBatches(questions, 5);
+    await this.processBatches(analysis, batches);
+  }
+
+  // Shared batch processing logic
+  private async processBatches(analysis: Analysis, batches: string[][]): Promise<void> {
+    for (let i = 0; i < batches.length; i++) {
+      const currentStream = this.activeStreams.get(analysis.id);
+      if (!currentStream || !currentStream.isActive) {
+        return;
+      }
+
+      const batch = batches[i];
+      const batchNumber = i + 1;
+      await this.processBatch(analysis, batch, batchNumber);
+
+      const delayStream = this.activeStreams.get(analysis.id);
+      if (!delayStream || !delayStream.isActive) {
+        return;
+      }
+
+      if (i < batches.length - 1) {
+        await this.streamDelay(analysis.id, 10000);
+      }
+    }
   }
 }
