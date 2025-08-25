@@ -55,17 +55,12 @@ export class FileService {
   }
 
   private async parsePDF(buffer: Buffer): Promise<string> {
-    // In a real implementation, you would use a library like pdf-parse
-    // For now, we'll simulate PDF parsing
     try {
-      // This is a placeholder - in production, use pdf-parse or similar
-      const text = buffer.toString('utf-8');
-      // Simple heuristic to detect if it's actually a PDF
-      if (text.startsWith('%PDF')) {
-        throw new Error('PDF parsing requires pdf-parse library - not implemented in this demo');
-      }
-      return text;
+      const pdfParse = await import('pdf-parse');
+      const data = await pdfParse.default(buffer);
+      return data.text;
     } catch (error) {
+      console.error('PDF parsing error:', error);
       throw new Error('Failed to parse PDF file');
     }
   }
