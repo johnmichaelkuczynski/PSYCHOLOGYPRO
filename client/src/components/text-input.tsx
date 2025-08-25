@@ -22,6 +22,24 @@ export default function TextInput({ selectedFunction, selectedLLM, onAnalysisSta
   const [wordCount, setWordCount] = useState<number>(0);
   const { toast } = useToast();
 
+  // Client-side chunking function that matches server logic
+  const chunkText = (text: string, maxWords: number = 1000): string[] => {
+    const words = text.trim().split(/\s+/).filter(word => word.length > 0);
+    const chunks: string[] = [];
+    
+    for (let i = 0; i < words.length; i += maxWords) {
+      const chunk = words.slice(i, i + maxWords).join(' ');
+      chunks.push(chunk);
+    }
+    
+    return chunks;
+  };
+
+  // Helper function to count words
+  const countWords = (text: string): number => {
+    return text.trim().split(/\s+/).filter(word => word.length > 0).length;
+  };
+
   const handleFileUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (!file) return;
@@ -186,7 +204,7 @@ export default function TextInput({ selectedFunction, selectedLLM, onAnalysisSta
           Text to Analyze
           {textContent && (
             <span className="ml-2 text-xs text-gray-500">
-              ({textContent.trim().split(/\s+/).filter(word => word.length > 0).length} words)
+              ({countWords(textContent)} words)
             </span>
           )}
         </label>
@@ -196,15 +214,27 @@ export default function TextInput({ selectedFunction, selectedLLM, onAnalysisSta
           placeholder="Paste or type the text you want to analyze here. The text input area will expand to accommodate longer texts..."
           value={textContent}
           onChange={(e) => {
-            setTextContent(e.target.value);
-            setChunks(null); // Clear chunks when manually editing
+            const newText = e.target.value;
+            setTextContent(newText);
+            
+            // Auto-chunk pasted text if over 1000 words
+            const newWordCount = countWords(newText);
+            setWordCount(newWordCount);
+            
+            if (newWordCount > 1000) {
+              const newChunks = chunkText(newText, 1000);
+              setChunks(newChunks);
+              setSelectedChunks([0]); // Default to first chunk
+            } else {
+              setChunks(null);
+              setSelectedChunks([0]);
+            }
           }}
           data-testid="text-input-textarea"
         />
-        {textContent && textContent.trim().split(/\s+/).filter(word => word.length > 0).length > 1000 && (
-          <p className="text-sm text-yellow-600 mt-2">
-            ⚠️ Your text has {textContent.trim().split(/\s+/).filter(word => word.length > 0).length} words. 
-            Texts over 1000 words may hit token limits. Consider uploading as a file for automatic chunking.
+        {textContent && countWords(textContent) > 1000 && !chunks && (
+          <p className="text-sm text-blue-600 mt-2">
+            ✅ Your text has {countWords(textContent)} words and has been automatically chunked for analysis.
           </p>
         )}
       </div>
