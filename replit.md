@@ -88,6 +88,8 @@ Preferred communication style: Simple, everyday language.
 
 ✅ **Scoring Direction Fix**: Fixed critical scoring confusion where LLMs were inverting positive/negative trait scoring. Now clearly distinguishes between positive traits (score HIGH for good performance) and negative traits (score HIGH for bad performance)
 
+✅ **Uniform Scoring System**: Implemented consistent scoring where HIGH SCORES ALWAYS mean good/positive evaluation across all questions. Eliminated confusion where some questions used low scores for good performance (e.g., "Is it phony?" now gives 95/100 for authentic text, not 5/100)
+
 ✅ **NEW ANALYSIS Button**: Added prominent button for complete state reset, clearing all analysis data and returning to fresh start state
 
 ✅ **Markdown Stripping**: Implemented clean text display removing ** ### *** formatting from LLM responses
