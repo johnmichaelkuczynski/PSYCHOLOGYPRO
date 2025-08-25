@@ -31,6 +31,7 @@ export default function ResultsPanel({ analysisId, onDiscussionToggle }: Results
   const [totalBatches] = useState(4); // 18 questions / 5 per batch = 4 batches (rounded)
   const [summary, setSummary] = useState("");
   const [delayProgress, setDelayProgress] = useState(0);
+  const [streamingContent, setStreamingContent] = useState<{[key: number]: string}>({});
   
   const { isStreaming, streamData, error } = useStreaming(analysisId, isPaused);
 
@@ -38,6 +39,15 @@ export default function ResultsPanel({ analysisId, onDiscussionToggle }: Results
     if (streamData) {
       if (streamData.type === "summary") {
         setSummary(streamData.content || "");
+      } else if (streamData.type === "streaming_response") {
+        // Show raw streaming content immediately
+        if (streamData.batchNumber && streamData.rawContent) {
+          setStreamingContent(prev => ({
+            ...prev,
+            [streamData.batchNumber!]: streamData.rawContent!
+          }));
+          setCurrentBatch(streamData.batchNumber);
+        }
       } else if (streamData.type === "batch") {
         if (streamData.batchNumber && streamData.questions) {
           setBatches(prev => {
@@ -56,6 +66,14 @@ export default function ResultsPanel({ analysisId, onDiscussionToggle }: Results
             }
             return [...prev, batchData];
           });
+          // Clear streaming content when batch is complete
+          if (streamData.isComplete) {
+            setStreamingContent(prev => {
+              const newState = { ...prev };
+              delete newState[streamData.batchNumber!];
+              return newState;
+            });
+          }
         }
         if (streamData.batchNumber) {
           setCurrentBatch(streamData.batchNumber);
@@ -147,12 +165,31 @@ export default function ResultsPanel({ analysisId, onDiscussionToggle }: Results
             </div>
           )}
 
+          {/* Real-time Streaming Content */}
+          {Object.entries(streamingContent).map(([batchNumber, content]) => (
+            <div key={`streaming-${batchNumber}`} className="analysis-batch" data-testid={`streaming-batch-${batchNumber}`}>
+              <div className="flex items-center space-x-2 mb-3">
+                <h4 className="font-medium text-gray-900">Batch {batchNumber} - Live Response</h4>
+                <div className="flex-1 h-px bg-gray-200"></div>
+                <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-primary"></div>
+              </div>
+              
+              <div className="question-card">
+                <div className="text-sm text-gray-700 leading-relaxed">
+                  <div className="streaming-text font-mono whitespace-pre-wrap">
+                    {content}
+                  </div>
+                </div>
+              </div>
+            </div>
+          ))}
+
           {/* Question Batches */}
           <div className="space-y-6">
             {batches.map((batch) => (
               <div key={batch.batchNumber} className="analysis-batch" data-testid={`batch-${batch.batchNumber}`}>
                 <div className="flex items-center space-x-2 mb-3">
-                  <h4 className="font-medium text-gray-900">Batch {batch.batchNumber}</h4>
+                  <h4 className="font-medium text-gray-900">Batch {batch.batchNumber} - Final Results</h4>
                   <div className="flex-1 h-px bg-gray-200"></div>
                   <span className="text-xs text-gray-500">{batch.timestamp}</span>
                 </div>
