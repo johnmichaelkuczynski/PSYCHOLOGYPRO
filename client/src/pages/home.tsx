@@ -14,6 +14,11 @@ export default function Home() {
   const [isDiscussionOpen, setIsDiscussionOpen] = useState(false);
   const [currentAnalysisId, setCurrentAnalysisId] = useState<string | null>(null);
 
+  const handleNewAnalysis = () => {
+    setCurrentAnalysisId(null);
+    setIsDiscussionOpen(false);
+  };
+
   return (
     <div className="min-h-screen bg-gray-50">
       {/* Header */}
@@ -87,6 +92,7 @@ export default function Home() {
                 <ResultsPanel 
                   analysisId={currentAnalysisId}
                   onDiscussionToggle={() => setIsDiscussionOpen(true)}
+                  onNewAnalysis={handleNewAnalysis}
                 />
               </div>
             </div>

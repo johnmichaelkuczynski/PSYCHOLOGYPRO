@@ -41,6 +41,7 @@ function stripMarkdown(text: string): string {
 interface ResultsPanelProps {
   analysisId: string | null;
   onDiscussionToggle: () => void;
+  onNewAnalysis: () => void;
 }
 
 interface QuestionResponse {
@@ -57,7 +58,7 @@ interface BatchData {
   timestamp: string;
 }
 
-export default function ResultsPanel({ analysisId, onDiscussionToggle }: ResultsPanelProps) {
+export default function ResultsPanel({ analysisId, onDiscussionToggle, onNewAnalysis }: ResultsPanelProps) {
   const [isPaused, setIsPaused] = useState(false);
   const [batches, setBatches] = useState<BatchData[]>([]);
   const [currentBatch, setCurrentBatch] = useState(1);
@@ -68,6 +69,16 @@ export default function ResultsPanel({ analysisId, onDiscussionToggle }: Results
   const [isStopped, setIsStopped] = useState(false);
   
   const { isStreaming, streamData, error } = useStreaming(analysisId, isPaused);
+
+  const handleClearAnalysis = () => {
+    setBatches([]);
+    setSummary("");
+    setStreamingContent({});
+    setCurrentBatch(1);
+    setDelayProgress(0);
+    setIsStopped(false);
+    onNewAnalysis();
+  };
 
   const stopAnalysis = async () => {
     if (!analysisId) return;
@@ -142,6 +153,16 @@ export default function ResultsPanel({ analysisId, onDiscussionToggle }: Results
         <div className="bg-gray-50 px-6 py-4 border-b border-gray-200">
           <div className="flex items-center justify-between">
             <h3 className="text-lg font-medium text-gray-900">Analysis Results</h3>
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={handleClearAnalysis}
+              className="text-blue-600 border-blue-200 hover:bg-blue-50"
+              data-testid="new-analysis-button-welcome"
+            >
+              <Brain className="h-4 w-4 mr-2" />
+              NEW ANALYSIS
+            </Button>
           </div>
         </div>
 
@@ -167,6 +188,16 @@ export default function ResultsPanel({ analysisId, onDiscussionToggle }: Results
         <div className="flex items-center justify-between">
           <h3 className="text-lg font-medium text-gray-900">Analysis Results</h3>
           <div className="flex items-center space-x-2">
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={handleClearAnalysis}
+              className="text-blue-600 border-blue-200 hover:bg-blue-50"
+              data-testid="new-analysis-button"
+            >
+              <Brain className="h-4 w-4 mr-2" />
+              NEW ANALYSIS
+            </Button>
             {!isStopped && isStreaming && (
               <Button
                 variant="destructive"
