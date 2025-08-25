@@ -1,5 +1,6 @@
 import * as fs from 'fs';
 import * as path from 'path';
+import * as mammoth from 'mammoth';
 
 export class FileService {
   async parseFile(file: Express.Multer.File): Promise<string> {
@@ -43,17 +44,11 @@ export class FileService {
   }
 
   private async parseWord(buffer: Buffer): Promise<string> {
-    // In a real implementation, you would use mammoth.js for .docx files
-    // For now, we'll simulate Word parsing
     try {
-      // This is a placeholder - in production, use mammoth for .docx files
-      const text = buffer.toString('utf-8');
-      // Simple check for Word file format
-      if (text.includes('PK') && text.includes('word/')) {
-        throw new Error('Word document parsing requires mammoth library - not implemented in this demo');
-      }
-      return text;
+      const result = await mammoth.extractRawText({ buffer });
+      return result.value;
     } catch (error) {
+      console.error('Word parsing error:', error);
       throw new Error('Failed to parse Word document');
     }
   }
