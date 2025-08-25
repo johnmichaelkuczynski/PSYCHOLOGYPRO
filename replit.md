@@ -86,6 +86,8 @@ Preferred communication style: Simple, everyday language.
 
 ✅ **Enhanced Scoring Calibration**: Completely overhauled LLM scoring instructions with explicit examples and warnings against conservative scoring, clarifying that reference class is entire human population including children, disabled, illiterate
 
+✅ **Scoring Direction Fix**: Fixed critical scoring confusion where LLMs were inverting positive/negative trait scoring. Now clearly distinguishes between positive traits (score HIGH for good performance) and negative traits (score HIGH for bad performance)
+
 ✅ **NEW ANALYSIS Button**: Added prominent button for complete state reset, clearing all analysis data and returning to fresh start state
 
 ✅ **Markdown Stripping**: Implemented clean text display removing ** ### *** formatting from LLM responses
