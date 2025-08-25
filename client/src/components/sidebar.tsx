@@ -46,10 +46,7 @@ const FUNCTIONS = [
   },
 ];
 
-const RECENT_ANALYSES = [
-  "Analysis_2024_01_15.txt",
-  "Research_Paper_Analysis.txt",
-];
+const RECENT_ANALYSES: string[] = [];
 
 export default function Sidebar({ selectedFunction, onFunctionChange }: SidebarProps) {
   return (
@@ -80,23 +77,25 @@ export default function Sidebar({ selectedFunction, onFunctionChange }: SidebarP
           })}
         </div>
 
-        <div className="mt-8">
-          <div className="text-xs font-semibold text-gray-400 uppercase tracking-wider mb-3">
-            Recent Analyses
+        {RECENT_ANALYSES.length > 0 && (
+          <div className="mt-8">
+            <div className="text-xs font-semibold text-gray-400 uppercase tracking-wider mb-3">
+              Recent Analyses
+            </div>
+            <div className="space-y-2">
+              {RECENT_ANALYSES.map((filename, index) => (
+                <div 
+                  key={index}
+                  className="flex items-center text-sm text-gray-600 hover:text-gray-900 cursor-pointer p-2 rounded hover:bg-gray-50"
+                  data-testid={`recent-analysis-${index}`}
+                >
+                  <FileText className="mr-2 h-4 w-4 text-gray-400" />
+                  <span className="truncate">{filename}</span>
+                </div>
+              ))}
+            </div>
           </div>
-          <div className="space-y-2">
-            {RECENT_ANALYSES.map((filename, index) => (
-              <div 
-                key={index}
-                className="flex items-center text-sm text-gray-600 hover:text-gray-900 cursor-pointer p-2 rounded hover:bg-gray-50"
-                data-testid={`recent-analysis-${index}`}
-              >
-                <FileText className="mr-2 h-4 w-4 text-gray-400" />
-                <span className="truncate">{filename}</span>
-              </div>
-            ))}
-          </div>
-        </div>
+        )}
       </nav>
     </aside>
   );
