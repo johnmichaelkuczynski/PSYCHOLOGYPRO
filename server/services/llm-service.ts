@@ -248,6 +248,20 @@ You MUST:
 
 If you give a sophisticated philosophical text anything below 85/100, you are claiming that 15%+ of random humans could write better philosophy. THINK ABOUT WHETHER THAT MAKES SENSE.
 
+🚨 CRITICAL SCORING DIRECTION 🚨
+POSITIVE TRAIT QUESTIONS (score HIGH for good performance):
+- "IS IT INSIGHTFUL?" → High score = very insightful (good)
+- "DOES IT DEVELOP POINTS?" → High score = develops points well (good)  
+- "DOES IT OPERATE SKILLFULLY WITH LOGIC?" → High score = very logical (good)
+- "ARE THE POINTS FRESH?" → High score = very fresh/original (good)
+
+NEGATIVE TRAIT QUESTIONS (score HIGH for bad performance):
+- "ARE THE STATEMENTS AMBIGUOUS?" → High score = very ambiguous (bad)
+- "IS THE WRITING EVASIVE?" → High score = very evasive (bad)
+- "IS IT PHONY?" → High score = very phony (bad)
+
+EXAMPLE: If text is exceptionally clear and unambiguous, score "ARE THE STATEMENTS AMBIGUOUS?" as 5-15/100 (meaning almost no humans are less ambiguous). If text is very confusing and ambiguous, score it 85-95/100 (meaning most humans are clearer).
+
 Answer each question explicitly with quotations from the text and accompanying reasoning. Provide a numerical score out of 100 for each question.`;
 
     return prompt;
