@@ -17,6 +17,9 @@ export default function TextInput({ selectedFunction, selectedLLM, onAnalysisSta
   const [additionalContext, setAdditionalContext] = useState("");
   const [isAnalyzing, setIsAnalyzing] = useState(false);
   const [uploadedFile, setUploadedFile] = useState<File | null>(null);
+  const [chunks, setChunks] = useState<string[] | null>(null);
+  const [selectedChunk, setSelectedChunk] = useState<number>(0);
+  const [wordCount, setWordCount] = useState<number>(0);
   const { toast } = useToast();
 
   const handleFileUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -61,13 +64,24 @@ export default function TextInput({ selectedFunction, selectedLLM, onAnalysisSta
       
       if (!response.ok) throw new Error("Failed to parse file");
       
-      const { text } = await response.json();
-      setTextContent(text);
+      const parseResult = await response.json();
+      setTextContent(parseResult.text);
+      setWordCount(parseResult.wordCount);
       
-      toast({
-        title: "File uploaded successfully",
-        description: `Parsed ${file.name} and extracted text content.`,
-      });
+      if (parseResult.chunks) {
+        setChunks(parseResult.chunks);
+        setSelectedChunk(0);
+        toast({
+          title: "File uploaded successfully",
+          description: `Parsed ${file.name} (${parseResult.wordCount} words). Text divided into ${parseResult.chunks.length} chunks for analysis.`,
+        });
+      } else {
+        setChunks(null);
+        toast({
+          title: "File uploaded successfully",
+          description: `Parsed ${file.name} (${parseResult.wordCount} words).`,
+        });
+      }
     } catch (error) {
       toast({
         title: "File upload failed",
@@ -90,9 +104,12 @@ export default function TextInput({ selectedFunction, selectedLLM, onAnalysisSta
     setIsAnalyzing(true);
     
     try {
+      // Use selected chunk if chunks exist, otherwise use full text
+      const contentToAnalyze = chunks ? chunks[selectedChunk] : textContent;
+      
       const response = await apiRequest("POST", "/api/analyses", {
         type: selectedFunction,
-        textContent,
+        textContent: contentToAnalyze,
         additionalContext: additionalContext.trim() || undefined,
         llmProvider: selectedLLM,
       });
@@ -157,15 +174,29 @@ export default function TextInput({ selectedFunction, selectedLLM, onAnalysisSta
       <div className="flex-1 flex flex-col">
         <label htmlFor="text-input" className="block text-sm font-medium text-gray-700 mb-2">
           Text to Analyze
+          {textContent && (
+            <span className="ml-2 text-xs text-gray-500">
+              ({textContent.trim().split(/\s+/).filter(word => word.length > 0).length} words)
+            </span>
+          )}
         </label>
         <Textarea
           id="text-input"
           className="flex-1 resize-none"
           placeholder="Paste or type the text you want to analyze here. The text input area will expand to accommodate longer texts..."
           value={textContent}
-          onChange={(e) => setTextContent(e.target.value)}
+          onChange={(e) => {
+            setTextContent(e.target.value);
+            setChunks(null); // Clear chunks when manually editing
+          }}
           data-testid="text-input-textarea"
         />
+        {textContent && textContent.trim().split(/\s+/).filter(word => word.length > 0).length > 1000 && (
+          <p className="text-sm text-yellow-600 mt-2">
+            ⚠️ Your text has {textContent.trim().split(/\s+/).filter(word => word.length > 0).length} words. 
+            Texts over 1000 words may hit token limits. Consider uploading as a file for automatic chunking.
+          </p>
+        )}
       </div>
 
       {/* Additional Information */}
@@ -182,6 +213,42 @@ export default function TextInput({ selectedFunction, selectedLLM, onAnalysisSta
           data-testid="additional-context-textarea"
         />
       </div>
+
+      {/* Chunk Selection (when text is too long) */}
+      {chunks && (
+        <div className="mt-4">
+          <label className="block text-sm font-medium text-gray-700 mb-2">
+            Text Chunks ({wordCount} words total)
+          </label>
+          <div className="bg-yellow-50 border border-yellow-200 rounded-md p-4">
+            <p className="text-sm text-yellow-800 mb-3">
+              Your text was divided into {chunks.length} chunks of ~1000 words each to stay within token limits. 
+              Select which chunk to analyze:
+            </p>
+            <div className="grid grid-cols-1 gap-2">
+              {chunks.map((chunk, index) => (
+                <button
+                  key={index}
+                  onClick={() => setSelectedChunk(index)}
+                  className={`text-left p-3 rounded border ${
+                    selectedChunk === index
+                      ? "bg-blue-50 border-blue-300 text-blue-900"
+                      : "bg-white border-gray-200 hover:bg-gray-50"
+                  }`}
+                  data-testid={`chunk-${index}`}
+                >
+                  <div className="font-medium text-sm">
+                    Chunk {index + 1} ({chunk.split(' ').length} words)
+                  </div>
+                  <div className="text-xs text-gray-600 mt-1 truncate">
+                    {chunk.substring(0, 100)}...
+                  </div>
+                </button>
+              ))}
+            </div>
+          </div>
+        </div>
+      )}
 
       {/* Start Analysis Button */}
       <div className="mt-6">

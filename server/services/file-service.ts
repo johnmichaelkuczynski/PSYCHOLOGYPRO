@@ -2,25 +2,52 @@ import * as fs from 'fs';
 import * as path from 'path';
 import * as mammoth from 'mammoth';
 
+interface ParseResult {
+  text: string;
+  chunks?: string[];
+  wordCount: number;
+}
+
 export class FileService {
-  async parseFile(file: Express.Multer.File): Promise<string> {
+  async parseFile(file: Express.Multer.File): Promise<ParseResult> {
     const { mimetype, buffer, originalname } = file;
 
     try {
+      let text: string;
+      
       switch (mimetype) {
         case 'text/plain':
-          return buffer.toString('utf-8');
+          text = buffer.toString('utf-8');
+          break;
 
         case 'application/pdf':
-          return await this.parsePDF(buffer);
+          text = await this.parsePDF(buffer);
+          break;
 
         case 'application/msword':
         case 'application/vnd.openxmlformats-officedocument.wordprocessingml.document':
-          return await this.parseWord(buffer);
+          text = await this.parseWord(buffer);
+          break;
 
         default:
           throw new Error(`Unsupported file type: ${mimetype}`);
       }
+
+      const wordCount = this.countWords(text);
+      
+      if (wordCount > 1000) {
+        const chunks = this.chunkText(text, 1000);
+        return {
+          text,
+          chunks,
+          wordCount
+        };
+      }
+
+      return {
+        text,
+        wordCount
+      };
     } catch (error) {
       console.error('File parsing error:', error);
       throw new Error(`Failed to parse ${originalname}: ${error instanceof Error ? error.message : String(error)}`);
@@ -77,5 +104,21 @@ export class FileService {
     }
 
     return { valid: true };
+  }
+
+  private countWords(text: string): number {
+    return text.trim().split(/\s+/).filter(word => word.length > 0).length;
+  }
+
+  private chunkText(text: string, maxWords: number): string[] {
+    const words = text.trim().split(/\s+/);
+    const chunks: string[] = [];
+    
+    for (let i = 0; i < words.length; i += maxWords) {
+      const chunk = words.slice(i, i + maxWords).join(' ');
+      chunks.push(chunk);
+    }
+    
+    return chunks;
   }
 }

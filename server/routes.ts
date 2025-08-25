@@ -28,8 +28,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
         return res.status(400).json({ error: "No file provided" });
       }
 
-      const text = await fileService.parseFile(req.file);
-      res.json({ text });
+      const parseResult = await fileService.parseFile(req.file);
+      res.json(parseResult);
     } catch (error) {
       console.error("File parsing error:", error);
       res.status(500).json({ error: "Failed to parse file" });
