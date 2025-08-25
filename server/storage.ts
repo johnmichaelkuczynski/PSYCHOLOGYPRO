@@ -24,11 +24,12 @@ export class MemStorage implements IStorage {
     const id = randomUUID();
     const analysis: Analysis = {
       ...insertAnalysis,
+      additionalContext: insertAnalysis.additionalContext || null,
       id,
       status: "pending",
       results: null,
-      createdAt: new Date().toISOString(),
-      updatedAt: new Date().toISOString(),
+      createdAt: new Date(),
+      updatedAt: new Date(),
     };
     this.analyses.set(id, analysis);
     return analysis;
@@ -42,7 +43,7 @@ export class MemStorage implements IStorage {
     const analysis = this.analyses.get(id);
     if (analysis) {
       analysis.status = status;
-      analysis.updatedAt = new Date().toISOString();
+      analysis.updatedAt = new Date();
       this.analyses.set(id, analysis);
     }
   }
@@ -51,7 +52,7 @@ export class MemStorage implements IStorage {
     const analysis = this.analyses.get(id);
     if (analysis) {
       analysis.results = results;
-      analysis.updatedAt = new Date().toISOString();
+      analysis.updatedAt = new Date();
       this.analyses.set(id, analysis);
     }
   }
@@ -61,7 +62,7 @@ export class MemStorage implements IStorage {
     const discussion: Discussion = {
       ...insertDiscussion,
       id,
-      createdAt: new Date().toISOString(),
+      createdAt: new Date(),
     };
     this.discussions.set(id, discussion);
     return discussion;

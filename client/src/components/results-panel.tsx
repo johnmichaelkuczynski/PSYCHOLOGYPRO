@@ -37,21 +37,33 @@ export default function ResultsPanel({ analysisId, onDiscussionToggle }: Results
   useEffect(() => {
     if (streamData) {
       if (streamData.type === "summary") {
-        setSummary(streamData.content);
+        setSummary(streamData.content || "");
       } else if (streamData.type === "batch") {
-        setBatches(prev => {
-          const existingBatch = prev.find(b => b.batchNumber === streamData.batchNumber);
-          if (existingBatch) {
-            return prev.map(b => b.batchNumber === streamData.batchNumber 
-              ? { ...b, ...streamData } 
-              : b
-            );
-          }
-          return [...prev, streamData];
-        });
-        setCurrentBatch(streamData.batchNumber);
+        if (streamData.batchNumber && streamData.questions) {
+          setBatches(prev => {
+            const existingBatch = prev.find(b => b.batchNumber === streamData.batchNumber);
+            const batchData: BatchData = {
+              batchNumber: streamData.batchNumber!,
+              questions: streamData.questions!,
+              isComplete: streamData.isComplete || false,
+              timestamp: streamData.timestamp || new Date().toLocaleTimeString()
+            };
+            if (existingBatch) {
+              return prev.map(b => b.batchNumber === streamData.batchNumber 
+                ? batchData
+                : b
+              );
+            }
+            return [...prev, batchData];
+          });
+        }
+        if (streamData.batchNumber) {
+          setCurrentBatch(streamData.batchNumber);
+        }
       } else if (streamData.type === "delay") {
-        setDelayProgress(streamData.progress);
+        if (streamData.progress !== undefined) {
+          setDelayProgress(streamData.progress);
+        }
       }
     }
   }, [streamData]);

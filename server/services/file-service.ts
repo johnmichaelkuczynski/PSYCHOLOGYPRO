@@ -22,7 +22,7 @@ export class FileService {
       }
     } catch (error) {
       console.error('File parsing error:', error);
-      throw new Error(`Failed to parse ${originalname}: ${error.message}`);
+      throw new Error(`Failed to parse ${originalname}: ${error instanceof Error ? error.message : String(error)}`);
     }
   }
 

@@ -22,7 +22,7 @@ export default function DiscussionModal({ isOpen, onClose, analysisId }: Discuss
   const { toast } = useToast();
   const queryClient = useQueryClient();
 
-  const { data: discussions = [], isLoading } = useQuery({
+  const { data: discussions = [], isLoading } = useQuery<Discussion[]>({
     queryKey: ["/api/discussions", analysisId],
     enabled: !!analysisId && isOpen,
   });
@@ -141,7 +141,7 @@ export default function DiscussionModal({ isOpen, onClose, analysisId }: Discuss
               </div>
             ) : (
               <div className="space-y-4">
-                {discussions.map((discussion: Discussion) => (
+                {discussions.map((discussion) => (
                   <div key={discussion.id} className="flex space-x-3" data-testid={`message-${discussion.id}`}>
                     <Avatar className="h-8 w-8 flex-shrink-0">
                       <AvatarFallback>
@@ -158,7 +158,7 @@ export default function DiscussionModal({ isOpen, onClose, analysisId }: Discuss
                           {discussion.sender === "user" ? "You" : "Mind Reader"}
                         </span>
                         <span className="text-gray-500">
-                          {formatTimestamp(discussion.createdAt!)}
+                          {formatTimestamp(discussion.createdAt!.toString())}
                         </span>
                       </div>
                       <div className="mt-1 text-sm text-gray-700">
