@@ -86,50 +86,10 @@ export class StreamingService {
     await this.storage.updateAnalysisStatus(analysisId, "streaming");
 
     try {
-      // Step 1: Generate and stream summary
-      await this.streamSummary(analysis);
-
-      // Step 2: Process questions in batches of 5
-      const questions = this.llmService.getCognitiveQuestions();
-      const batches = this.createBatches(questions, 5);
-
-      for (let i = 0; i < batches.length; i++) {
-        // Check if analysis was stopped
-        const currentStream = this.activeStreams.get(analysisId);
-        if (!currentStream || !currentStream.isActive) {
-          return;
-        }
-
-        const batch = batches[i];
-        const batchNumber = i + 1;
-
-        // Stream batch start
-        this.broadcastToStream(analysisId, {
-          type: "batch",
-          batchNumber,
-          questions: batch.map(q => ({ question: q, response: "", score: 0, isComplete: false })),
-          isComplete: false,
-          timestamp: new Date().toLocaleTimeString("en-US", {
-            hour: "numeric",
-            minute: "2-digit",
-            second: "2-digit",
-            hour12: true,
-          })
-        });
-
-        // Process each question in the batch
-        await this.processBatch(analysis, batch, batchNumber);
-
-        // Check if analysis was stopped before delay
-        const delayStream = this.activeStreams.get(analysisId);
-        if (!delayStream || !delayStream.isActive) {
-          return;
-        }
-
-        // Wait 10 seconds before next batch (except for last batch)
-        if (i < batches.length - 1) {
-          await this.streamDelay(analysisId, 10000);
-        }
+      if (analysis.type === "cognitive") {
+        await this.processCognitiveAnalysis(analysis);
+      } else {
+        throw new Error(`Analysis type ${analysis.type} not yet implemented`);
       }
 
       await this.storage.updateAnalysisStatus(analysisId, "completed");
@@ -141,6 +101,40 @@ export class StreamingService {
     } catch (error) {
       await this.storage.updateAnalysisStatus(analysisId, "error");
       throw error;
+    }
+  }
+
+  private async processCognitiveAnalysis(analysis: Analysis): Promise<void> {
+    // Step 1: Generate and stream summary
+    await this.streamSummary(analysis);
+
+    // Step 2: Process questions in batches of 5
+    const questions = this.llmService.getCognitiveQuestions();
+    const batches = this.createBatches(questions, 5);
+
+    for (let i = 0; i < batches.length; i++) {
+      // Check if analysis was stopped
+      const currentStream = this.activeStreams.get(analysis.id);
+      if (!currentStream || !currentStream.isActive) {
+        return;
+      }
+
+      const batch = batches[i];
+      const batchNumber = i + 1;
+
+      // Process each question in the batch
+      await this.processBatch(analysis, batch, batchNumber);
+
+      // Check if analysis was stopped before delay
+      const delayStream = this.activeStreams.get(analysis.id);
+      if (!delayStream || !delayStream.isActive) {
+        return;
+      }
+
+      // Wait 10 seconds before next batch (except for last batch)
+      if (i < batches.length - 1) {
+        await this.streamDelay(analysis.id, 10000);
+      }
     }
   }
 
