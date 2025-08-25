@@ -125,7 +125,7 @@ export class StreamingService {
     let summary = "";
     
     for await (const chunk of this.llmService.streamResponse(
-      analysis.llmProvider,
+      analysis.llmProvider as any,
       [{ role: "user", content: summaryPrompt }],
       (chunk) => {
         summary += chunk;
@@ -143,13 +143,13 @@ export class StreamingService {
     const prompt = this.llmService.createCognitivePrompt(
       analysis.textContent,
       questions,
-      analysis.additionalContext
+      analysis.additionalContext || undefined
     );
 
     let fullResponse = "";
     
     for await (const chunk of this.llmService.streamResponse(
-      analysis.llmProvider,
+      analysis.llmProvider as any,
       [{ role: "user", content: prompt }],
       (chunk) => {
         fullResponse += chunk;
