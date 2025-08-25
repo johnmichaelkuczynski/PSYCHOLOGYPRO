@@ -19,7 +19,6 @@ export async function parseFile(file: File): Promise<string> {
 export function validateFile(file: File): { valid: boolean; error?: string } {
   const allowedTypes = [
     'text/plain',
-    'application/pdf',
     'application/msword',
     'application/vnd.openxmlformats-officedocument.wordprocessingml.document'
   ];
@@ -27,7 +26,7 @@ export function validateFile(file: File): { valid: boolean; error?: string } {
   if (!allowedTypes.includes(file.type)) {
     return {
       valid: false,
-      error: 'Invalid file type. Only TXT, PDF, DOC, and DOCX files are supported.'
+      error: 'Invalid file type. Only TXT, DOC, and DOCX files are supported.'
     };
   }
 

@@ -28,7 +28,6 @@ export default function TextInput({ selectedFunction, selectedLLM, onAnalysisSta
 
     const allowedTypes = [
       "text/plain",
-      "application/pdf", 
       "application/msword",
       "application/vnd.openxmlformats-officedocument.wordprocessingml.document"
     ];
@@ -36,7 +35,7 @@ export default function TextInput({ selectedFunction, selectedLLM, onAnalysisSta
     if (!allowedTypes.includes(file.type)) {
       toast({
         title: "Invalid file type",
-        description: "Please upload TXT, PDF, DOC, or DOCX files only.",
+        description: "Please upload TXT, DOC, or DOCX files only.",
         variant: "destructive",
       });
       return;
@@ -153,14 +152,14 @@ export default function TextInput({ selectedFunction, selectedLLM, onAnalysisSta
                   name="file-upload"
                   type="file"
                   className="sr-only"
-                  accept=".txt,.doc,.docx,.pdf"
+                  accept=".txt,.doc,.docx"
                   onChange={handleFileUpload}
                   data-testid="file-upload-input"
                 />
               </label>
               <p className="pl-1">or drag and drop</p>
             </div>
-            <p className="text-xs text-gray-500">TXT, DOC, DOCX, PDF up to 10MB</p>
+            <p className="text-xs text-gray-500">TXT, DOC, DOCX up to 10MB</p>
             {uploadedFile && (
               <p className="text-sm text-green-600 font-medium">
                 Uploaded: {uploadedFile.name}
