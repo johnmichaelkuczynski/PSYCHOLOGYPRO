@@ -56,9 +56,26 @@ export class FileService {
 
   private async parsePDF(buffer: Buffer): Promise<string> {
     try {
-      const pdfParse = await import('pdf-parse');
-      const data = await pdfParse.default(buffer);
-      return data.text;
+      const pdfjsLib = await import('pdfjs-dist');
+      
+      const loadingTask = pdfjsLib.getDocument({
+        data: new Uint8Array(buffer),
+        verbosity: 0
+      });
+      
+      const pdf = await loadingTask.promise;
+      let fullText = '';
+      
+      for (let pageNum = 1; pageNum <= pdf.numPages; pageNum++) {
+        const page = await pdf.getPage(pageNum);
+        const textContent = await page.getTextContent();
+        const pageText = textContent.items
+          .map((item: any) => item.str)
+          .join(' ');
+        fullText += pageText + ' ';
+      }
+      
+      return fullText.trim();
     } catch (error) {
       console.error('PDF parsing error:', error);
       throw new Error('Failed to parse PDF file');
