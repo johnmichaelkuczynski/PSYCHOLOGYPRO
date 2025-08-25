@@ -1,6 +1,6 @@
 # Overview
 
-Mind Reader is a cognitive/psychological/psychopathological profiler web application built with a React frontend and Node.js/Express backend. The application serves as a passthrough system that facilitates analysis of text content through multiple AI language models, focusing on cognitive, psychological, and psychopathological assessments. Currently implements the basic cognitive profiling function with plans for comprehensive analysis modules.
+Mind Reader is a cognitive/psychological/psychopathological profiler web application built with a React frontend and Node.js/Express backend. The application serves as a passthrough system that facilitates analysis of text content through multiple AI language models, focusing on cognitive, psychological, and psychopathological assessments. Features full cognitive profiling with real-time streaming, multi-chunk text analysis, and enhanced scoring calibration.
 
 # User Preferences
 
@@ -14,7 +14,9 @@ Preferred communication style: Simple, everyday language.
 - **Styling**: Tailwind CSS with CSS custom properties for theming and responsive design
 - **State Management**: TanStack Query (React Query) for server state management and API caching
 - **Routing**: wouter library for lightweight client-side routing
-- **File Handling**: Custom file parsing utilities supporting TXT, PDF, DOC, and DOCX formats
+- **File Handling**: Custom file parsing utilities supporting TXT, DOC, and DOCX formats (PDF removed after implementation failures)
+- **Text Chunking**: Automatic chunking system for both uploaded files and copy-pasted text over 1000 words
+- **Multi-Chunk Selection**: Advanced chunk selection interface allowing analysis of multiple text segments simultaneously
 
 ## Backend Architecture
 - **Express.js Server**: RESTful API with middleware for request logging and error handling
@@ -37,6 +39,8 @@ Preferred communication style: Simple, everyday language.
 - **Batch Processing**: Questions sent in batches of 5 to manage token limits and response quality
 - **Streaming Service**: Real-time analysis progress with pause/resume functionality
 - **Discussion System**: Post-analysis dialogue capability for result refinement and contestation
+- **Enhanced Scoring System**: Calibrated LLM scoring instructions to prevent artificially low scores by clarifying reference class as entire human population
+- **State Management**: NEW ANALYSIS button for complete state reset and fresh analysis initiation
 
 ## Key Design Patterns
 - **Passthrough Architecture**: Application acts as intermediary without implementing analysis logic
@@ -57,9 +61,9 @@ Preferred communication style: Simple, everyday language.
 - **Drizzle Kit**: Database migration and schema management tools
 
 ## File Processing
-- **Multer**: File upload handling middleware
-- **PDF parsing libraries**: Prepared integration points for pdf-parse
-- **Document processing**: Prepared integration points for mammoth.js (Word documents)
+- **Multer**: File upload handling middleware with 10MB size limit
+- **Document processing**: Mammoth.js for Word document text extraction (DOC/DOCX)
+- **PDF Support**: Deliberately removed after multiple failed implementation attempts
 
 ## UI Component Libraries
 - **Radix UI**: Comprehensive set of accessible UI primitives
@@ -70,3 +74,28 @@ Preferred communication style: Simple, everyday language.
 - **Vite**: Frontend build tool and development server
 - **Replit Integration**: Development environment plugins and error overlays
 - **TypeScript**: Static type checking across the entire codebase
+
+# Recent Changes (August 25, 2025)
+
+## Major Improvements Completed
+✅ **PDF Upload Removal**: After multiple failed attempts with pdf-parse and pdfjs-dist libraries, PDF functionality was completely removed to focus on working features
+
+✅ **Multi-Chunk Selection**: Implemented comprehensive chunk selection system allowing users to select and analyze multiple text chunks simultaneously with checkbox interface and Select All/Deselect All controls
+
+✅ **Automatic Text Chunking**: Added real-time chunking for copy-pasted text over 1000 words, not just uploaded files. Text automatically divides into ~1000 word chunks with immediate chunk selection interface
+
+✅ **Enhanced Scoring Calibration**: Completely overhauled LLM scoring instructions with explicit examples and warnings against conservative scoring, clarifying that reference class is entire human population including children, disabled, illiterate
+
+✅ **NEW ANALYSIS Button**: Added prominent button for complete state reset, clearing all analysis data and returning to fresh start state
+
+✅ **Markdown Stripping**: Implemented clean text display removing ** ### *** formatting from LLM responses
+
+## Current Status
+- **File Support**: TXT, DOC, DOCX (PDF deliberately excluded)
+- **Text Processing**: Automatic chunking for both uploaded and pasted text
+- **Analysis Functions**: All 6 cognitive analysis types fully operational
+- **LLM Integration**: All 4 providers (ZHI 1-4) working with enhanced scoring
+- **User Interface**: Complete chunk selection and state management controls
+
+## User Feedback
+User satisfaction significantly improved with multi-chunk selection and automatic text chunking functionality. PDF removal acknowledged as correct decision after implementation failures.
