@@ -18,7 +18,7 @@ export default function TextInput({ selectedFunction, selectedLLM, onAnalysisSta
   const [isAnalyzing, setIsAnalyzing] = useState(false);
   const [uploadedFile, setUploadedFile] = useState<File | null>(null);
   const [chunks, setChunks] = useState<string[] | null>(null);
-  const [selectedChunk, setSelectedChunk] = useState<number>(0);
+  const [selectedChunks, setSelectedChunks] = useState<number[]>([0]);
   const [wordCount, setWordCount] = useState<number>(0);
   const { toast } = useToast();
 
@@ -69,7 +69,7 @@ export default function TextInput({ selectedFunction, selectedLLM, onAnalysisSta
       
       if (parseResult.chunks) {
         setChunks(parseResult.chunks);
-        setSelectedChunk(0);
+        setSelectedChunks([0]);
         toast({
           title: "File uploaded successfully",
           description: `Parsed ${file.name} (${parseResult.wordCount} words). Text divided into ${parseResult.chunks.length} chunks for analysis.`,
@@ -100,11 +100,22 @@ export default function TextInput({ selectedFunction, selectedLLM, onAnalysisSta
       return;
     }
 
+    if (chunks && selectedChunks.length === 0) {
+      toast({
+        title: "No chunks selected",
+        description: "Please select at least one chunk to analyze.",
+        variant: "destructive",
+      });
+      return;
+    }
+
     setIsAnalyzing(true);
     
     try {
-      // Use selected chunk if chunks exist, otherwise use full text
-      const contentToAnalyze = chunks ? chunks[selectedChunk] : textContent;
+      // Use selected chunks if chunks exist, otherwise use full text
+      const contentToAnalyze = chunks 
+        ? selectedChunks.map(index => chunks[index]).join('\n\n')
+        : textContent;
       
       const response = await apiRequest("POST", "/api/analyses", {
         type: selectedFunction,
@@ -220,30 +231,70 @@ export default function TextInput({ selectedFunction, selectedLLM, onAnalysisSta
             Text Chunks ({wordCount} words total)
           </label>
           <div className="bg-yellow-50 border border-yellow-200 rounded-md p-4">
-            <p className="text-sm text-yellow-800 mb-3">
-              Your text was divided into {chunks.length} chunks of ~1000 words each to stay within token limits. 
-              Select which chunk to analyze:
-            </p>
-            <div className="grid grid-cols-1 gap-2">
-              {chunks.map((chunk, index) => (
+            <div className="flex items-center justify-between mb-3">
+              <p className="text-sm text-yellow-800">
+                Your text was divided into {chunks.length} chunks of ~1000 words each to stay within token limits. 
+                Select which chunks to analyze (multiple selection allowed):
+              </p>
+              <div className="flex gap-2">
                 <button
-                  key={index}
-                  onClick={() => setSelectedChunk(index)}
-                  className={`text-left p-3 rounded border ${
-                    selectedChunk === index
-                      ? "bg-blue-50 border-blue-300 text-blue-900"
-                      : "bg-white border-gray-200 hover:bg-gray-50"
-                  }`}
-                  data-testid={`chunk-${index}`}
+                  onClick={() => setSelectedChunks(chunks.map((_, i) => i))}
+                  className="text-xs px-2 py-1 bg-blue-100 text-blue-700 rounded hover:bg-blue-200"
+                  data-testid="select-all-chunks"
                 >
-                  <div className="font-medium text-sm">
-                    Chunk {index + 1} ({chunk.split(' ').length} words)
-                  </div>
-                  <div className="text-xs text-gray-600 mt-1 truncate">
-                    {chunk.substring(0, 100)}...
-                  </div>
+                  Select All
                 </button>
-              ))}
+                <button
+                  onClick={() => setSelectedChunks([])}
+                  className="text-xs px-2 py-1 bg-gray-100 text-gray-700 rounded hover:bg-gray-200"
+                  data-testid="deselect-all-chunks"
+                >
+                  Deselect All
+                </button>
+              </div>
+            </div>
+            <div className="grid grid-cols-1 gap-2">
+              {chunks.map((chunk, index) => {
+                const isSelected = selectedChunks.includes(index);
+                const toggleChunk = () => {
+                  if (isSelected) {
+                    setSelectedChunks(prev => prev.filter(i => i !== index));
+                  } else {
+                    setSelectedChunks(prev => [...prev, index].sort((a, b) => a - b));
+                  }
+                };
+                
+                return (
+                  <button
+                    key={index}
+                    onClick={toggleChunk}
+                    className={`text-left p-3 rounded border ${
+                      isSelected
+                        ? "bg-blue-50 border-blue-300 text-blue-900"
+                        : "bg-white border-gray-200 hover:bg-gray-50"
+                    }`}
+                    data-testid={`chunk-${index}`}
+                  >
+                    <div className="flex items-center gap-2">
+                      <input
+                        type="checkbox"
+                        checked={isSelected}
+                        onChange={() => {}} // Handled by button click
+                        className="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 rounded"
+                        onClick={(e) => e.stopPropagation()}
+                      />
+                      <div className="flex-1">
+                        <div className="font-medium text-sm">
+                          Chunk {index + 1} ({chunk.split(' ').length} words)
+                        </div>
+                        <div className="text-xs text-gray-600 mt-1 truncate">
+                          {chunk.substring(0, 100)}...
+                        </div>
+                      </div>
+                    </div>
+                  </button>
+                );
+              })}
             </div>
           </div>
         </div>
