@@ -16,7 +16,7 @@ export class LLMService {
     zhi2: {
       apiKey: process.env.ANTHROPIC_API_KEY || process.env.API_KEY || "",
       baseUrl: "https://api.anthropic.com", 
-      model: "claude-3-sonnet-20240229",
+      model: "claude-sonnet-4-20250514",
     },
     zhi3: {
       apiKey: process.env.DEEPSEEK_API_KEY || process.env.API_KEY || "",
@@ -182,7 +182,7 @@ export class LLMService {
     }
   }
 
-  // Generate the cognitive questions as specified in the protocol
+  // Generate questions for each analysis type
   getCognitiveQuestions(): string[] {
     return [
       "IS IT INSIGHTFUL?",
@@ -219,7 +219,9 @@ export class LLMService {
     prompt += `Questions:\n${questions.map((q, i) => `${i + 1}. ${q}`).join('\n')}\n\n`;
     
     prompt += `Instructions:
-A score of N/100 (e.g. 73/100) means that (100-N)/100 (e.g. 27/100) outperform the author with respect to the parameter defined by the question. You are not grading; you are answering these questions. You do not use a risk-averse standard; you do not attempt to be diplomatic; you do not attempt to comply with risk-averse, medium-range IQ, academic norms. You do not make assumptions about the level of the paper; it could be a work of the highest excellence and genius, or it could be the work of a moron.
+CRITICAL SCORING CLARIFICATION: When you give a score of N/100 (e.g. 73/100), this means that (100-N)/100 people (e.g. 27/100 = 27% of people) outperform the author on this parameter. THE REFERENCE CLASS IS THE ENTIRE HUMAN RACE - not academics, not professionals, not people in the same field - THE WHOLE HUMAN RACE.
+
+You are not grading; you are answering these questions. You do not use a risk-averse standard; you do not attempt to be diplomatic; you do not attempt to comply with risk-averse, medium-range IQ, academic norms. You do not make assumptions about the level of the paper; it could be a work of the highest excellence and genius, or it could be the work of a moron.
 
 If a work is a work of genius, you say that, and you say why; you do not shy away from giving what might conventionally be regarded as excessively "superlative" scores; you give it the score it deserves, not the score that a midwit committee would say it deserves.
 
@@ -230,5 +232,82 @@ Do not give credit merely for use of jargon or for referencing authorities. Focu
 Answer each question explicitly with quotations from the text and accompanying reasoning. Provide a numerical score out of 100 for each question.`;
 
     return prompt;
+  }
+
+  // Comprehensive Cognitive Questions (more extensive set)
+  getComprehensiveCognitiveQuestions(): string[] {
+    return [
+      ...this.getCognitiveQuestions(),
+      "DOES THE AUTHOR UNDERSTAND THE FOUNDATIONS OF THE SUBJECT MATTER?",
+      "IS THERE EVIDENCE OF DEEP STRUCTURAL UNDERSTANDING?",
+      "DOES THE WORK TRANSCEND DISCIPLINARY BOUNDARIES MEANINGFULLY?",
+      "IS THE ARGUMENTATION INTERNALLY CONSISTENT ACROSS ALL LEVELS?",
+      "DOES THE AUTHOR ANTICIPATE AND ADDRESS COUNTERARGUMENTS?",
+      "IS THERE SYSTEMATIC INTEGRATION OF MULTIPLE PERSPECTIVES?",
+      "DOES THE WORK DEMONSTRATE MASTERY OF RELEVANT METHODOLOGIES?",
+      "IS THE SCOPE APPROPRIATE TO THE CLAIMS BEING MADE?"
+    ];
+  }
+
+  // Psychological Questions  
+  getPsychologicalQuestions(): string[] {
+    return [
+      "WHAT PSYCHOLOGICAL PROFILE EMERGES FROM THE WRITING STYLE?",
+      "DOES THE AUTHOR DISPLAY INTELLECTUAL COURAGE OR COWARDICE?",
+      "IS THERE EVIDENCE OF INTELLECTUAL HONESTY OR SELF-DECEPTION?",
+      "WHAT LEVEL OF EMOTIONAL INTELLIGENCE IS DEMONSTRATED?",
+      "DOES THE AUTHOR SHOW CAPACITY FOR SELF-REFLECTION?",
+      "IS THERE EVIDENCE OF PSYCHOLOGICAL RIGIDITY OR FLEXIBILITY?",
+      "WHAT MOTIVATIONAL PATTERNS CAN BE INFERRED?",
+      "DOES THE WRITING SUGGEST NARCISSISTIC OR HUMBLE TENDENCIES?",
+      "IS THERE EVIDENCE OF ANXIETY OR CONFIDENCE IN THE PRESENTATION?",
+      "WHAT LEVEL OF PSYCHOLOGICAL SOPHISTICATION IS DISPLAYED?"
+    ];
+  }
+
+  // Comprehensive Psychological Questions
+  getComprehensivePsychologicalQuestions(): string[] {
+    return [
+      ...this.getPsychologicalQuestions(),
+      "WHAT ATTACHMENT PATTERNS ARE SUGGESTED BY THE ARGUMENTATION STYLE?",
+      "DOES THE AUTHOR DISPLAY MATURE OR IMMATURE DEFENSE MECHANISMS?",
+      "IS THERE EVIDENCE OF EMOTIONAL REGULATION OR DYSREGULATION?",
+      "WHAT LEVEL OF EMPATHY IS DEMONSTRATED TOWARD OPPOSING VIEWPOINTS?",
+      "DOES THE WORK SUGGEST HIGH OR LOW EMOTIONAL QUOTIENT?",
+      "IS THERE EVIDENCE OF PROJECTION OR PSYCHOLOGICAL INSIGHT?",
+      "WHAT PERSONALITY TRAITS EMERGE FROM THE COMMUNICATION PATTERNS?",
+      "DOES THE AUTHOR SHOW CAPACITY FOR PSYCHOLOGICAL GROWTH?"
+    ];
+  }
+
+  // Psychopathological Questions
+  getPsychopathologicalQuestions(): string[] {
+    return [
+      "ARE THERE SIGNS OF COGNITIVE DISTORTIONS OR CLEAR THINKING?",
+      "DOES THE REASONING SUGGEST PATHOLOGICAL OR HEALTHY MENTAL PROCESSES?",
+      "IS THERE EVIDENCE OF PARANOID THINKING OR APPROPRIATE SKEPTICISM?",
+      "DOES THE WORK DISPLAY GRANDIOSITY OR APPROPRIATE SELF-ASSESSMENT?",
+      "ARE THERE SIGNS OF DELUSIONAL THINKING OR REALITY-BASED REASONING?",
+      "DOES THE AUTHOR SHOW CAPACITY FOR LOGICAL COHERENCE?",
+      "IS THERE EVIDENCE OF OBSESSIVE-COMPULSIVE PATTERNS IN THE REASONING?",
+      "DOES THE WORK SUGGEST MANIC OR BALANCED MENTAL STATES?",
+      "ARE THERE SIGNS OF DISSOCIATION OR INTEGRATED THINKING?",
+      "DOES THE REASONING SUGGEST PSYCHOTIC OR NEUROTIC ORGANIZATION?"
+    ];
+  }
+
+  // Comprehensive Psychopathological Questions  
+  getComprehensivePsychopathologicalQuestions(): string[] {
+    return [
+      ...this.getPsychopathologicalQuestions(),
+      "WHAT LEVEL OF REALITY TESTING IS DEMONSTRATED?",
+      "ARE THERE SIGNS OF THOUGHT DISORDER OR ORGANIZED COGNITION?",
+      "DOES THE WORK SUGGEST PERSONALITY DISORDER TRAITS?",
+      "IS THERE EVIDENCE OF IMPULSE CONTROL OR DYSCONTROL?",
+      "DOES THE REASONING SUGGEST BORDERLINE OR INTEGRATED FUNCTIONING?",
+      "ARE THERE SIGNS OF ANTISOCIAL OR PROSOCIAL ORIENTATION?",
+      "DOES THE WORK DISPLAY PSYCHOPATHIC OR EMPATHIC CHARACTERISTICS?",
+      "IS THERE EVIDENCE OF DEVELOPMENTAL TRAUMA IMPACT ON COGNITION?"
+    ];
   }
 }
