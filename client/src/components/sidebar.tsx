@@ -18,31 +18,31 @@ const FUNCTIONS = [
     key: "comprehensive-cognitive" as AnalysisTypeType,
     label: "Comprehensive Cognitive", 
     icon: Brain,
-    available: false,
+    available: true,
   },
   {
     key: "psychological" as AnalysisTypeType,
     label: "Psychological",
     icon: UserCheck,
-    available: false,
+    available: true,
   },
   {
     key: "comprehensive-psychological" as AnalysisTypeType,
     label: "Comprehensive Psychological",
     icon: Users,
-    available: false,
+    available: true,
   },
   {
     key: "psychopathological" as AnalysisTypeType,
     label: "Psychopathological",
     icon: Stethoscope,
-    available: false,
+    available: true,
   },
   {
     key: "comprehensive-psychopathological" as AnalysisTypeType,
     label: "Comprehensive Psychopathological",
     icon: ClipboardCheck,
-    available: false,
+    available: true,
   },
 ];
 
@@ -53,7 +53,7 @@ const RECENT_ANALYSES = [
 
 export default function Sidebar({ selectedFunction, onFunctionChange }: SidebarProps) {
   return (
-    <aside className="w-64 bg-white shadow-sm border-r border-gray-200" data-testid="sidebar">
+    <aside className="w-72 bg-white shadow-sm border-r border-gray-200" data-testid="sidebar">
       <nav className="mt-8 px-4">
         <div className="space-y-2">
           <div className="text-xs font-semibold text-gray-400 uppercase tracking-wider mb-3">
@@ -69,20 +69,12 @@ export default function Sidebar({ selectedFunction, onFunctionChange }: SidebarP
               <Button
                 key={func.key}
                 variant={isSelected ? "default" : "ghost"}
-                className={`w-full justify-start text-sm font-medium ${
-                  !isAvailable ? "opacity-50 cursor-not-allowed" : ""
-                }`}
-                onClick={() => isAvailable && onFunctionChange(func.key)}
-                disabled={!isAvailable}
+                className="w-full justify-start text-sm font-medium h-auto py-3 px-3"
+                onClick={() => onFunctionChange(func.key)}
                 data-testid={`function-${func.key}`}
               >
-                <Icon className="mr-3 h-4 w-4" />
-                {func.label}
-                {!isAvailable && (
-                  <span className="ml-auto text-xs bg-gray-200 px-2 py-1 rounded">
-                    Soon
-                  </span>
-                )}
+                <Icon className="mr-3 h-4 w-4 flex-shrink-0" />
+                <span className="text-left leading-tight">{func.label}</span>
               </Button>
             );
           })}
