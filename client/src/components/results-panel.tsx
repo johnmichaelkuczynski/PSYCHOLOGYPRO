@@ -1,9 +1,10 @@
 import { useState, useEffect } from "react";
-import { Brain, MessageCircle, Pause, Play } from "lucide-react";
+import { Brain, MessageCircle, Pause, Play, Square } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Progress } from "@/components/ui/progress";
 import { useStreaming } from "@/hooks/use-streaming";
+import { apiRequest } from "@/lib/queryClient";
 
 interface ResultsPanelProps {
   analysisId: string | null;
@@ -32,15 +33,29 @@ export default function ResultsPanel({ analysisId, onDiscussionToggle }: Results
   const [summary, setSummary] = useState("");
   const [delayProgress, setDelayProgress] = useState(0);
   const [streamingContent, setStreamingContent] = useState<{[key: number]: string}>({});
+  const [isStopped, setIsStopped] = useState(false);
   
   const { isStreaming, streamData, error } = useStreaming(analysisId, isPaused);
+
+  const stopAnalysis = async () => {
+    if (!analysisId) return;
+    
+    try {
+      await fetch(`/api/analyses/${analysisId}`, {
+        method: "DELETE"
+      });
+      setIsStopped(true);
+    } catch (error) {
+      console.error("Failed to stop analysis:", error);
+    }
+  };
 
   useEffect(() => {
     if (streamData) {
       if (streamData.type === "summary") {
         setSummary(streamData.content || "");
-      } else if (streamData.type === "streaming_response") {
-        // Show raw streaming content immediately
+      } else if (streamData.type === "raw_stream") {
+        // Show pure raw streaming content immediately - NO FILTERING
         if (streamData.batchNumber && streamData.rawContent) {
           setStreamingContent(prev => ({
             ...prev,
@@ -48,40 +63,36 @@ export default function ResultsPanel({ analysisId, onDiscussionToggle }: Results
           }));
           setCurrentBatch(streamData.batchNumber);
         }
-      } else if (streamData.type === "batch") {
-        if (streamData.batchNumber && streamData.questions) {
+      } else if (streamData.type === "batch_complete") {
+        // When batch completes, keep the final raw response visible
+        if (streamData.batchNumber && streamData.finalRawResponse) {
           setBatches(prev => {
-            const existingBatch = prev.find(b => b.batchNumber === streamData.batchNumber);
             const batchData: BatchData = {
               batchNumber: streamData.batchNumber!,
-              questions: streamData.questions!,
-              isComplete: streamData.isComplete || false,
+              questions: [{ 
+                question: `Batch ${streamData.batchNumber} - Raw LLM Response`,
+                response: streamData.finalRawResponse!,
+                score: 0,
+                isComplete: true 
+              }],
+              isComplete: true,
               timestamp: streamData.timestamp || new Date().toLocaleTimeString()
             };
-            if (existingBatch) {
-              return prev.map(b => b.batchNumber === streamData.batchNumber 
-                ? batchData
-                : b
-              );
-            }
             return [...prev, batchData];
           });
           // Clear streaming content when batch is complete
-          if (streamData.isComplete) {
-            setStreamingContent(prev => {
-              const newState = { ...prev };
-              delete newState[streamData.batchNumber!];
-              return newState;
-            });
-          }
-        }
-        if (streamData.batchNumber) {
-          setCurrentBatch(streamData.batchNumber);
+          setStreamingContent(prev => {
+            const newState = { ...prev };
+            delete newState[streamData.batchNumber!];
+            return newState;
+          });
         }
       } else if (streamData.type === "delay") {
         if (streamData.progress !== undefined) {
           setDelayProgress(streamData.progress);
         }
+      } else if (streamData.type === "stopped") {
+        setIsStopped(true);
       }
     }
   }, [streamData]);
@@ -124,11 +135,23 @@ export default function ResultsPanel({ analysisId, onDiscussionToggle }: Results
         <div className="flex items-center justify-between">
           <h3 className="text-lg font-medium text-gray-900">Analysis Results</h3>
           <div className="flex items-center space-x-2">
+            {!isStopped && isStreaming && (
+              <Button
+                variant="destructive"
+                size="sm"
+                onClick={stopAnalysis}
+                className="bg-red-600 hover:bg-red-700 text-white"
+                data-testid="stop-button"
+              >
+                <Square className="h-4 w-4 mr-2" />
+                STOP ANALYSIS
+              </Button>
+            )}
             {isStreaming && (
               <div className="flex items-center space-x-2" data-testid="streaming-status">
                 <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-primary"></div>
                 <span className="text-sm text-gray-600">
-                  Processing batch {currentBatch} of {totalBatches}
+                  {isStopped ? "Analysis stopped" : `Processing batch ${currentBatch} of ${totalBatches}`}
                 </span>
               </div>
             )}

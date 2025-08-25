@@ -51,6 +51,19 @@ export class StreamingService {
     }
   }
 
+  stopAnalysis(analysisId: string): void {
+    const stream = this.activeStreams.get(analysisId);
+    if (stream) {
+      stream.isActive = false;
+      this.broadcastToStream(analysisId, {
+        type: "stopped",
+        message: "Analysis stopped by user"
+      });
+      stream.callbacks.clear();
+      this.activeStreams.delete(analysisId);
+    }
+  }
+
   private broadcastToStream(analysisId: string, data: any): void {
     const stream = this.activeStreams.get(analysisId);
     if (stream && stream.isActive) {
@@ -81,6 +94,12 @@ export class StreamingService {
       const batches = this.createBatches(questions, 5);
 
       for (let i = 0; i < batches.length; i++) {
+        // Check if analysis was stopped
+        const currentStream = this.activeStreams.get(analysisId);
+        if (!currentStream || !currentStream.isActive) {
+          return;
+        }
+
         const batch = batches[i];
         const batchNumber = i + 1;
 
@@ -100,6 +119,12 @@ export class StreamingService {
 
         // Process each question in the batch
         await this.processBatch(analysis, batch, batchNumber);
+
+        // Check if analysis was stopped before delay
+        const delayStream = this.activeStreams.get(analysisId);
+        if (!delayStream || !delayStream.isActive) {
+          return;
+        }
 
         // Wait 10 seconds before next batch (except for last batch)
         if (i < batches.length - 1) {
@@ -154,9 +179,9 @@ export class StreamingService {
       (chunk) => {
         fullResponse += chunk;
         
-        // Stream the raw response immediately as it comes in
+        // Stream the raw response immediately as it comes in - PURE PASSTHROUGH
         this.broadcastToStream(analysis.id, {
-          type: "streaming_response",
+          type: "raw_stream",
           batchNumber,
           rawContent: fullResponse,
           timestamp: new Date().toLocaleTimeString("en-US", {
@@ -171,12 +196,11 @@ export class StreamingService {
       // Stream is handled by the onChunk callback
     }
 
-    // Mark batch as complete with final parsed response
-    const finalParsed = this.parseQuestionResponses(fullResponse, questions);
+    // Mark batch as complete - NO PARSING, JUST RAW FINAL RESPONSE
     this.broadcastToStream(analysis.id, {
-      type: "batch",
+      type: "batch_complete", 
       batchNumber,
-      questions: finalParsed.map(q => ({ ...q, isComplete: true })),
+      finalRawResponse: fullResponse,
       isComplete: true,
       timestamp: new Date().toLocaleTimeString("en-US", {
         hour: "numeric",
