@@ -15,7 +15,7 @@ export class LLMService {
     },
     zhi2: {
       apiKey: process.env.ANTHROPIC_API_KEY || process.env.API_KEY || "",
-      baseUrl: "https://api.anthropic.com/v1", 
+      baseUrl: "https://api.anthropic.com", 
       model: "claude-3-sonnet-20240229",
     },
     zhi3: {
@@ -41,65 +41,22 @@ export class LLMService {
       throw new Error(`API key not configured for ${provider}`);
     }
 
+    // For now, only implement OpenAI (ZHI 1) - the others will be added later
+    if (provider !== "zhi1") {
+      throw new Error(`Provider ${provider} not yet implemented. Please use ZHI 1 for now.`);
+    }
+
     try {
-      let requestBody: any;
-      let headers: Record<string, string>;
-
-      // Configure request based on provider
-      switch (provider) {
-        case "zhi1": // OpenAI
-          headers = {
-            "Authorization": `Bearer ${config.apiKey}`,
-            "Content-Type": "application/json",
-          };
-          requestBody = {
-            model: config.model,
-            messages,
-            stream: true,
-          };
-          break;
-
-        case "zhi2": // Anthropic
-          headers = {
-            "x-api-key": config.apiKey,
-            "Content-Type": "application/json",
-            "anthropic-version": "2023-06-01",
-          };
-          requestBody = {
-            model: config.model,
-            messages,
-            stream: true,
-            max_tokens: 4000,
-          };
-          break;
-
-        case "zhi3": // DeepSeek  
-          headers = {
-            "Authorization": `Bearer ${config.apiKey}`,
-            "Content-Type": "application/json",
-          };
-          requestBody = {
-            model: config.model,
-            messages,
-            stream: true,
-          };
-          break;
-
-        case "zhi4": // Perplexity
-          headers = {
-            "Authorization": `Bearer ${config.apiKey}`,
-            "Content-Type": "application/json",
-          };
-          requestBody = {
-            model: config.model,
-            messages,
-            stream: true,
-          };
-          break;
-
-        default:
-          throw new Error(`Unsupported provider: ${provider}`);
-      }
+      const headers = {
+        "Authorization": `Bearer ${config.apiKey}`,
+        "Content-Type": "application/json",
+      };
+      
+      const requestBody = {
+        model: config.model,
+        messages,
+        stream: true,
+      };
 
       const response = await fetch(`${config.baseUrl}/chat/completions`, {
         method: "POST",
@@ -108,7 +65,8 @@ export class LLMService {
       });
 
       if (!response.ok) {
-        throw new Error(`LLM API error: ${response.status} ${response.statusText}`);
+        const errorText = await response.text();
+        throw new Error(`LLM API error: ${response.status} ${response.statusText} - ${errorText}`);
       }
 
       const reader = response.body?.getReader();
@@ -135,7 +93,7 @@ export class LLMService {
 
               try {
                 const parsed = JSON.parse(data);
-                const content = this.extractContentFromResponse(parsed, provider);
+                const content = parsed.choices?.[0]?.delta?.content || null;
                 
                 if (content) {
                   onChunk?.(content);
@@ -165,7 +123,7 @@ export class LLMService {
         return parsed.choices?.[0]?.delta?.content || null;
         
       case "zhi2": // Anthropic
-        return parsed.delta?.text || null;
+        return parsed.delta?.text || parsed.content_block?.text || null;
         
       default:
         return null;

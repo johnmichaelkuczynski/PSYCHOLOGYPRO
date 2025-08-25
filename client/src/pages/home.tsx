@@ -10,7 +10,7 @@ import type { LLMProviderType, AnalysisTypeType } from "@shared/schema";
 
 export default function Home() {
   const [selectedFunction, setSelectedFunction] = useState<AnalysisTypeType>("cognitive");
-  const [selectedLLM, setSelectedLLM] = useState<LLMProviderType>("zhi2");
+  const [selectedLLM, setSelectedLLM] = useState<LLMProviderType>("zhi1");
   const [isDiscussionOpen, setIsDiscussionOpen] = useState(false);
   const [currentAnalysisId, setCurrentAnalysisId] = useState<string | null>(null);
 
