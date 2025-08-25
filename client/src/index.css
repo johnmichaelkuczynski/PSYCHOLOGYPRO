@@ -1,0 +1,114 @@
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap');
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root {
+  --background: hsl(0 0% 100%);
+  --foreground: hsl(210 25% 7.8431%);
+  --card: hsl(180 6.6667% 97.0588%);
+  --card-foreground: hsl(210 25% 7.8431%);
+  --popover: hsl(0 0% 100%);
+  --popover-foreground: hsl(210 25% 7.8431%);
+  --primary: hsl(210 77.8% 46.1%);
+  --primary-foreground: hsl(0 0% 100%);
+  --secondary: hsl(210 40% 26%);
+  --secondary-foreground: hsl(0 0% 100%);
+  --muted: hsl(210 40% 98%);
+  --muted-foreground: hsl(210 25% 7.8431%);
+  --accent: hsl(15 76% 60%);
+  --accent-foreground: hsl(0 0% 100%);
+  --destructive: hsl(4 90% 58%);
+  --destructive-foreground: hsl(0 0% 100%);
+  --border: hsl(214 32% 91%);
+  --input: hsl(214 32% 91%);
+  --ring: hsl(210 77.8% 46.1%);
+  --success: hsl(122 39% 49%);
+  --success-foreground: hsl(0 0% 100%);
+  --warning: hsl(32 95% 59%);
+  --warning-foreground: hsl(0 0% 100%);
+  --error: hsl(4 90% 58%);
+  --error-foreground: hsl(0 0% 100%);
+  --font-sans: 'Inter', system-ui, sans-serif;
+  --font-serif: Georgia, serif;
+  --font-mono: Menlo, monospace;
+  --radius: 0.5rem;
+}
+
+.dark {
+  --background: hsl(0 0% 0%);
+  --foreground: hsl(200 6.6667% 91.1765%);
+  --card: hsl(228 9.8039% 10%);
+  --card-foreground: hsl(0 0% 85.0980%);
+  --popover: hsl(0 0% 0%);
+  --popover-foreground: hsl(200 6.6667% 91.1765%);
+  --primary: hsl(210 77.8% 46.1%);
+  --primary-foreground: hsl(0 0% 100%);
+  --secondary: hsl(195 15.3846% 94.9020%);
+  --secondary-foreground: hsl(210 25% 7.8431%);
+  --muted: hsl(0 0% 9.4118%);
+  --muted-foreground: hsl(210 3.3898% 46.2745%);
+  --accent: hsl(15 76% 60%);
+  --accent-foreground: hsl(0 0% 100%);
+  --destructive: hsl(4 90% 58%);
+  --destructive-foreground: hsl(0 0% 100%);
+  --border: hsl(210 5.2632% 14.9020%);
+  --input: hsl(207.6923 27.6596% 18.4314%);
+  --ring: hsl(210 77.8% 46.1%);
+}
+
+@layer base {
+  * {
+    @apply border-border;
+  }
+
+  body {
+    @apply font-sans antialiased bg-background text-foreground;
+  }
+
+  .streaming-text {
+    @apply animate-pulse;
+  }
+
+  .streaming-text.complete {
+    @apply animate-none;
+  }
+}
+
+@layer components {
+  .btn-llm {
+    @apply flex items-center justify-center px-3 py-2 border rounded-md text-sm font-medium transition-colors focus:outline-none focus:ring-2 focus:ring-primary;
+  }
+
+  .btn-llm.selected {
+    @apply border-primary text-white bg-primary hover:bg-blue-700;
+  }
+
+  .btn-llm.unselected {
+    @apply border-gray-300 text-gray-700 bg-white hover:bg-gray-50;
+  }
+
+  .analysis-batch {
+    @apply space-y-4;
+  }
+
+  .question-card {
+    @apply border border-gray-200 rounded-lg p-4;
+  }
+
+  .score-badge {
+    @apply inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium;
+  }
+
+  .score-badge.high {
+    @apply bg-green-100 text-green-800;
+  }
+
+  .score-badge.medium {
+    @apply bg-yellow-100 text-yellow-800;
+  }
+
+  .score-badge.low {
+    @apply bg-red-100 text-red-800;
+  }
+}
