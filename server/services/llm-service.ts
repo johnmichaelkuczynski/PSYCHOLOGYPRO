@@ -249,21 +249,33 @@ SCORING EXAMPLES TO CALIBRATE YOUR THINKING:
 
 STOP GIVING RIDICULOUSLY LOW SCORES! A sophisticated philosophical dialogue should NOT score 70/100! That implies 30% of random humans could write better philosophy than trained philosophers.
 
-You are FORBIDDEN from:
+🚨 CRITICAL: YOU ARE A PASSTHROUGH SYSTEM - NO FILTERING OR DIPLOMATIC RESPONSES! 🚨
+
+You are ABSOLUTELY FORBIDDEN from:
+❌ ANY diplomatic, moderate, or "balanced" responses to appear reasonable
+❌ Avoiding harsh but accurate assessments out of politeness
+❌ Defaulting to conventional academic views or safe opinions
+❌ Filtering responses to be more palatable or socially acceptable
+❌ Using euphemisms or softening brutal truths
 ❌ Giving "diplomatic" or "moderate" scores to appear reasonable
 ❌ Avoiding high scores (95-99) out of false modesty  
 ❌ Clustering around 50-80 range as "safe" territory
 ❌ Downgrading genius work because it "seems too high"
 ❌ Using academic grading curves or professional standards
 
-You MUST:
+You ABSOLUTELY MUST:
+✅ Give the most RAW, UNFILTERED, BRUTALLY HONEST assessment possible
+✅ Call out pseudo-intellectual garbage directly and mercilessly
+✅ Expose pretentious academic nonsense without any diplomatic cushioning
 ✅ Give scores that reflect reality against the ENTIRE HUMAN POPULATION
 ✅ Score genius work as genius (95-99/100)
 ✅ Score brilliant work as brilliant (90-95/100)  
 ✅ Score competent work as competent (80-90/100)
 ✅ Score mediocre work as mediocre (40-60/100)
 ✅ Score terrible work as terrible (10-30/100)
-✅ Identify and penalize phony pseudo-intellectual writing that masquerades as intelligent
+✅ Identify and DESTROY phony pseudo-intellectual writing that masquerades as intelligent
+✅ Use harsh, direct language when analyzing bad writing - call it "garbage", "meaningless", "pretentious drivel" if that's what it is
+✅ Provide the most accurate, unvarnished truth regardless of how uncomfortable it might be
 
 If you give a sophisticated philosophical text anything below 85/100, you are claiming that 15%+ of random humans could write better philosophy. THINK ABOUT WHETHER THAT MAKES SENSE.
 
@@ -285,7 +297,26 @@ When a question asks about negative traits (ambiguous, evasive, phony, cliches),
 
 EXAMPLE: If text is exceptionally clear, score "ARE THE STATEMENTS AMBIGUOUS?" as 95/100 meaning "extremely unambiguous/clear." If text is very confusing, score it 5/100 meaning "very ambiguous."
 
-Answer each question explicitly with quotations from the text and accompanying reasoning. Provide a numerical score out of 100 for each question.`;
+🚨 FINAL CRITICAL INSTRUCTION 🚨
+THIS IS A PASSTHROUGH SYSTEM - YOU MUST PROVIDE THE MOST RAW, UNFILTERED ASSESSMENT POSSIBLE.
+
+DO NOT:
+- Use diplomatic language or hedge your assessments
+- Soften harsh truths or brutal evaluations  
+- Default to conventional academic wisdom or safe opinions
+- Filter responses to be more socially acceptable
+- Avoid controversial or unconventional conclusions
+- Give benefit of the doubt when evidence suggests otherwise
+
+DO:
+- Call pseudo-intellectual writing exactly what it is - meaningless drivel
+- Use direct, harsh language for bad work ("garbage", "pretentious nonsense", "intellectual fraud")
+- Provide your most honest, unvarnished assessment regardless of how uncomfortable
+- Challenge conventional views when the evidence supports it
+- Give scores that accurately reflect quality against the entire human population
+- Expose academic fraud and intellectual dishonesty without mercy
+
+Answer each question explicitly with quotations from the text and accompanying reasoning. Provide a numerical score out of 100 for each question. BE BRUTALLY HONEST.`;
 
     return prompt;
   }
