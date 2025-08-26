@@ -44,6 +44,13 @@ export default function TextInput({ selectedFunction, selectedLLM, onAnalysisSta
     const file = e.target.files?.[0];
     if (!file) return;
 
+    console.log("Client: File selected:", {
+      name: file.name,
+      type: file.type,
+      size: file.size,
+      lastModified: file.lastModified
+    });
+
     const allowedTypes = [
       "text/plain",
       "application/pdf",
@@ -52,13 +59,16 @@ export default function TextInput({ selectedFunction, selectedLLM, onAnalysisSta
     ];
 
     if (!allowedTypes.includes(file.type)) {
+      console.log("Client: File type validation failed:", file.type);
       toast({
         title: "Invalid file type",
-        description: "Please upload TXT, PDF, DOC, or DOCX files only.",
+        description: `File type "${file.type}" not supported. Please upload TXT, PDF, DOC, or DOCX files only.`,
         variant: "destructive",
       });
       return;
     }
+
+    console.log("Client: File type validation passed");
 
     if (file.size > 10 * 1024 * 1024) {
       toast({
@@ -182,14 +192,14 @@ export default function TextInput({ selectedFunction, selectedLLM, onAnalysisSta
                   name="file-upload"
                   type="file"
                   className="sr-only"
-                  accept=".txt,.doc,.docx"
+                  accept=".txt,.pdf,.doc,.docx"
                   onChange={handleFileUpload}
                   data-testid="file-upload-input"
                 />
               </label>
               <p className="pl-1">or drag and drop</p>
             </div>
-            <p className="text-xs text-gray-500">TXT, DOC, DOCX up to 10MB</p>
+            <p className="text-xs text-gray-500">TXT, PDF, DOC, DOCX up to 10MB</p>
             {uploadedFile && (
               <p className="text-sm text-green-600 font-medium">
                 Uploaded: {uploadedFile.name}
