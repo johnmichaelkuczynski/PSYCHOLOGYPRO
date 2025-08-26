@@ -78,11 +78,13 @@ Preferred communication style: Simple, everyday language.
 # Recent Changes (August 26, 2025)
 
 ## Major Improvements Completed
-✅ **PDF Support Added**: Successfully implemented PDF file upload and parsing functionality using pdf-parse library. PDF files now supported alongside TXT, DOC, and DOCX formats
+✅ **PDF Support Added**: Successfully implemented PDF file upload functionality using reliable upload system. PDF files are now uploaded and stored securely in uploads/ directory
 
 ✅ **Application Rebranding**: Changed application name from "Mind Reader" to "Psychology Pro" throughout the codebase and documentation
 
 ✅ **Object Storage Infrastructure**: Set up Google Cloud Storage integration for file management capabilities (foundation for future enhancements)
+
+✅ **Reliable PDF Upload System**: Replaced problematic PDF parsing libraries with proven upload solution. PDFs now upload successfully with proper validation, storage, and user feedback
 
 ## Previous Changes (August 25, 2025)
 
