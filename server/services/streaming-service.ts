@@ -1,4 +1,4 @@
-import type { Analysis } from "@shared/schema";
+import type { Analysis } from "../../shared/schema.js";
 import type { IStorage } from "../storage";
 import { LLMService } from "./llm-service";
 
