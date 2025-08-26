@@ -13,10 +13,12 @@ export default function Home() {
   const [selectedLLM, setSelectedLLM] = useState<LLMProviderType>("zhi1");
   const [isDiscussionOpen, setIsDiscussionOpen] = useState(false);
   const [currentAnalysisId, setCurrentAnalysisId] = useState<string | null>(null);
+  const [resetKey, setResetKey] = useState(0);
 
   const handleNewAnalysis = () => {
     setCurrentAnalysisId(null);
     setIsDiscussionOpen(false);
+    setResetKey(prev => prev + 1); // This will force TextInput to reset
   };
 
   return (
@@ -82,6 +84,7 @@ export default function Home() {
                   />
                   
                   <TextInput 
+                    key={resetKey}
                     selectedFunction={selectedFunction}
                     selectedLLM={selectedLLM}
                     onAnalysisStart={(analysisId) => setCurrentAnalysisId(analysisId)}
