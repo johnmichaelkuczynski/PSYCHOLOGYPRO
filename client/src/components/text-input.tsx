@@ -66,6 +66,7 @@ export default function TextInput({ selectedFunction, selectedLLM, onAnalysisSta
         const result = await uploadPdf(file);
         
         console.log("PDF upload result:", result);
+        console.log("About to call extract API with ID:", result.id);
         
         if (!result.ok) {
           toast({
@@ -87,10 +88,15 @@ export default function TextInput({ selectedFunction, selectedLLM, onAnalysisSta
         // Auto-fill text area with PDF content/instructions using extract API
         try {
           const { extractPdfText } = await import("@/lib/fillFromPdf");
-          const extractedText = await extractPdfText(result.id);
-          setTextContent(extractedText);
+          const fileId = result.id;
+          if (fileId) {
+            const extractedText = await extractPdfText(fileId);
+            setTextContent(extractedText);
+          } else {
+            throw new Error("No file ID returned from upload");
+          }
         } catch (error) {
-          console.warn("Text extraction failed, using fallback instructions");
+          console.warn("Text extraction failed, using fallback instructions:", error);
           setTextContent(`PDF "${file.name}" uploaded successfully!\n\nTo analyze your PDF content:\n1. Open your PDF file\n2. Copy the text you want to analyze\n3. Paste it in this text area\n4. Select your analysis options below\n\nReplace this message with your PDF text content.`);
         }
         
