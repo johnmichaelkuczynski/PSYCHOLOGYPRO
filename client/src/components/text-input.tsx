@@ -55,9 +55,17 @@ export default function TextInput({ selectedFunction, selectedLLM, onAnalysisSta
     if (file.type === "application/pdf") {
       console.log("Handling PDF upload with new system");
       
+      // Show immediate uploading feedback
+      toast({
+        title: "Uploading PDF...",
+        description: `Uploading ${file.name}, please wait...`,
+      });
+      
       try {
         const { uploadPdf } = await import("@/lib/uploadPdf");
         const result = await uploadPdf(file);
+        
+        console.log("PDF upload result:", result);
         
         if (!result.ok) {
           toast({
@@ -68,13 +76,16 @@ export default function TextInput({ selectedFunction, selectedLLM, onAnalysisSta
           return;
         }
 
-        // For now, just show success - we'll need to handle PDF text extraction differently
+        // Show success with more details and file access link
         toast({
-          title: "PDF uploaded successfully",
-          description: `${file.name} has been uploaded. PDF text extraction will be added soon.`,
+          title: "✅ PDF uploaded successfully!",
+          description: `${file.name} is now stored and accessible. Copy/paste text from your PDF to analyze it.`,
         });
         
         setUploadedFile(file);
+        
+        // Also update the text content area to show instructions
+        setTextContent(`PDF "${file.name}" uploaded successfully!\n\nTo analyze your PDF content:\n1. Open your PDF file\n2. Copy the text you want to analyze\n3. Paste it in this text area\n4. Select your analysis options below\n\nReplace this message with your PDF text content.`);
         return;
         
       } catch (error) {
