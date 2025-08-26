@@ -55,7 +55,14 @@ export class FileService {
   }
 
   private async parsePDF(buffer: Buffer): Promise<string> {
-    throw new Error('PDF upload is not supported');
+    try {
+      const pdfParse = require('pdf-parse');
+      const pdfData = await pdfParse(buffer);
+      return pdfData.text;
+    } catch (error) {
+      console.error('PDF parsing error:', error);
+      throw new Error('Failed to parse PDF document');
+    }
   }
 
   private async parseWord(buffer: Buffer): Promise<string> {
@@ -71,6 +78,7 @@ export class FileService {
   validateFile(file: Express.Multer.File): { valid: boolean; error?: string } {
     const allowedTypes = [
       'text/plain',
+      'application/pdf',
       'application/msword',
       'application/vnd.openxmlformats-officedocument.wordprocessingml.document'
     ];
@@ -78,7 +86,7 @@ export class FileService {
     if (!allowedTypes.includes(file.mimetype)) {
       return {
         valid: false,
-        error: 'Invalid file type. Only TXT, DOC, and DOCX files are supported.'
+        error: 'Invalid file type. Only TXT, PDF, DOC, and DOCX files are supported.'
       };
     }
 

@@ -46,6 +46,7 @@ export default function TextInput({ selectedFunction, selectedLLM, onAnalysisSta
 
     const allowedTypes = [
       "text/plain",
+      "application/pdf",
       "application/msword",
       "application/vnd.openxmlformats-officedocument.wordprocessingml.document"
     ];
@@ -53,7 +54,7 @@ export default function TextInput({ selectedFunction, selectedLLM, onAnalysisSta
     if (!allowedTypes.includes(file.type)) {
       toast({
         title: "Invalid file type",
-        description: "Please upload TXT, DOC, or DOCX files only.",
+        description: "Please upload TXT, PDF, DOC, or DOCX files only.",
         variant: "destructive",
       });
       return;
