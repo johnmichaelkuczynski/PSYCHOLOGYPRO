@@ -6,7 +6,7 @@ import { storage } from "./storage";
 import { LLMService } from "./services/llm-service";
 import { FileService } from "./services/file-service";
 import { StreamingService } from "./services/streaming-service";
-import { insertAnalysisSchema, insertDiscussionSchema } from "@shared/schema";
+import { insertAnalysisSchema, insertDiscussionSchema } from "../shared/schema.js";
 
 // Configure multer for file uploads
 const upload = multer({

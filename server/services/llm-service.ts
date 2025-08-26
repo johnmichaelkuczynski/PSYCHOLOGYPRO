@@ -1,4 +1,4 @@
-import type { LLMProviderType } from "@shared/schema";
+import type { LLMProviderType } from "../../shared/schema.js";
 
 interface LLMConfig {
   apiKey: string;
