@@ -51,69 +51,8 @@ export default function TextInput({ selectedFunction, selectedLLM, onAnalysisSta
       lastModified: file.lastModified
     });
 
-    // Handle PDF files with the new upload system
-    if (file.type === "application/pdf") {
-      console.log("Handling PDF upload with new system");
-      
-      // Show immediate uploading feedback
-      toast({
-        title: "Uploading PDF...",
-        description: `Uploading ${file.name}, please wait...`,
-      });
-      
-      try {
-        const { uploadPdf } = await import("@/lib/uploadPdf");
-        const result = await uploadPdf(file);
-        
-        console.log("PDF upload result:", result);
-        console.log("About to call extract API with ID:", result.id);
-        
-        if (!result.ok) {
-          toast({
-            title: "PDF upload failed",
-            description: result.error || "Could not upload PDF file",
-            variant: "destructive",
-          });
-          return;
-        }
 
-        // Show success and auto-fill text area with instructions
-        toast({
-          title: "✅ PDF uploaded successfully!",
-          description: `${file.name} is now stored and accessible. Instructions added to text area.`,
-        });
-        
-        setUploadedFile(file);
-        
-        // Auto-fill text area with PDF content/instructions using extract API
-        try {
-          const { extractPdfText } = await import("@/lib/fillFromPdf");
-          const fileId = result.id;
-          if (fileId) {
-            const extractedText = await extractPdfText(fileId);
-            setTextContent(extractedText);
-          } else {
-            throw new Error("No file ID returned from upload");
-          }
-        } catch (error) {
-          console.warn("Text extraction failed, using fallback instructions:", error);
-          setTextContent(`PDF "${file.name}" uploaded successfully!\n\nTo analyze your PDF content:\n1. Open your PDF file\n2. Copy the text you want to analyze\n3. Paste it in this text area\n4. Select your analysis options below\n\nReplace this message with your PDF text content.`);
-        }
-        
-        return;
-        
-      } catch (error) {
-        console.error("PDF upload error:", error);
-        toast({
-          title: "PDF upload failed",
-          description: "Could not upload PDF file",
-          variant: "destructive",
-        });
-        return;
-      }
-    }
 
-    // Handle other file types with existing system
     const allowedTypes = [
       "text/plain",
       "application/msword",
@@ -124,7 +63,7 @@ export default function TextInput({ selectedFunction, selectedLLM, onAnalysisSta
       console.log("Client: File type validation failed:", file.type);
       toast({
         title: "Invalid file type",
-        description: `File type "${file.type}" not supported. Please upload TXT, PDF, DOC, or DOCX files only.`,
+        description: `File type "${file.type}" not supported. Please upload TXT, DOC, or DOCX files only.`,
         variant: "destructive",
       });
       return;
@@ -254,14 +193,14 @@ export default function TextInput({ selectedFunction, selectedLLM, onAnalysisSta
                   name="file-upload"
                   type="file"
                   className="sr-only"
-                  accept=".txt,.pdf,.doc,.docx"
+                  accept=".txt,.doc,.docx"
                   onChange={handleFileUpload}
                   data-testid="file-upload-input"
                 />
               </label>
               <p className="pl-1">or drag and drop</p>
             </div>
-            <p className="text-xs text-gray-500">TXT, PDF, DOC, DOCX up to 10MB</p>
+            <p className="text-xs text-gray-500">TXT, DOC, DOCX up to 10MB</p>
             {uploadedFile && (
               <p className="text-sm text-green-600 font-medium">
                 Uploaded: {uploadedFile.name}

@@ -103,7 +103,7 @@ Preferred communication style: Simple, everyday language.
 ✅ **Markdown Stripping**: Implemented clean text display removing ** ### *** formatting from LLM responses
 
 ## Current Status
-- **File Support**: TXT, PDF, DOC, DOCX (full document processing support)
+- **File Support**: TXT, DOC, DOCX (full document processing support)
 - **Text Processing**: Automatic chunking for both uploaded and pasted text
 - **Analysis Functions**: All 6 cognitive analysis types fully operational
 - **LLM Integration**: All 4 providers (ZHI 1-4) working with enhanced scoring
@@ -112,4 +112,4 @@ Preferred communication style: Simple, everyday language.
 ## User Feedback
 User satisfaction significantly improved with multi-chunk selection and automatic text chunking functionality. PDF removal acknowledged as correct decision after implementation failures.
 
-**Latest Changes (August 26, 2025)**: Successfully implemented PDF upload functionality and rebranded application to "Psychology Pro". All document formats (TXT, PDF, DOC, DOCX) now fully supported with automatic text chunking and multi-chunk analysis capabilities.
+**Latest Changes (August 26, 2025)**: Successfully rebranded application to "Psychology Pro". Document formats TXT, DOC, DOCX are fully supported with automatic text chunking and multi-chunk analysis capabilities. PDF support has been removed per user request.
