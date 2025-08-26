@@ -67,18 +67,35 @@ export class FileService {
 
   private async parsePDF(buffer: Buffer): Promise<string> {
     try {
-      console.log('Parsing PDF buffer...');
+      console.log('Parsing PDF buffer using pdfjs-dist...');
       
-      // Use dynamic import to avoid the test file loading issue
-      const { default: pdfParse } = await import('pdf-parse');
-      const pdfData = await pdfParse(buffer);
-      console.log(`PDF parsed successfully, text length: ${pdfData.text?.length || 0}`);
+      // Use pdfjs-dist which is more reliable than pdf-parse
+      const pdfjsLib = await import('pdfjs-dist/legacy/build/pdf.js');
       
-      if (!pdfData.text || pdfData.text.trim().length === 0) {
+      // Create a typed array from the buffer
+      const data = new Uint8Array(buffer);
+      
+      // Load the PDF document
+      const pdf = await pdfjsLib.getDocument({ data }).promise;
+      console.log(`PDF loaded successfully, pages: ${pdf.numPages}`);
+      
+      let fullText = '';
+      
+      // Extract text from each page
+      for (let pageNum = 1; pageNum <= pdf.numPages; pageNum++) {
+        const page = await pdf.getPage(pageNum);
+        const textContent = await page.getTextContent();
+        const pageText = textContent.items.map((item: any) => item.str).join(' ');
+        fullText += pageText + '\n';
+      }
+      
+      console.log(`PDF text extracted successfully, length: ${fullText.length}`);
+      
+      if (!fullText || fullText.trim().length === 0) {
         throw new Error('PDF file appears to be empty or contains no extractable text');
       }
       
-      return pdfData.text;
+      return fullText.trim();
     } catch (error) {
       console.error('PDF parsing error:', error);
       throw new Error(`Failed to parse PDF document: ${error instanceof Error ? error.message : String(error)}`);
