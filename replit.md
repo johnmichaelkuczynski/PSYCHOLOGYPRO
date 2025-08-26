@@ -1,6 +1,6 @@
 # Overview
 
-Mind Reader is a cognitive/psychological/psychopathological profiler web application built with a React frontend and Node.js/Express backend. The application serves as a passthrough system that facilitates analysis of text content through multiple AI language models, focusing on cognitive, psychological, and psychopathological assessments. Features full cognitive profiling with real-time streaming, multi-chunk text analysis, and enhanced scoring calibration.
+Psychology Pro is a cognitive/psychological/psychopathological profiler web application built with a React frontend and Node.js/Express backend. The application serves as a passthrough system that facilitates analysis of text content through multiple AI language models, focusing on cognitive, psychological, and psychopathological assessments. Features full cognitive profiling with real-time streaming, multi-chunk text analysis, and enhanced scoring calibration.
 
 # User Preferences
 
@@ -75,10 +75,16 @@ Preferred communication style: Simple, everyday language.
 - **Replit Integration**: Development environment plugins and error overlays
 - **TypeScript**: Static type checking across the entire codebase
 
-# Recent Changes (August 25, 2025)
+# Recent Changes (August 26, 2025)
 
 ## Major Improvements Completed
-✅ **PDF Upload Removal**: After multiple failed attempts with pdf-parse and pdfjs-dist libraries, PDF functionality was completely removed to focus on working features
+✅ **PDF Support Added**: Successfully implemented PDF file upload and parsing functionality using pdf-parse library. PDF files now supported alongside TXT, DOC, and DOCX formats
+
+✅ **Application Rebranding**: Changed application name from "Mind Reader" to "Psychology Pro" throughout the codebase and documentation
+
+✅ **Object Storage Infrastructure**: Set up Google Cloud Storage integration for file management capabilities (foundation for future enhancements)
+
+## Previous Changes (August 25, 2025)
 
 ✅ **Multi-Chunk Selection**: Implemented comprehensive chunk selection system allowing users to select and analyze multiple text chunks simultaneously with checkbox interface and Select All/Deselect All controls
 
@@ -95,7 +101,7 @@ Preferred communication style: Simple, everyday language.
 ✅ **Markdown Stripping**: Implemented clean text display removing ** ### *** formatting from LLM responses
 
 ## Current Status
-- **File Support**: TXT, DOC, DOCX (PDF deliberately excluded)
+- **File Support**: TXT, PDF, DOC, DOCX (full document processing support)
 - **Text Processing**: Automatic chunking for both uploaded and pasted text
 - **Analysis Functions**: All 6 cognitive analysis types fully operational
 - **LLM Integration**: All 4 providers (ZHI 1-4) working with enhanced scoring
@@ -104,4 +110,4 @@ Preferred communication style: Simple, everyday language.
 ## User Feedback
 User satisfaction significantly improved with multi-chunk selection and automatic text chunking functionality. PDF removal acknowledged as correct decision after implementation failures.
 
-**Latest Feedback (August 25, 2025)**: "EXCELLENT. MUCH MUCH MUCH BETTER" - User extremely satisfied with final implementation. All major functionality working as intended. Ready for deployment.
+**Latest Changes (August 26, 2025)**: Successfully implemented PDF upload functionality and rebranded application to "Psychology Pro". All document formats (TXT, PDF, DOC, DOCX) now fully supported with automatic text chunking and multi-chunk analysis capabilities.
