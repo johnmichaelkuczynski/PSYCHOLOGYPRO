@@ -27,7 +27,7 @@ export default function Home() {
           <div className="flex items-center justify-between h-16">
             <div className="flex items-center space-x-3">
               <Brain className="text-primary text-2xl" data-testid="brain-icon" />
-              <h1 className="text-xl font-bold text-gray-900" data-testid="app-title">Mind Reader</h1>
+              <h1 className="text-xl font-bold text-gray-900" data-testid="app-title">Psychology Pro</h1>
               <span className="text-sm text-gray-500" data-testid="app-subtitle">Cognitive Profiler</span>
             </div>
             <div className="flex items-center space-x-4">
