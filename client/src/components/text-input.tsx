@@ -51,9 +51,46 @@ export default function TextInput({ selectedFunction, selectedLLM, onAnalysisSta
       lastModified: file.lastModified
     });
 
+    // Handle PDF files with the new upload system
+    if (file.type === "application/pdf") {
+      console.log("Handling PDF upload with new system");
+      
+      try {
+        const { uploadPdf } = await import("@/lib/uploadPdf");
+        const result = await uploadPdf(file);
+        
+        if (!result.ok) {
+          toast({
+            title: "PDF upload failed",
+            description: result.error || "Could not upload PDF file",
+            variant: "destructive",
+          });
+          return;
+        }
+
+        // For now, just show success - we'll need to handle PDF text extraction differently
+        toast({
+          title: "PDF uploaded successfully",
+          description: `${file.name} has been uploaded. PDF text extraction will be added soon.`,
+        });
+        
+        setUploadedFile(file);
+        return;
+        
+      } catch (error) {
+        console.error("PDF upload error:", error);
+        toast({
+          title: "PDF upload failed",
+          description: "Could not upload PDF file",
+          variant: "destructive",
+        });
+        return;
+      }
+    }
+
+    // Handle other file types with existing system
     const allowedTypes = [
       "text/plain",
-      "application/pdf",
       "application/msword",
       "application/vnd.openxmlformats-officedocument.wordprocessingml.document"
     ];

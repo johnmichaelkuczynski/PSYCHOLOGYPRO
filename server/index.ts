@@ -1,10 +1,28 @@
 import express, { type Request, Response, NextFunction } from "express";
+import cors from "cors";
+import path from "path";
 import { registerRoutes } from "./routes";
 import { setupVite, serveStatic, log } from "./vite";
+import uploadRouter from "./routes/upload";
 
 const app = express();
+
+// CORS: allow your Replit domain and local dev
+app.use(cors({ origin: true, credentials: true }));
+
 app.use(express.json());
 app.use(express.urlencoded({ extended: false }));
+
+// Static serve of uploaded PDFs
+app.use("/uploads", express.static(path.resolve("uploads"), {
+  setHeaders(res) {
+    // Force PDF content type for static links
+    res.setHeader("Content-Type", "application/pdf");
+  }
+}));
+
+// Upload API
+app.use("/api/upload", uploadRouter);
 
 app.use((req, res, next) => {
   const start = Date.now();
