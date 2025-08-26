@@ -28,11 +28,27 @@ export async function registerRoutes(app: Express): Promise<Server> {
         return res.status(400).json({ error: "No file provided" });
       }
 
+      console.log("File upload received:", {
+        originalname: req.file.originalname,
+        mimetype: req.file.mimetype,
+        size: req.file.size
+      });
+
+      // Validate file first
+      const validation = fileService.validateFile(req.file);
+      if (!validation.valid) {
+        console.log("File validation failed:", validation.error);
+        return res.status(400).json({ error: validation.error });
+      }
+
       const parseResult = await fileService.parseFile(req.file);
       res.json(parseResult);
     } catch (error) {
       console.error("File parsing error:", error);
-      res.status(500).json({ error: "Failed to parse file" });
+      res.status(500).json({ 
+        error: "Failed to parse file",
+        details: error instanceof Error ? error.message : String(error)
+      });
     }
   });
 

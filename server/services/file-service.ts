@@ -12,25 +12,36 @@ export class FileService {
   async parseFile(file: Express.Multer.File): Promise<ParseResult> {
     const { mimetype, buffer, originalname } = file;
 
+    console.log(`Parsing file: ${originalname}, type: ${mimetype}, size: ${buffer.length} bytes`);
+
     try {
       let text: string;
       
       switch (mimetype) {
         case 'text/plain':
+          console.log('Parsing as text file');
           text = buffer.toString('utf-8');
           break;
 
         case 'application/pdf':
+          console.log('Parsing as PDF file');
           text = await this.parsePDF(buffer);
           break;
 
         case 'application/msword':
         case 'application/vnd.openxmlformats-officedocument.wordprocessingml.document':
+          console.log('Parsing as Word document');
           text = await this.parseWord(buffer);
           break;
 
         default:
           throw new Error(`Unsupported file type: ${mimetype}`);
+      }
+
+      console.log(`Successfully parsed file: ${originalname}, extracted text length: ${text.length}`);
+      
+      if (!text || text.trim().length === 0) {
+        throw new Error('No text content could be extracted from the file');
       }
 
       const wordCount = this.countWords(text);
@@ -56,12 +67,21 @@ export class FileService {
 
   private async parsePDF(buffer: Buffer): Promise<string> {
     try {
+      console.log('Loading pdf-parse module...');
       const pdfParse = require('pdf-parse');
+      console.log('pdf-parse module loaded, parsing buffer...');
+      
       const pdfData = await pdfParse(buffer);
+      console.log(`PDF parsed successfully, text length: ${pdfData.text?.length || 0}`);
+      
+      if (!pdfData.text || pdfData.text.trim().length === 0) {
+        throw new Error('PDF file appears to be empty or contains no extractable text');
+      }
+      
       return pdfData.text;
     } catch (error) {
       console.error('PDF parsing error:', error);
-      throw new Error('Failed to parse PDF document');
+      throw new Error(`Failed to parse PDF document: ${error instanceof Error ? error.message : String(error)}`);
     }
   }
 
