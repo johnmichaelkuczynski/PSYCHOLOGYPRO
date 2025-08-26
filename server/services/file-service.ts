@@ -67,10 +67,10 @@ export class FileService {
 
   private async parsePDF(buffer: Buffer): Promise<string> {
     try {
-      console.log('Loading pdf-parse module...');
-      const pdfParse = require('pdf-parse');
-      console.log('pdf-parse module loaded, parsing buffer...');
+      console.log('Parsing PDF buffer...');
       
+      // Use dynamic import to avoid the test file loading issue
+      const { default: pdfParse } = await import('pdf-parse');
       const pdfData = await pdfParse(buffer);
       console.log(`PDF parsed successfully, text length: ${pdfData.text?.length || 0}`);
       
