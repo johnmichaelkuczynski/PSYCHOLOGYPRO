@@ -4,6 +4,7 @@ import path from "path";
 import { registerRoutes } from "./routes";
 import { setupVite, serveStatic, log } from "./vite";
 import uploadRouter from "./routes/upload";
+import extractRouter from "./routes/extract";
 
 const app = express();
 
@@ -23,6 +24,8 @@ app.use("/uploads", express.static(path.resolve("uploads"), {
 
 // Upload API
 app.use("/api/upload", uploadRouter);
+// Extract API  
+app.use("/api/extract", extractRouter);
 
 app.use((req, res, next) => {
   const start = Date.now();

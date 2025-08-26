@@ -76,16 +76,24 @@ export default function TextInput({ selectedFunction, selectedLLM, onAnalysisSta
           return;
         }
 
-        // Show success with more details and file access link
+        // Show success and auto-fill text area with instructions
         toast({
           title: "✅ PDF uploaded successfully!",
-          description: `${file.name} is now stored and accessible. Copy/paste text from your PDF to analyze it.`,
+          description: `${file.name} is now stored and accessible. Instructions added to text area.`,
         });
         
         setUploadedFile(file);
         
-        // Also update the text content area to show instructions
-        setTextContent(`PDF "${file.name}" uploaded successfully!\n\nTo analyze your PDF content:\n1. Open your PDF file\n2. Copy the text you want to analyze\n3. Paste it in this text area\n4. Select your analysis options below\n\nReplace this message with your PDF text content.`);
+        // Auto-fill text area with PDF content/instructions using extract API
+        try {
+          const { extractPdfText } = await import("@/lib/fillFromPdf");
+          const extractedText = await extractPdfText(result.id);
+          setTextContent(extractedText);
+        } catch (error) {
+          console.warn("Text extraction failed, using fallback instructions");
+          setTextContent(`PDF "${file.name}" uploaded successfully!\n\nTo analyze your PDF content:\n1. Open your PDF file\n2. Copy the text you want to analyze\n3. Paste it in this text area\n4. Select your analysis options below\n\nReplace this message with your PDF text content.`);
+        }
+        
         return;
         
       } catch (error) {
