@@ -5,6 +5,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { useToast } from "@/hooks/use-toast";
 import { apiRequest } from "@/lib/queryClient";
 import type { LLMProviderType, AnalysisTypeType } from "@shared/schema";
+// import PdfUploader from "../../../src/components/PdfUploader";
 
 interface TextInputProps {
   selectedFunction: AnalysisTypeType;
@@ -52,6 +53,90 @@ export default function TextInput({ selectedFunction, selectedLLM, onAnalysisSta
     });
 
 
+
+    // Handle PDF files with new system
+    if (file.type === "application/pdf") {
+      console.log("Handling PDF upload with new system");
+      
+      toast({
+        title: "Uploading PDF...",
+        description: `Uploading ${file.name}, please wait...`,
+      });
+      
+      try {
+        const formData = new FormData();
+        formData.append("file", file);
+        const response = await fetch("/api/upload/pdf", {
+          method: "POST", 
+          body: formData
+        });
+        
+        const result = await response.json();
+        console.log("PDF upload result:", result);
+        
+        if (!response.ok || !result.ok) {
+          toast({
+            title: "PDF upload failed",
+            description: result.error || "Could not upload PDF file",
+            variant: "destructive",
+          });
+          return;
+        }
+
+        // Show success 
+        toast({
+          title: "✅ PDF uploaded successfully!",
+          description: `${result.name} (${(result.size/1024).toFixed(1)}KB) uploaded`,
+        });
+        
+        setUploadedFile(file);
+        
+        // Extract text automatically
+        try {
+          const extractResponse = await fetch(`/api/extract/${result.id}`);
+          const extractResult = await extractResponse.json();
+          
+          if (extractResult.ok && extractResult.text) {
+            const extractedText = extractResult.text;
+            setTextContent(extractedText);
+            const wc = countWords(extractedText);
+            setWordCount(wc);
+            
+            if (wc > 1000) {
+              const textChunks = chunkText(extractedText);
+              setChunks(textChunks);
+              setSelectedChunks([0]);
+              toast({
+                title: "Text extracted and chunked",
+                description: `${textChunks.length} chunks created from PDF`
+              });
+            } else {
+              setChunks(null);
+              setSelectedChunks([0]);
+            }
+            
+            toast({
+              title: "PDF text extracted",
+              description: `${wc} words extracted and ready for analysis`
+            });
+          }
+        } catch (error) {
+          console.warn("Text extraction failed:", error);
+          setTextContent(`PDF "${file.name}" uploaded successfully!\n\nTo analyze your PDF content:\n1. Copy the text you want to analyze\n2. Paste it here and replace this message\n3. Select your analysis options below`);
+        }
+        
+        return;
+        
+      } catch (error) {
+        console.error("PDF upload error:", error);
+        toast({
+          title: "PDF upload failed",
+          description: "Could not upload PDF file",
+          variant: "destructive",
+        });
+        return;
+      }
+    }
 
     const allowedTypes = [
       "text/plain",
@@ -193,14 +278,14 @@ export default function TextInput({ selectedFunction, selectedLLM, onAnalysisSta
                   name="file-upload"
                   type="file"
                   className="sr-only"
-                  accept=".txt,.doc,.docx"
+                  accept=".txt,.pdf,.doc,.docx"
                   onChange={handleFileUpload}
                   data-testid="file-upload-input"
                 />
               </label>
               <p className="pl-1">or drag and drop</p>
             </div>
-            <p className="text-xs text-gray-500">TXT, DOC, DOCX up to 10MB</p>
+            <p className="text-xs text-gray-500">TXT, PDF, DOC, DOCX up to 10MB</p>
             {uploadedFile && (
               <p className="text-sm text-green-600 font-medium">
                 Uploaded: {uploadedFile.name}
