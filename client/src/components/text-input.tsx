@@ -165,16 +165,24 @@ export default function TextInput({ selectedFunction, selectedLLM, onAnalysisSta
     // Handle other file types (TXT, DOC, DOCX)
     setUploadedFile(file);
     
+    toast({
+      title: "Uploading file...",
+      description: `Uploading ${file.name}, please wait...`,
+    });
+    
     try {
       const formData = new FormData();
       formData.append("file", file);
       
-      const response = await fetch("/api/upload", {
+      const response = await fetch("/api/files/parse", {
         method: "POST",
         body: formData,
       });
       
-      if (!response.ok) throw new Error("Failed to parse file");
+      if (!response.ok) {
+        const errorData = await response.json().catch(() => ({}));
+        throw new Error(errorData.error || "Failed to parse file");
+      }
       
       const parseResult = await response.json();
       setTextContent(parseResult.text);
@@ -195,9 +203,10 @@ export default function TextInput({ selectedFunction, selectedLLM, onAnalysisSta
         });
       }
     } catch (error) {
+      console.error("File upload error:", error);
       toast({
         title: "File upload failed",
-        description: "Could not parse the uploaded file. Please try again.",
+        description: error instanceof Error ? error.message : "Could not parse the uploaded file. Please try again.",
         variant: "destructive",
       });
     }
