@@ -225,10 +225,14 @@ export async function registerRoutes(app: Express): Promise<Server> {
       'Access-Control-Allow-Headers': 'Cache-Control'
     });
 
-    const cleanup = streamingService.addEnhancedClient(analysisId, res);
+    // Send initial connection message
+    res.write(`data: ${JSON.stringify({ type: "connected", message: "Stream connected" })}\n\n`);
+
+    // Add client to streaming service
+    const removeClient = streamingService.addEnhancedClient(analysisId, res);
     
-    req.on('close', cleanup);
-    req.on('end', cleanup);
+    req.on('close', removeClient);
+    req.on('end', removeClient);
   });
 
   // Stop enhanced analysis
