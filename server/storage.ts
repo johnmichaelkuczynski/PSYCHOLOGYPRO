@@ -1,4 +1,4 @@
-import { type Analysis, type Discussion, type InsertAnalysis, type InsertDiscussion } from "@shared/schema";
+import { type Analysis, type Discussion, type InsertAnalysis, type InsertDiscussion } from "../shared/schema.js";
 import { randomUUID } from "crypto";
 
 export interface IStorage {
