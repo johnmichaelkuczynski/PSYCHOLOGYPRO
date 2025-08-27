@@ -1,15 +1,15 @@
 import { useState } from "react";
 import { Brain, Settings, HelpCircle } from "lucide-react";
-import Sidebar from "@/components/sidebar";
+import Sidebar from "@/components/enhanced-sidebar";
 import LLMSelector from "@/components/llm-selector";
-import TextInput from "@/components/text-input";
-import ResultsPanel from "@/components/results-panel";
+import TextInput from "@/components/enhanced-text-input";
+import ResultsPanel from "@/components/enhanced-results-panel";
 import DiscussionModal from "@/components/discussion-modal";
 import { Button } from "@/components/ui/button";
-import type { LLMProviderType, AnalysisTypeType } from "@shared/schema";
+import type { LLMProviderType, EnhancedAnalysisTypeType } from "../../shared/schema.js";
 
-export default function Home() {
-  const [selectedFunction, setSelectedFunction] = useState<AnalysisTypeType>("cognitive");
+export default function Enhanced() {
+  const [selectedFunction, setSelectedFunction] = useState<EnhancedAnalysisTypeType>("enhanced-cognitive-normal");
   const [selectedLLM, setSelectedLLM] = useState<LLMProviderType>("zhi1");
   const [isDiscussionOpen, setIsDiscussionOpen] = useState(false);
   const [currentAnalysisId, setCurrentAnalysisId] = useState<string | null>(null);
@@ -30,7 +30,7 @@ export default function Home() {
             <div className="flex items-center space-x-3">
               <Brain className="text-primary text-2xl" data-testid="brain-icon" />
               <h1 className="text-xl font-bold text-gray-900" data-testid="app-title">Psychology Pro</h1>
-              <span className="text-sm text-gray-500" data-testid="app-subtitle">Cognitive Profiler</span>
+              <span className="text-sm text-gray-500" data-testid="app-subtitle">Enhanced Protocol</span>
               <a 
                 href="mailto:contact@zhisystems.ai" 
                 className="text-sm text-blue-600 hover:text-blue-800 underline ml-4"
@@ -64,10 +64,12 @@ export default function Home() {
               <div className="flex items-center justify-between">
                 <div>
                   <h2 className="text-lg font-semibold text-gray-900" data-testid="analysis-title">
-                    {selectedFunction === "cognitive" ? "Cognitive Analysis" : "Analysis"}
+                    Enhanced {selectedFunction.includes("cognitive") ? "Cognitive" : 
+                             selectedFunction.includes("psychological") ? "Psychological" : 
+                             "Psychopathological"} Analysis
                   </h2>
                   <p className="text-sm text-gray-600" data-testid="analysis-description">
-                    Analyze text for cognitive patterns and intelligence markers
+                    {selectedFunction.includes("comprehensive") ? "4-Phase Comprehensive Protocol" : "Normal Protocol (Phase 1 Only)"}
                   </p>
                 </div>
                 <div className="flex items-center space-x-3">
