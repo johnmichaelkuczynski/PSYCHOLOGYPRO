@@ -1,5 +1,6 @@
 import { useState } from "react";
-import { Brain, Settings, HelpCircle } from "lucide-react";
+import { Brain, Settings, HelpCircle, Zap } from "lucide-react";
+import { Link } from "wouter";
 import Sidebar from "@/components/sidebar";
 import LLMSelector from "@/components/llm-selector";
 import TextInput from "@/components/text-input";
@@ -31,6 +32,12 @@ export default function Home() {
               <span className="text-sm text-gray-500" data-testid="app-subtitle">Cognitive Profiler</span>
             </div>
             <div className="flex items-center space-x-4">
+              <Link href="/psychology-pro">
+                <Button variant="default" size="sm" data-testid="psychology-pro-button">
+                  <Zap className="h-4 w-4 mr-2" />
+                  Psychology Pro
+                </Button>
+              </Link>
               <Button variant="ghost" size="sm" data-testid="help-button">
                 <HelpCircle className="h-4 w-4" />
               </Button>
