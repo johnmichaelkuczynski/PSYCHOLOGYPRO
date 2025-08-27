@@ -62,7 +62,7 @@ export default function EnhancedResultsPanel({ analysisId, onDiscussionToggle, o
             if (data.question) {
               setStreamingContent(prev => ({
                 ...prev,
-                [`question_${currentBatch}`]: data.question || ""
+                [`question_${data.batch || currentBatch}`]: data.question || ""
               }));
             }
             break;
@@ -71,7 +71,7 @@ export default function EnhancedResultsPanel({ analysisId, onDiscussionToggle, o
             if (data.answer) {
               setStreamingContent(prev => ({
                 ...prev,
-                [`answer_${currentBatch}`]: (prev[`answer_${currentBatch}`] || "") + data.answer
+                [`answer_${data.batch || currentBatch}`]: (prev[`answer_${data.batch || currentBatch}`] || "") + data.answer
               }));
             }
             break;
@@ -225,7 +225,7 @@ export default function EnhancedResultsPanel({ analysisId, onDiscussionToggle, o
             <CardTitle className="flex items-center justify-between text-base">
               <span>Enhanced Protocol Progress</span>
               <Badge variant={currentPhase === 4 ? "default" : "secondary"}>
-                Phase {currentPhase}/4
+                Phase {currentPhase}/{currentPhase === 1 && !isStreaming ? 1 : 4}
               </Badge>
             </CardTitle>
           </CardHeader>
