@@ -13,12 +13,10 @@ export default function Home() {
   const [selectedLLM, setSelectedLLM] = useState<LLMProviderType>("zhi1");
   const [isDiscussionOpen, setIsDiscussionOpen] = useState(false);
   const [currentAnalysisId, setCurrentAnalysisId] = useState<string | null>(null);
-  const [resetKey, setResetKey] = useState(0);
 
   const handleNewAnalysis = () => {
     setCurrentAnalysisId(null);
     setIsDiscussionOpen(false);
-    setResetKey(prev => prev + 1); // This will force TextInput to reset
   };
 
   return (
@@ -31,13 +29,6 @@ export default function Home() {
               <Brain className="text-primary text-2xl" data-testid="brain-icon" />
               <h1 className="text-xl font-bold text-gray-900" data-testid="app-title">Psychology Pro</h1>
               <span className="text-sm text-gray-500" data-testid="app-subtitle">Cognitive Profiler</span>
-              <a 
-                href="mailto:contact@zhisystems.ai" 
-                className="text-sm text-blue-600 hover:text-blue-800 underline ml-4"
-                data-testid="contact-link"
-              >
-                Contact Us
-              </a>
             </div>
             <div className="flex items-center space-x-4">
               <Button variant="ghost" size="sm" data-testid="help-button">
@@ -91,7 +82,6 @@ export default function Home() {
                   />
                   
                   <TextInput 
-                    key={resetKey}
                     selectedFunction={selectedFunction}
                     selectedLLM={selectedLLM}
                     onAnalysisStart={(analysisId) => setCurrentAnalysisId(analysisId)}

@@ -51,15 +51,5 @@ export const AnalysisType = z.enum([
   "comprehensive-psychopathological"
 ]);
 
-export const EnhancedAnalysisType = z.enum([
-  "enhanced-cognitive-normal",
-  "enhanced-cognitive-comprehensive",
-  "enhanced-psychological-normal", 
-  "enhanced-psychological-comprehensive",
-  "enhanced-psychopathological-normal",
-  "enhanced-psychopathological-comprehensive"
-]);
-
 export type LLMProviderType = z.infer<typeof LLMProvider>;
 export type AnalysisTypeType = z.infer<typeof AnalysisType>;
-export type EnhancedAnalysisTypeType = z.infer<typeof EnhancedAnalysisType>;
