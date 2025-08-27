@@ -387,4 +387,488 @@ export class StreamingService {
       }
     }
   }
+
+  // Enhanced Analysis Methods
+  
+  private enhancedStreams = new Map<string, ActiveStream>();
+  
+  async startEnhancedAnalysis(analysisId: string, enhancedType: string): Promise<void> {
+    this.processEnhancedAnalysis(analysisId, enhancedType).catch(error => {
+      console.error(`Enhanced analysis ${analysisId} failed:`, error);
+      this.broadcastToEnhancedStream(analysisId, {
+        type: "error",
+        error: error.message
+      });
+    });
+  }
+
+  addEnhancedClient(analysisId: string, res: any): () => void {
+    if (!this.enhancedStreams.has(analysisId)) {
+      this.enhancedStreams.set(analysisId, {
+        callbacks: new Set(),
+        isActive: true
+      });
+    }
+
+    const callback = (data: any) => {
+      try {
+        res.write(`data: ${JSON.stringify(data)}\n\n`);
+      } catch (error) {
+        console.error("Error writing to enhanced stream:", error);
+      }
+    };
+
+    const stream = this.enhancedStreams.get(analysisId)!;
+    stream.callbacks.add(callback);
+
+    return () => {
+      stream.callbacks.delete(callback);
+      if (stream.callbacks.size === 0) {
+        this.enhancedStreams.delete(analysisId);
+      }
+    };
+  }
+
+  stopEnhancedAnalysis(analysisId: string): void {
+    const stream = this.enhancedStreams.get(analysisId);
+    if (stream) {
+      stream.isActive = false;
+      this.broadcastToEnhancedStream(analysisId, {
+        type: "stopped",
+        message: "Enhanced analysis stopped by user"
+      });
+      stream.callbacks.clear();
+      this.enhancedStreams.delete(analysisId);
+    }
+  }
+
+  private broadcastToEnhancedStream(analysisId: string, data: any): void {
+    const stream = this.enhancedStreams.get(analysisId);
+    if (stream && stream.isActive) {
+      stream.callbacks.forEach(callback => {
+        try {
+          callback(data);
+        } catch (error) {
+          console.error("Enhanced stream callback error:", error);
+        }
+      });
+    }
+  }
+
+  private async processEnhancedAnalysis(analysisId: string, enhancedType: string): Promise<void> {
+    const analysis = await this.storage.getAnalysis(analysisId);
+    if (!analysis) {
+      throw new Error("Analysis not found");
+    }
+
+    const stream = this.enhancedStreams.get(analysisId);
+    if (!stream || !stream.isActive) {
+      return;
+    }
+
+    try {
+      const isComprehensive = enhancedType.includes("comprehensive");
+      const analysisMode = enhancedType.includes("cognitive") ? "cognitive" : 
+                          enhancedType.includes("psychological") ? "psychological" : 
+                          "psychopathological";
+
+      const { questions, instructions } = this.getEnhancedProtocol(analysisMode);
+
+      this.broadcastToEnhancedStream(analysisId, {
+        type: "phase_start",
+        phase: 1,
+        message: "Starting Phase 1: Direct Questions"
+      });
+
+      let phase1Results = await this.processEnhancedPhase1(analysis, questions, instructions, analysisMode);
+
+      if (!isComprehensive) {
+        this.broadcastToEnhancedStream(analysisId, {
+          type: "complete",
+          message: "Enhanced analysis complete"
+        });
+        return;
+      }
+
+      if (this.shouldContinueToPhase2(phase1Results)) {
+        await this.processEnhancedPhase2(analysis, questions, instructions, analysisMode, phase1Results);
+        await this.processEnhancedPhase3(analysis, questions, instructions, analysisMode, phase1Results);
+        await this.processEnhancedPhase4(analysis, questions, instructions, analysisMode, phase1Results);
+      }
+
+      this.broadcastToEnhancedStream(analysisId, {
+        type: "complete",
+        message: "Enhanced comprehensive analysis complete"
+      });
+
+    } catch (error) {
+      console.error("Enhanced analysis error:", error);
+      this.broadcastToEnhancedStream(analysisId, {
+        type: "error",
+        error: error instanceof Error ? error.message : String(error)
+      });
+    }
+  }
+
+  private getEnhancedProtocol(mode: string) {
+    if (mode === "cognitive") {
+      return {
+        questions: [
+          "Is it insightful?",
+          "Does it develop points?",
+          "Is the organization hierarchical or merely sequential?",
+          "Does it operate skillfully with logic/reasoning?",
+          "Are the points fresh or cliched?",
+          "Does jargon obfuscate or clarify?",
+          "Do points develop organically?",
+          "Does it open or shut inquiry?",
+          "Is it actually intelligent?",
+          "Is it real or phony?",
+          "Do sentences show internal logic?",
+          "Is it governed by strong concepts?",
+          "Is there system-level control?",
+          "Are points authentic or institutional?",
+          "Is writing direct or evasive?",
+          "Are statements clear or ambiguous?",
+          "Does progression follow logic or authority?",
+          "Does author use others constructively?"
+        ],
+        instructions: `Answer these questions about this text. Give a score out of 100 for each.
+
+A score of N/100 means (100-N)/100 outperform the author.
+
+You are not grading. You are answering questions.
+
+Do not use risk-averse standards. Do not be diplomatic. Think very hard.
+
+If a work is genius, say so. Give the score it deserves.
+
+Focus on substance, not jargon or authorities.
+
+Insight is a sniper shot. Truth often looks extreme.
+
+95-100: Unignorable insight or genius
+80-94: Strong with minor friction  
+<80: Mediocrity or failure
+
+Start by summarizing and categorizing the text.`
+      };
+    } else if (mode === "psychological") {
+      return {
+        questions: [
+          "Stable self-concept or fragmented?",
+          "Ego strength or brittle defenses?",
+          "Mature, neurotic, or primitive defenses?",
+          "Affect-thought integration?",
+          "Direct/engaged or defensive/avoidant?",
+          "Narcissistic organization?",
+          "Drives: open, displaced, or repressed?",
+          "Internal conflict or monolithic certainty?",
+          "Object constancy or splitting?",
+          "Aggression integrated or projected?",
+          "Self-reflection or defensive earnestness?",
+          "Growth potential or rigidity?",
+          "Paranoid or reality-based?",
+          "Authentic or phony depth?",
+          "Resilient or fragile under stress?",
+          "Compulsive repetition or flexible?",
+          "Capacity for intimacy?",
+          "Shame/guilt: constructive or projected?"
+        ],
+        instructions: `Answer these questions about psychological functioning. Score out of 100.
+
+Score means (100-N)/100 have superior psychological functioning.
+
+You are answering questions, not grading.
+
+Describe psyche configuration, not diagnostic checklists.
+
+Don't conflate verbal confidence with psychological strength.
+
+Evaluate vs. general population.
+
+Don't penalize honesty or boldness if integrated.
+
+95-100: Authentic, integrated psyche
+80-94: Strong with observable defenses
+<80: Rigidity, fragmentation, dissimulation
+
+Summarize and categorize the psychological presentation.`
+      };
+    } else {
+      return {
+        questions: [
+          "Reality testing: intact or distorted?",
+          "Persecutory ideation or proportionate perception?",
+          "Rigid obsessional patterns or flexible thought?",
+          "Narcissistic pathology or balanced relations?",
+          "Aggression: sadistic or integrated?",
+          "Affect regulation: stable or labile?",
+          "Emptiness/hollowness or capacity for meaning?",
+          "Identity diffusion or stable self?",
+          "Exploitative or genuine interpersonal patterns?",
+          "Psychotic, borderline, or neurotic organization?",
+          "Primitive or higher-level defenses?",
+          "Pathological lying or authentic communication?",
+          "Paranoid defiance or measured critique?",
+          "Sexuality: integrated or perverse/displaced?",
+          "Overall: coherent or chaotic/performative?"
+        ],
+        instructions: `Answer these questions about psychopathology. Score out of 100.
+
+Score means (100-N)/100 outperform the subject.
+
+You are describing psychopathology degree, not diagnosing.
+
+Focus on reality testing, defenses, affect, interpersonal stance.
+
+Evaluate vs. general population, not just clinical.
+
+Don't penalize intense but integrated thought.
+
+95-100: Minimal pathology, resilient
+80-94: Functional with marked distortions
+<80: Clear maladaptive pathology
+
+Summarize and categorize the presentation.`
+      };
+    }
+  }
+
+  private async processEnhancedPhase1(analysis: Analysis, questions: string[], instructions: string, mode: string): Promise<any[]> {
+    const batchSize = 5;
+    const results: any[] = [];
+
+    for (let i = 0; i < questions.length; i += batchSize) {
+      const stream = this.enhancedStreams.get(analysis.id);
+      if (!stream || !stream.isActive) break;
+
+      const batchQuestions = questions.slice(i, i + batchSize);
+      const batchNumber = Math.floor(i / batchSize) + 1;
+
+      this.broadcastToEnhancedStream(analysis.id, {
+        type: "batch_start",
+        batch: batchNumber,
+        questions: batchQuestions
+      });
+
+      const prompt = `${instructions}
+
+TEXT: ${analysis.textContent}
+
+QUESTIONS:
+${batchQuestions.map((q, idx) => `${i + idx + 1}. ${q}`).join('\n')}`;
+
+      let fullResponse = "";
+      for await (const chunk of this.llmService.streamResponse(
+        analysis.llmProvider as any,
+        [{ role: "user", content: prompt }],
+        (chunk) => {
+          fullResponse += chunk;
+          this.broadcastToEnhancedStream(analysis.id, {
+            type: "answer_chunk",
+            batch: batchNumber,
+            answer: chunk
+          });
+        }
+      )) {}
+
+      const batchResults = this.parseEnhancedBatchResponse(fullResponse, batchQuestions);
+      results.push(...batchResults);
+
+      batchResults.forEach((result) => {
+        this.broadcastToEnhancedStream(analysis.id, {
+          type: "batch_complete",
+          question: result.question,
+          answer: result.answer,
+          score: result.score
+        });
+      });
+
+      if (i + batchSize < questions.length) {
+        await this.addDelayWithProgress(analysis.id, 3000);
+      }
+    }
+
+    return results;
+  }
+
+  private parseEnhancedBatchResponse(response: string, questions: string[]): any[] {
+    const results = questions.map(question => ({ question, answer: "", score: 50 }));
+    
+    const lines = response.split('\n');
+    let currentQuestionIndex = -1;
+    let currentAnswer = "";
+
+    for (const line of lines) {
+      const questionMatch = line.match(/^(\d+)\./);
+      if (questionMatch) {
+        if (currentQuestionIndex >= 0 && currentQuestionIndex < results.length) {
+          results[currentQuestionIndex].answer = currentAnswer.trim();
+          const scoreMatch = currentAnswer.match(/(\d+)\/100/);
+          if (scoreMatch) {
+            results[currentQuestionIndex].score = parseInt(scoreMatch[1]);
+          }
+        }
+        currentQuestionIndex = parseInt(questionMatch[1]) - 1;
+        currentAnswer = line.substring(questionMatch[0].length).trim();
+      } else if (currentQuestionIndex >= 0) {
+        currentAnswer += "\n" + line;
+      }
+    }
+
+    if (currentQuestionIndex >= 0 && currentQuestionIndex < results.length) {
+      results[currentQuestionIndex].answer = currentAnswer.trim();
+      const scoreMatch = currentAnswer.match(/(\d+)\/100/);
+      if (scoreMatch) {
+        results[currentQuestionIndex].score = parseInt(scoreMatch[1]);
+      }
+    }
+
+    return results;
+  }
+
+  private shouldContinueToPhase2(results: any[]): boolean {
+    return results.some(result => result.score < 95);
+  }
+
+  private async processEnhancedPhase2(analysis: Analysis, questions: string[], instructions: string, mode: string, phase1Results: any[]): Promise<void> {
+    this.broadcastToEnhancedStream(analysis.id, {
+      type: "phase_start",
+      phase: 2,
+      message: "Starting Phase 2: Pushback Protocol"
+    });
+
+    const lowScores = phase1Results.filter(result => result.score < 95);
+    
+    for (const result of lowScores) {
+      const pushbackPrompt = `You scored this ${result.score}/100, meaning ${100 - result.score}/100 outperform the author. Your position is that ${100 - result.score}/100 have superior functioning. Are you sure?
+
+What concrete superiority do those ${100 - result.score} people have that this author lacks?
+
+Question: ${result.question}
+Your answer: ${result.answer}
+
+Answer the question de novo:`;
+
+      let pushbackResponse = "";
+      for await (const chunk of this.llmService.streamResponse(
+        analysis.llmProvider as any,
+        [{ role: "user", content: pushbackPrompt }],
+        (chunk) => {
+          pushbackResponse += chunk;
+          this.broadcastToEnhancedStream(analysis.id, {
+            type: "answer_chunk",
+            batch: 2,
+            answer: chunk
+          });
+        }
+      )) {}
+
+      this.broadcastToEnhancedStream(analysis.id, {
+        type: "batch_complete",
+        question: `Pushback: ${result.question}`,
+        answer: pushbackResponse,
+        score: this.extractScoreFromResponse(pushbackResponse)
+      });
+    }
+  }
+
+  private async processEnhancedPhase3(analysis: Analysis, questions: string[], instructions: string, mode: string, phase1Results: any[]): Promise<void> {
+    this.broadcastToEnhancedStream(analysis.id, {
+      type: "phase_start",
+      phase: 3,
+      message: "Starting Phase 3: Walmart Metric Enforcement"
+    });
+
+    const walmartPrompt = `Walmart metric verification:
+
+${phase1Results.map(result => 
+  `${result.question}: ${result.score}/100 (${100 - result.score}/100 Walmart patrons outperform)`
+).join('\n')}
+
+If you claim Walmart patrons outperform the author, provide concrete examples of their superior work. If you cannot, revise scores.`;
+
+    let walmartResponse = "";
+    for await (const chunk of this.llmService.streamResponse(
+      analysis.llmProvider as any,
+      [{ role: "user", content: walmartPrompt }],
+      (chunk) => {
+        walmartResponse += chunk;
+        this.broadcastToEnhancedStream(analysis.id, {
+          type: "answer_chunk",
+          batch: 3,
+          answer: chunk
+        });
+      }
+    )) {}
+
+    this.broadcastToEnhancedStream(analysis.id, {
+      type: "batch_complete",
+      question: "Walmart Metric Verification",
+      answer: walmartResponse,
+      score: 100
+    });
+  }
+
+  private async processEnhancedPhase4(analysis: Analysis, questions: string[], instructions: string, mode: string, phase1Results: any[]): Promise<void> {
+    this.broadcastToEnhancedStream(analysis.id, {
+      type: "phase_start",
+      phase: 4,
+      message: "Starting Phase 4: Final Validation"
+    });
+
+    const validationPrompt = `Final validation checklist:
+
+1. Were you penalized for unconventionality vs. actual deficiencies?
+2. Do scores reflect truth density, not norm compliance?
+3. Is the Walmart metric empirically grounded?
+
+Provide final, calibrated assessment:`;
+
+    let validationResponse = "";
+    for await (const chunk of this.llmService.streamResponse(
+      analysis.llmProvider as any,
+      [{ role: "user", content: validationPrompt }],
+      (chunk) => {
+        validationResponse += chunk;
+        this.broadcastToEnhancedStream(analysis.id, {
+          type: "answer_chunk",
+          batch: 4,
+          answer: chunk
+        });
+      }
+    )) {}
+
+    this.broadcastToEnhancedStream(analysis.id, {
+      type: "batch_complete",
+      question: "Final Validation",
+      answer: validationResponse,
+      score: 100
+    });
+  }
+
+  private extractScoreFromResponse(response: string): number {
+    const scoreMatch = response.match(/(\d+)\/100/);
+    return scoreMatch ? parseInt(scoreMatch[1]) : 50;
+  }
+
+  private async addDelayWithProgress(analysisId: string, delayMs: number): Promise<void> {
+    const steps = 20;
+    const stepMs = delayMs / steps;
+    
+    for (let i = 0; i <= steps; i++) {
+      const stream = this.enhancedStreams.get(analysisId);
+      if (!stream || !stream.isActive) break;
+      
+      this.broadcastToEnhancedStream(analysisId, {
+        type: "delay",
+        progress: (i / steps) * 100
+      });
+      
+      if (i < steps) {
+        await new Promise(resolve => setTimeout(resolve, stepMs));
+      }
+    }
+  }
 }
