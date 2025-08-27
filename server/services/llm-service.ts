@@ -271,125 +271,80 @@ Answer each question explicitly with quotations from the text and accompanying r
     return prompt;
   }
 
-  // Create psychological prompt as specified
-  createPsychologicalPrompt(textContent: string, questions: string[], additionalContext?: string): string {
-    let prompt = `Answer these questions in connection with this text.\n\n`;
-    
-    if (additionalContext) {
-      prompt += `Additional Context: ${additionalContext}\n\n`;
-    }
-    
-    prompt += `Text to analyze:\n${textContent}\n\n`;
-    
-    prompt += `Questions:\n${questions.map((q, i) => `${i + 1}. ${q}`).join('\n')}\n\n`;
-    
-    prompt += `Instructions:
-A score of N/100 means (100–N)/100 outperform the subject with respect to the psychological capacity defined by the question.
-
-You are not grading. You are answering questions.
-
-Do not default to diagnostic checklists; describe configuration of psyche.
-
-Do not conflate verbal confidence with psychological strength.
-
-Summarize the text and categorize the psychological presentation (e.g., narcissistic, depressive, obsessional, resilient, fragmented).
-
-Evaluate relative to the general population, not only "advanced" or "pathological" groups.
-
-Do not penalize honesty, boldness, or extreme statements if they indicate integration rather than breakdown.
-
-Answer each question explicitly with reasoning. Provide a numerical score out of 100 for each question.`;
-
-    return prompt;
-  }
-
-  // Create psychopathological prompt as specified
-  createPsychopathologicalPrompt(textContent: string, questions: string[], additionalContext?: string): string {
-    let prompt = `Answer these questions in connection with this text.\n\n`;
-    
-    if (additionalContext) {
-      prompt += `Additional Context: ${additionalContext}\n\n`;
-    }
-    
-    prompt += `Text to analyze:\n${textContent}\n\n`;
-    
-    prompt += `Questions:\n${questions.map((q, i) => `${i + 1}. ${q}`).join('\n')}\n\n`;
-    
-    prompt += `Instructions:
-A score of N/100 means (100–N)/100 outperform the subject with respect to the pathological indicator defined by the question.
-
-Higher scores indicate healthier/more integrated functioning.
-
-Evaluate signs of pathology against baseline of general population mental health.
-
-Focus on structural organization of psyche, not surface presentation.
-
-Distinguish between neurotic (ego-dystonic) and psychotic (ego-syntonic) presentations.
-
-Do not conflate unconventional thinking with pathology.
-
-Answer each question explicitly with reasoning. Provide a numerical score out of 100 for each question.`;
-
-    return prompt;
-  }
-
-  // Comprehensive Cognitive Questions (same as normal - comprehensive = 4-phase protocol)
+  // Comprehensive Cognitive Questions (more extensive set)
   getComprehensiveCognitiveQuestions(): string[] {
-    return this.getCognitiveQuestions();
+    return [
+      ...this.getCognitiveQuestions(),
+      "DOES THE AUTHOR UNDERSTAND THE FOUNDATIONS OF THE SUBJECT MATTER?",
+      "IS THERE EVIDENCE OF DEEP STRUCTURAL UNDERSTANDING?",
+      "DOES THE WORK TRANSCEND DISCIPLINARY BOUNDARIES MEANINGFULLY?",
+      "IS THE ARGUMENTATION INTERNALLY CONSISTENT ACROSS ALL LEVELS?",
+      "DOES THE AUTHOR ANTICIPATE AND ADDRESS COUNTERARGUMENTS?",
+      "IS THERE SYSTEMATIC INTEGRATION OF MULTIPLE PERSPECTIVES?",
+      "DOES THE WORK DEMONSTRATE MASTERY OF RELEVANT METHODOLOGIES?",
+      "IS THE SCOPE APPROPRIATE TO THE CLAIMS BEING MADE?"
+    ];
   }
 
   // Psychological Questions  
   getPsychologicalQuestions(): string[] {
     return [
-      "Does the text reveal a stable, coherent self-concept, or is the self fragmented/contradictory?",
-      "Is there evidence of ego strength (resilience, capacity to tolerate conflict/ambiguity), or does the psyche rely on brittle defenses?",
-      "Are defenses primarily mature (sublimation, humor, anticipation), neurotic (intellectualization, repression), or primitive (splitting, denial, projection)?",
-      "Does the writing show integration of affect and thought, or are emotions split off / overly intellectualized?",
-      "Is the author's stance defensive/avoidant or direct/engaged?",
-      "Does the psyche appear narcissistically organized (grandiosity, fragile self-esteem, hunger for validation), or not?",
-      "Are desires/drives expressed openly, displaced, or repressed?",
-      "Does the voice suggest internal conflict (superego vs. id, competing identifications), or monolithic certainty?",
-      "Is there evidence of object constancy (capacity to sustain nuanced view of others) or splitting (others seen as all-good/all-bad)?",
-      "Is aggression integrated (channeled productively) or dissociated/projected?",
-      "Is the author capable of irony/self-reflection, or trapped in compulsive earnestness / defensiveness?",
-      "Does the text suggest psychological growth potential (openness, curiosity, capacity to metabolize experience) or rigidity?",
-      "Is the discourse paranoid / persecutory (others as threats, conspiracies) or reality-based?",
-      "Does the tone reflect authentic engagement with reality, or phony simulation of depth?",
-      "Is the psyche resilient under stress, or fragile / evasive?",
-      "Is there evidence of compulsion or repetition (obsessional returns to the same themes), or flexible progression?",
-      "Does the author show capacity for intimacy / genuine connection, or only instrumental/defended relations?",
-      "Is shame/guilt worked through constructively or disavowed/projected?"
+      "WHAT PSYCHOLOGICAL PROFILE EMERGES FROM THE WRITING STYLE?",
+      "DOES THE AUTHOR DISPLAY INTELLECTUAL COURAGE OR COWARDICE?",
+      "IS THERE EVIDENCE OF INTELLECTUAL HONESTY OR SELF-DECEPTION?",
+      "WHAT LEVEL OF EMOTIONAL INTELLIGENCE IS DEMONSTRATED?",
+      "DOES THE AUTHOR SHOW CAPACITY FOR SELF-REFLECTION?",
+      "IS THERE EVIDENCE OF PSYCHOLOGICAL RIGIDITY OR FLEXIBILITY?",
+      "WHAT MOTIVATIONAL PATTERNS CAN BE INFERRED?",
+      "DOES THE WRITING SUGGEST NARCISSISTIC OR HUMBLE TENDENCIES?",
+      "IS THERE EVIDENCE OF ANXIETY OR CONFIDENCE IN THE PRESENTATION?",
+      "WHAT LEVEL OF PSYCHOLOGICAL SOPHISTICATION IS DISPLAYED?"
     ];
   }
 
-  // Comprehensive Psychological Questions (same as normal - comprehensive = 4-phase protocol)
+  // Comprehensive Psychological Questions
   getComprehensivePsychologicalQuestions(): string[] {
-    return this.getPsychologicalQuestions();
+    return [
+      ...this.getPsychologicalQuestions(),
+      "WHAT ATTACHMENT PATTERNS ARE SUGGESTED BY THE ARGUMENTATION STYLE?",
+      "DOES THE AUTHOR DISPLAY MATURE OR IMMATURE DEFENSE MECHANISMS?",
+      "IS THERE EVIDENCE OF EMOTIONAL REGULATION OR DYSREGULATION?",
+      "WHAT LEVEL OF EMPATHY IS DEMONSTRATED TOWARD OPPOSING VIEWPOINTS?",
+      "DOES THE WORK SUGGEST HIGH OR LOW EMOTIONAL QUOTIENT?",
+      "IS THERE EVIDENCE OF PROJECTION OR PSYCHOLOGICAL INSIGHT?",
+      "WHAT PERSONALITY TRAITS EMERGE FROM THE COMMUNICATION PATTERNS?",
+      "DOES THE AUTHOR SHOW CAPACITY FOR PSYCHOLOGICAL GROWTH?"
+    ];
   }
 
   // Psychopathological Questions
   getPsychopathologicalQuestions(): string[] {
     return [
-      "Does the text reveal distorted reality testing (delusion, paranoia, magical thinking), or intact contact with reality?",
-      "Is there evidence of persecutory ideation (seeing threats/conspiracies) or is perception proportionate?",
-      "Does the subject show rigid obsessional patterns (compulsion, repetitive fixation) vs. flexible thought?",
-      "Are there signs of narcissistic pathology (grandiosity, exploitation, lack of empathy), or balanced self-other relation?",
-      "Is aggression expressed as sadism, cruelty, destructive glee, or is it integrated/controlled?",
-      "Is affect regulation stable or does it suggest lability, rage, despair, manic flight?",
-      "Does the person exhibit emptiness, hollowness, anhedonia, or a capacity for meaning/connection?",
-      "Is there evidence of identity diffusion (incoherence, role-shifting, lack of stable self)?",
-      "Are interpersonal patterns exploitative/manipulative or reciprocal/genuine?",
-      "Does the psyche lean toward psychotic organization (loss of boundaries, hallucination-like claims), borderline organization (splitting, fear of abandonment), or neurotic organization (anxiety, repression)?",
-      "Are defenses predominantly primitive (denial, projection, splitting) or higher-level?",
-      "Is there evidence of pathological lying, phoniness, simulation, or authentic communication?",
-      "Does the discourse exhibit compulsive hostility toward norms/authorities (paranoid defiance) or measured critique?",
-      "Is sexuality integrated or perverse/displaced (voyeurism, exhibitionism, compulsive control)?",
-      "Is the overall presentation coherent and reality-based or chaotic, persecutory, hollow, performative?"
+      "ARE THERE SIGNS OF COGNITIVE DISTORTIONS OR CLEAR THINKING?",
+      "DOES THE REASONING SUGGEST PATHOLOGICAL OR HEALTHY MENTAL PROCESSES?",
+      "IS THERE EVIDENCE OF PARANOID THINKING OR APPROPRIATE SKEPTICISM?",
+      "DOES THE WORK DISPLAY GRANDIOSITY OR APPROPRIATE SELF-ASSESSMENT?",
+      "ARE THERE SIGNS OF DELUSIONAL THINKING OR REALITY-BASED REASONING?",
+      "DOES THE AUTHOR SHOW CAPACITY FOR LOGICAL COHERENCE?",
+      "IS THERE EVIDENCE OF OBSESSIVE-COMPULSIVE PATTERNS IN THE REASONING?",
+      "DOES THE WORK SUGGEST MANIC OR BALANCED MENTAL STATES?",
+      "ARE THERE SIGNS OF DISSOCIATION OR INTEGRATED THINKING?",
+      "DOES THE REASONING SUGGEST PSYCHOTIC OR NEUROTIC ORGANIZATION?"
     ];
   }
 
-  // Comprehensive Psychopathological Questions (same as normal - comprehensive = 4-phase protocol)  
+  // Comprehensive Psychopathological Questions  
   getComprehensivePsychopathologicalQuestions(): string[] {
-    return this.getPsychopathologicalQuestions();
+    return [
+      ...this.getPsychopathologicalQuestions(),
+      "WHAT LEVEL OF REALITY TESTING IS DEMONSTRATED?",
+      "ARE THERE SIGNS OF THOUGHT DISORDER OR ORGANIZED COGNITION?",
+      "DOES THE WORK SUGGEST PERSONALITY DISORDER TRAITS?",
+      "IS THERE EVIDENCE OF IMPULSE CONTROL OR DYSCONTROL?",
+      "DOES THE REASONING SUGGEST BORDERLINE OR INTEGRATED FUNCTIONING?",
+      "ARE THERE SIGNS OF ANTISOCIAL OR PROSOCIAL ORIENTATION?",
+      "DOES THE WORK DISPLAY PSYCHOPATHIC OR EMPATHIC CHARACTERISTICS?",
+      "IS THERE EVIDENCE OF DEVELOPMENTAL TRAUMA IMPACT ON COGNITION?"
+    ];
   }
 }
