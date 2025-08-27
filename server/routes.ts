@@ -6,7 +6,8 @@ import { storage } from "./storage";
 import { LLMService } from "./services/llm-service";
 import { FileService } from "./services/file-service";
 import { StreamingService } from "./services/streaming-service";
-import { insertAnalysisSchema, insertDiscussionSchema } from "@shared/schema";
+import { insertAnalysisSchema, insertDiscussionSchema } from "../shared/schema";
+import { profilerRouter } from "./profiler-routes";
 
 // Configure multer for file uploads
 const upload = multer({
@@ -193,6 +194,9 @@ export async function registerRoutes(app: Express): Promise<Server> {
       res.status(500).json({ error: "Failed to download analysis" });
     }
   });
+
+  // Register profiler routes
+  app.use(profilerRouter);
 
   const httpServer = createServer(app);
   return httpServer;
