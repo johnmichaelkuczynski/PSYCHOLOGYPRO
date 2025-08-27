@@ -31,13 +31,13 @@ function Router() {
         <Tabs value={activeTab} onValueChange={handleTabChange}>
           <TabsList className="grid w-[600px] grid-cols-3">
             <TabsTrigger value="original" data-testid="original-tab">
-              Original Analysis
+              Tab 1
             </TabsTrigger>
             <TabsTrigger value="enhanced" data-testid="enhanced-tab">
-              Enhanced Protocol
+              Tab 2
             </TabsTrigger>
             <TabsTrigger value="psychology-pro" data-testid="psychology-pro-tab">
-              Psychology Pro
+              Tab 3
             </TabsTrigger>
           </TabsList>
         </Tabs>
