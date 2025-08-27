@@ -166,7 +166,7 @@ export default function EnhancedTextInput({ selectedFunction, selectedLLM, onAna
 
       const result = await response.json();
 
-      if (!result.success) {
+      if (!response.ok || result.error) {
         toast({
           title: "File parsing failed",
           description: result.error || "Could not parse the file",
