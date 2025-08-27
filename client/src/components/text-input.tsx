@@ -11,9 +11,19 @@ interface TextInputProps {
   selectedFunction: AnalysisTypeType;
   selectedLLM: LLMProviderType;
   onAnalysisStart: (analysisId: string) => void;
+  onAnalysisComplete?: (data: any) => void;
+  isComprehensiveMode?: boolean;
+  onAllAnalysesComplete?: (data: any) => void;
 }
 
-export default function TextInput({ selectedFunction, selectedLLM, onAnalysisStart }: TextInputProps) {
+export default function TextInput({ 
+  selectedFunction, 
+  selectedLLM, 
+  onAnalysisStart, 
+  onAnalysisComplete,
+  isComprehensiveMode = false,
+  onAllAnalysesComplete
+}: TextInputProps) {
   const [textContent, setTextContent] = useState("");
   const [additionalContext, setAdditionalContext] = useState("");
   const [isAnalyzing, setIsAnalyzing] = useState(false);
@@ -21,6 +31,7 @@ export default function TextInput({ selectedFunction, selectedLLM, onAnalysisSta
   const [chunks, setChunks] = useState<string[] | null>(null);
   const [selectedChunks, setSelectedChunks] = useState<number[]>([0]);
   const [wordCount, setWordCount] = useState<number>(0);
+  const [isDragOver, setIsDragOver] = useState(false);
   const { toast } = useToast();
 
   // Client-side chunking function that matches server logic
@@ -41,10 +52,7 @@ export default function TextInput({ selectedFunction, selectedLLM, onAnalysisSta
     return text.trim().split(/\s+/).filter(word => word.length > 0).length;
   };
 
-  const handleFileUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
-    const file = e.target.files?.[0];
-    if (!file) return;
-
+  const processFile = async (file: File) => {
     console.log("Client: File selected:", {
       name: file.name,
       type: file.type,
@@ -52,114 +60,28 @@ export default function TextInput({ selectedFunction, selectedLLM, onAnalysisSta
       lastModified: file.lastModified
     });
 
-
-
-    // Handle PDF files with new system
-    if (file.type === "application/pdf") {
-      console.log("Handling PDF upload with new system");
-      
-      toast({
-        title: "Uploading PDF...",
-        description: `Uploading ${file.name}, please wait...`,
-      });
-      
-      try {
-        const formData = new FormData();
-        formData.append("file", file);
-        const response = await fetch("/api/upload/pdf", {
-          method: "POST", 
-          body: formData
-        });
-        
-        const result = await response.json();
-        console.log("PDF upload result:", result);
-        
-        if (!response.ok || !result.ok) {
-          toast({
-            title: "PDF upload failed",
-            description: result.error || "Could not upload PDF file",
-            variant: "destructive",
-          });
-          return;
-        }
-
-        // Show success 
-        toast({
-          title: "✅ PDF uploaded successfully!",
-          description: `${result.name} (${(result.size/1024).toFixed(1)}KB) uploaded`,
-        });
-        
-        setUploadedFile(file);
-        
-        // Extract text automatically
-        try {
-          const extractResponse = await fetch(`/api/extract/${result.id}`);
-          const extractResult = await extractResponse.json();
-          
-          if (extractResult.ok && extractResult.text) {
-            const extractedText = extractResult.text;
-            setTextContent(extractedText);
-            const wc = countWords(extractedText);
-            setWordCount(wc);
-            
-            if (wc > 1000) {
-              const textChunks = chunkText(extractedText);
-              setChunks(textChunks);
-              setSelectedChunks([0]);
-              toast({
-                title: "Text extracted and chunked",
-                description: `${textChunks.length} chunks created from PDF`
-              });
-            } else {
-              setChunks(null);
-              setSelectedChunks([0]);
-            }
-            
-            toast({
-              title: "PDF text extracted",
-              description: `${wc} words extracted and ready for analysis`
-            });
-          }
-        } catch (error) {
-          console.warn("Text extraction failed:", error);
-          setTextContent(`PDF "${file.name}" uploaded successfully!\n\nTo analyze your PDF content:\n1. Copy the text you want to analyze\n2. Paste it here and replace this message\n3. Select your analysis options below`);
-        }
-        
-        return;
-        
-      } catch (error) {
-        console.error("PDF upload error:", error);
-        toast({
-          title: "PDF upload failed",
-          description: "Could not upload PDF file",
-          variant: "destructive",
-        });
-        return;
-      }
-    }
-
+    // Validate file type
     const allowedTypes = [
-      "text/plain",
-      "application/msword",
-      "application/vnd.openxmlformats-officedocument.wordprocessingml.document"
+      'text/plain',
+      'application/pdf',
+      'application/msword',
+      'application/vnd.openxmlformats-officedocument.wordprocessingml.document'
     ];
-
+    
     if (!allowedTypes.includes(file.type)) {
-      console.log("Client: File type validation failed:", file.type);
       toast({
         title: "Invalid file type",
-        description: `File type "${file.type}" not supported. Please upload TXT, DOC, or DOCX files only.`,
+        description: "Please upload a TXT, PDF, DOC, or DOCX file.",
         variant: "destructive",
       });
       return;
     }
 
-    console.log("Client: File type validation passed");
-
+    // Validate file size (10MB limit)
     if (file.size > 10 * 1024 * 1024) {
       toast({
         title: "File too large",
-        description: "Please upload files smaller than 10MB.",
+        description: "Please upload a file smaller than 10MB.",
         variant: "destructive",
       });
       return;
@@ -205,6 +127,45 @@ export default function TextInput({ selectedFunction, selectedLLM, onAnalysisSta
     }
   };
 
+  const handleFileUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+    await processFile(file);
+  };
+
+  const handleDragOver = (e: React.DragEvent) => {
+    e.preventDefault();
+    e.stopPropagation();
+    setIsDragOver(true);
+  };
+
+  const handleDragLeave = (e: React.DragEvent) => {
+    e.preventDefault();
+    e.stopPropagation();
+    setIsDragOver(false);
+  };
+
+  const handleDrop = async (e: React.DragEvent) => {
+    e.preventDefault();
+    e.stopPropagation();
+    setIsDragOver(false);
+
+    const files = Array.from(e.dataTransfer.files);
+    if (files.length === 0) return;
+
+    if (files.length > 1) {
+      toast({
+        title: "Multiple files detected",
+        description: "Please upload only one file at a time.",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    const file = files[0];
+    await processFile(file);
+  };
+
   const handleStartAnalysis = async () => {
     if (!textContent.trim()) {
       toast({
@@ -232,20 +193,24 @@ export default function TextInput({ selectedFunction, selectedLLM, onAnalysisSta
         ? selectedChunks.map(index => chunks[index]).join('\n\n')
         : textContent;
       
-      const response = await apiRequest("POST", "/api/analyses", {
-        type: selectedFunction,
-        textContent: contentToAnalyze,
-        additionalContext: additionalContext.trim() || undefined,
-        llmProvider: selectedLLM,
-      });
+      if (isComprehensiveMode) {
+        await handleComprehensiveAnalysis(contentToAnalyze);
+      } else {
+        const response = await apiRequest("POST", "/api/analyses", {
+          type: selectedFunction,
+          textContent: contentToAnalyze,
+          additionalContext: additionalContext.trim() || undefined,
+          llmProvider: selectedLLM,
+        });
 
-      const { analysisId } = await response.json();
-      onAnalysisStart(analysisId);
-      
-      toast({
-        title: "Analysis started",
-        description: "Your text is being analyzed. Results will stream in real-time.",
-      });
+        const { analysisId } = await response.json();
+        onAnalysisStart(analysisId);
+        
+        toast({
+          title: "Analysis started",
+          description: "Your text is being analyzed. Results will stream in real-time.",
+        });
+      }
     } catch (error) {
       toast({
         title: "Analysis failed to start",
@@ -257,6 +222,88 @@ export default function TextInput({ selectedFunction, selectedLLM, onAnalysisSta
     }
   };
 
+  const handleComprehensiveAnalysis = async (contentToAnalyze: string) => {
+    try {
+      const response = await fetch("/api/comprehensive-analysis/stream", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          text: contentToAnalyze,
+          llmProvider: selectedLLM,
+        }),
+      });
+
+      if (!response.ok) {
+        throw new Error("Failed to start comprehensive analysis");
+      }
+
+      const reader = response.body?.getReader();
+      if (!reader) {
+        throw new Error("No response body reader available");
+      }
+
+      const analysisResults: Record<string, string> = {};
+
+      toast({
+        title: "Comprehensive Analysis Started",
+        description: "All six evaluations are now running. Results will stream in real-time.",
+      });
+
+      // Start analysis placeholder
+      onAnalysisStart("comprehensive-analysis");
+
+      while (true) {
+        const { done, value } = await reader.read();
+        if (done) break;
+
+        const chunk = new TextDecoder().decode(value);
+        const lines = chunk.split('\n');
+        
+        for (const line of lines) {
+          if (line.startsWith('data: ')) {
+            try {
+              const data = JSON.parse(line.slice(6));
+              
+              if (data.type === 'complete') {
+                // All analyses complete
+                onAllAnalysesComplete?.(analysisResults);
+                toast({
+                  title: "Comprehensive Analysis Complete",
+                  description: "All six evaluations have finished successfully.",
+                });
+                return;
+              }
+              
+              if (data.type === 'error') {
+                throw new Error(data.error);
+              }
+              
+              if (data.analysisType && data.chunk) {
+                if (!analysisResults[data.analysisType]) {
+                  analysisResults[data.analysisType] = "";
+                }
+                analysisResults[data.analysisType] += data.chunk;
+                
+                // Update comprehensive results panel
+                onAllAnalysesComplete?.({
+                  ...analysisResults,
+                  [data.analysisType]: analysisResults[data.analysisType]
+                });
+              }
+            } catch (parseError) {
+              console.error("Failed to parse streaming data:", parseError);
+            }
+          }
+        }
+      }
+    } catch (error) {
+      console.error("Comprehensive analysis error:", error);
+      throw error;
+    }
+  };
+
   return (
     <div className="flex-1 p-6 flex flex-col" data-testid="text-input-panel">
       {/* File Upload Area */}
@@ -264,7 +311,17 @@ export default function TextInput({ selectedFunction, selectedLLM, onAnalysisSta
         <label className="block text-sm font-medium text-gray-700 mb-2">
           Upload Document
         </label>
-        <div className="mt-1 flex justify-center px-6 pt-5 pb-6 border-2 border-gray-300 border-dashed rounded-md hover:border-gray-400 transition-colors">
+        <div 
+          className={`mt-1 flex justify-center px-6 pt-5 pb-6 border-2 border-dashed rounded-md transition-colors ${
+            isDragOver 
+              ? "border-blue-400 bg-blue-50" 
+              : "border-gray-300 hover:border-gray-400"
+          }`}
+          onDragOver={handleDragOver}
+          onDragLeave={handleDragLeave}
+          onDrop={handleDrop}
+          data-testid="file-drop-zone"
+        >
           <div className="space-y-1 text-center">
             <Upload className="text-gray-400 text-3xl mx-auto mb-2" />
             <div className="flex text-sm text-gray-600">
@@ -283,9 +340,11 @@ export default function TextInput({ selectedFunction, selectedLLM, onAnalysisSta
                   data-testid="file-upload-input"
                 />
               </label>
-              <p className="pl-1">or drag and drop</p>
+              <p className="pl-1">or drag and drop here</p>
             </div>
-            <p className="text-xs text-gray-500">TXT, PDF, DOC, DOCX up to 10MB</p>
+            <p className={`text-xs ${isDragOver ? "text-blue-600 font-medium" : "text-gray-500"}`}>
+              {isDragOver ? "Drop your file here!" : "TXT, PDF, DOC, DOCX up to 10MB"}
+            </p>
             {uploadedFile && (
               <p className="text-sm text-green-600 font-medium">
                 Uploaded: {uploadedFile.name}
