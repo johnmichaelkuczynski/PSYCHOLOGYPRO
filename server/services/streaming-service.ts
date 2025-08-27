@@ -564,23 +564,43 @@ export class StreamingService {
 
       let phase1Results = await this.processEnhancedPhase1(analysis, questions, instructions, analysisMode);
 
+      // For Normal protocol (Short), only run Phase 1
       if (!isComprehensive) {
         this.broadcastToEnhancedStream(analysisId, {
           type: "complete",
-          message: "Enhanced analysis complete"
+          message: "Enhanced normal protocol analysis complete (Phase 1 only)"
         });
         return;
       }
 
+      // For Comprehensive protocol, run all 4 phases
+      this.broadcastToEnhancedStream(analysisId, {
+        type: "phase_start",
+        phase: 2,
+        message: "Starting Phase 2: Pushback and Validation"
+      });
+
       if (this.shouldContinueToPhase2(phase1Results)) {
         await this.processEnhancedPhase2(analysis, questions, instructions, analysisMode, phase1Results);
+        
+        this.broadcastToEnhancedStream(analysisId, {
+          type: "phase_start",
+          phase: 3,
+          message: "Starting Phase 3: Contextual Integration"
+        });
         await this.processEnhancedPhase3(analysis, questions, instructions, analysisMode, phase1Results);
+        
+        this.broadcastToEnhancedStream(analysisId, {
+          type: "phase_start",
+          phase: 4,
+          message: "Starting Phase 4: Final Assessment"
+        });
         await this.processEnhancedPhase4(analysis, questions, instructions, analysisMode, phase1Results);
       }
 
       this.broadcastToEnhancedStream(analysisId, {
         type: "complete",
-        message: "Enhanced comprehensive analysis complete"
+        message: "Enhanced comprehensive analysis complete (All 4 phases)"
       });
 
     } catch (error) {
