@@ -142,6 +142,7 @@ export default function EnhancedTextInput({ selectedFunction, selectedLLM, onAna
 
     const allowedTypes = [
       "text/plain",
+      "application/pdf",
       "application/msword",
       "application/vnd.openxmlformats-officedocument.wordprocessingml.document"
     ];
@@ -274,7 +275,7 @@ export default function EnhancedTextInput({ selectedFunction, selectedLLM, onAna
         finalText = selectedChunks.map(index => chunks[index]).join('\n\n--- CHUNK BREAK ---\n\n');
       }
 
-      const response = await apiRequest("/api/enhanced-analyses", {
+      const response = await fetch("/api/enhanced-analyses", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",

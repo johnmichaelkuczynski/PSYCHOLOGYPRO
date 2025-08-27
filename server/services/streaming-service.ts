@@ -30,6 +30,17 @@ export class StreamingService {
     });
   }
 
+  async startEnhancedAnalysis(analysisId: string, enhancedType: string): Promise<void> {
+    // Start the enhanced analysis processing in the background
+    this.processEnhancedAnalysis(analysisId, enhancedType).catch(error => {
+      console.error(`Enhanced analysis ${analysisId} failed:`, error);
+      this.broadcastToStream(analysisId, {
+        type: "error",
+        error: error.message
+      });
+    });
+  }
+
   streamAnalysis(analysisId: string, callback: StreamCallback): void {
     if (!this.activeStreams.has(analysisId)) {
       this.activeStreams.set(analysisId, {
