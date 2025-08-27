@@ -75,9 +75,24 @@ Preferred communication style: Simple, everyday language.
 - **Replit Integration**: Development environment plugins and error overlays
 - **TypeScript**: Static type checking across the entire codebase
 
-# Recent Changes (August 26, 2025)
+# Recent Changes (August 27, 2025)
 
-## Major Improvements Completed
+## Latest Major Update - Comprehensive Intelligence Analysis Protocol
+✅ **Complete Intelligence Protocol Overhaul**: Implemented comprehensive revised intelligence assessment protocol for both comprehensive and non-comprehensive cognitive analysis
+
+✅ **Enhanced Question Set**: Updated to include all 24 intelligence assessment questions including new critical analysis questions about undefined terms, free variables, statement development, and insight paraphrasing
+
+✅ **Paradigm-Based Evaluation**: Added detailed paradigm examples - transcendental empiricism passage as phony pseudo-intellectual reference, and genuine intelligence examples for comparison standards
+
+✅ **Core Intelligence Rubric**: Implemented 8-point evaluation framework including defined vs undefined terms, free variables, development of points, insight paraphrase test, depth vs surface, friction & tension, originality, and phoniness check  
+
+✅ **Strict Failure Conditions**: Built-in system validation - scores above 65 for phony writing or below 96 for genuine intelligence examples trigger assessment failure
+
+✅ **Complete Metapoint Integration**: All 6 metapoints now integrated including not grading completeness, not overvaluing phrases, text summarization requirements, population-based scoring, rewarding insights over argumentation
+
+## Previous Changes (August 26, 2025)
+
+## Major Improvements Completed  
 ✅ **PDF Support Added**: Successfully implemented PDF file upload functionality using reliable upload system. PDF files are now uploaded and stored securely in uploads/ directory
 
 ✅ **Application Rebranding**: Changed application name from "Mind Reader" to "Psychology Pro" throughout the codebase and documentation
