@@ -53,9 +53,9 @@ app.use("/api/upload", uploadRouter);
 app.use("/api/extract", extractRouter);
 
 (async () => {
-  // Create HTTP server
-  const { createServer } = await import("http");
-  const server = createServer(app);
+  // Register the analysis routes
+  const { registerRoutes } = await import("./routes");
+  const server = await registerRoutes(app);
 
   app.use((err: any, _req: Request, res: Response, _next: NextFunction) => {
     const status = err.status || err.statusCode || 500;

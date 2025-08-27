@@ -6,8 +6,7 @@ import { storage } from "./storage";
 import { LLMService } from "./services/llm-service";
 import { FileService } from "./services/file-service";
 import { StreamingService } from "./services/streaming-service";
-import { insertAnalysisSchema, insertDiscussionSchema } from "../shared/schema";
-import { profilerRouter } from "./profiler-routes";
+import { insertAnalysisSchema, insertDiscussionSchema } from "../shared/schema.js";
 
 // Configure multer for file uploads
 const upload = multer({
@@ -175,6 +174,78 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // Enhanced Analysis Routes
+  
+  // Create enhanced analysis
+  app.post("/api/enhanced-analyses", async (req, res) => {
+    try {
+      const enhancedAnalysisData = z.object({
+        type: z.enum(["enhanced-cognitive-normal", "enhanced-cognitive-comprehensive", "enhanced-psychological-normal", "enhanced-psychological-comprehensive", "enhanced-psychopathological-normal", "enhanced-psychopathological-comprehensive"]),
+        textContent: z.string(),
+        additionalContext: z.string().optional(),
+        llmProvider: z.enum(["zhi1", "zhi2", "zhi3", "zhi4"])
+      }).parse(req.body);
+      
+      // Convert enhanced analysis to regular analysis for storage compatibility
+      const analysisData = {
+        type: "cognitive" as const, // Store as cognitive for now
+        textContent: enhancedAnalysisData.textContent,
+        additionalContext: enhancedAnalysisData.additionalContext || "",
+        llmProvider: enhancedAnalysisData.llmProvider
+      };
+      
+      const analysis = await storage.createAnalysis(analysisData);
+      
+      // Store the enhanced analysis type separately in the analysis results for reference
+      analysis.results = JSON.stringify({ enhancedType: enhancedAnalysisData.type });
+      analysis.type = enhancedAnalysisData.type; // Store enhanced type directly
+      
+      // Start enhanced streaming analysis in background
+      streamingService.startEnhancedAnalysis(analysis.id, enhancedAnalysisData.type);
+      
+      res.json({ analysisId: analysis.id });
+    } catch (error) {
+      console.error("Create enhanced analysis error:", error);
+      if (error instanceof z.ZodError) {
+        return res.status(400).json({ error: "Invalid enhanced analysis data", details: error.errors });
+      }
+      res.status(500).json({ error: "Failed to create enhanced analysis" });
+    }
+  });
+
+  // Stream enhanced analysis results
+  app.get("/api/enhanced-analyses/:id/stream", (req, res) => {
+    const analysisId = req.params.id;
+    
+    res.writeHead(200, {
+      'Content-Type': 'text/event-stream',
+      'Cache-Control': 'no-cache',
+      'Connection': 'keep-alive',
+      'Access-Control-Allow-Origin': '*',
+      'Access-Control-Allow-Headers': 'Cache-Control'
+    });
+
+    // Send initial connection message
+    res.write(`data: ${JSON.stringify({ type: "connected", message: "Stream connected" })}\n\n`);
+
+    // Add client to streaming service
+    const removeClient = streamingService.addEnhancedClient(analysisId, res);
+    
+    req.on('close', removeClient);
+    req.on('end', removeClient);
+  });
+
+  // Stop enhanced analysis
+  app.delete("/api/enhanced-analyses/:id", async (req, res) => {
+    try {
+      streamingService.stopEnhancedAnalysis(req.params.id);
+      res.json({ success: true });
+    } catch (error) {
+      console.error("Stop enhanced analysis error:", error);
+      res.status(500).json({ error: "Failed to stop enhanced analysis" });
+    }
+  });
+
   // Download analysis as TXT
   app.get("/api/analyses/:id/download", async (req, res) => {
     try {
@@ -194,9 +265,6 @@ export async function registerRoutes(app: Express): Promise<Server> {
       res.status(500).json({ error: "Failed to download analysis" });
     }
   });
-
-  // Register profiler routes
-  app.use(profilerRouter);
 
   const httpServer = createServer(app);
   return httpServer;
