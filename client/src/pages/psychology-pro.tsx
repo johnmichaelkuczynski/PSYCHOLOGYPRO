@@ -10,7 +10,17 @@ import { ScrollArea } from "@/components/ui/scroll-area";
 import { Progress } from "@/components/ui/progress";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Upload, FileText, Play, Square, Download, ChevronDown, ChevronUp, Brain, Heart, AlertTriangle } from "lucide-react";
-import { useToast } from "@/hooks/use-toast";
+// Temporary toast replacement
+const useToast = () => ({
+  toast: (options: any) => {
+    console.log('Toast:', options.title, options.description);
+    if (options.variant === 'destructive') {
+      alert(`Error: ${options.title}\n${options.description}`);
+    } else {
+      console.log(`Success: ${options.title}\n${options.description}`);
+    }
+  }
+});
 
 // Types
 type EvaluationMode = "cognitive-normal" | "cognitive-comprehensive" | "psychological-normal" | "psychological-comprehensive" | "psychopathological-normal" | "psychopathological-comprehensive";
