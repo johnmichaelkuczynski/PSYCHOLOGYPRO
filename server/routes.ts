@@ -198,7 +198,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       
       // Store the enhanced analysis type separately in the analysis results for reference
       analysis.results = JSON.stringify({ enhancedType: enhancedAnalysisData.type });
-      await storage.updateAnalysis(analysis.id, { results: analysis.results });
+      analysis.type = enhancedAnalysisData.type; // Store enhanced type directly
       
       // Start enhanced streaming analysis in background
       streamingService.startEnhancedAnalysis(analysis.id, enhancedAnalysisData.type);

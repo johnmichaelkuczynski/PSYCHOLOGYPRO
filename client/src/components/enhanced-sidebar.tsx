@@ -11,42 +11,42 @@ export default function EnhancedSidebar({ selectedFunction, onFunctionChange }: 
   const analysisTypes = [
     {
       id: "enhanced-cognitive-normal" as EnhancedAnalysisTypeType,
-      label: "Intelligence Protocol (Normal)",
-      description: "Phase 1 only: 18 direct questions with anti-midwit calibration",
+      label: "Cognitive (Short)",
+      description: "Phase 1 only: Direct questions with anti-midwit calibration",
       icon: Brain,
       color: "blue"
     },
     {
       id: "enhanced-cognitive-comprehensive" as EnhancedAnalysisTypeType,
-      label: "Intelligence Protocol (Comprehensive)",
+      label: "Cognitive (Long)",
       description: "4-Phase: Questions + Pushback + Walmart Metric + Final Validation",
       icon: Brain,
       color: "blue"
     },
     {
       id: "enhanced-psychological-normal" as EnhancedAnalysisTypeType,
-      label: "Psychological Protocol (Normal)",
-      description: "Phase 1 only: 18 psychological questions with enhanced calibration",
+      label: "Psychological (Short)",
+      description: "Phase 1 only: Psychological questions with enhanced calibration",
       icon: Zap,
       color: "green"
     },
     {
       id: "enhanced-psychological-comprehensive" as EnhancedAnalysisTypeType,
-      label: "Psychological Protocol (Comprehensive)",
+      label: "Psychological (Long)",
       description: "4-Phase: Psychological profiling with pushback and sniper amendments",
       icon: Zap,
       color: "green"
     },
     {
       id: "enhanced-psychopathological-normal" as EnhancedAnalysisTypeType,
-      label: "Psychopathology Protocol (Normal)",
-      description: "Phase 1 only: 15 pathology questions with enhanced scoring",
+      label: "Psychopathological (Short)",
+      description: "Phase 1 only: Pathology questions with enhanced scoring",
       icon: AlertTriangle,
       color: "red"
     },
     {
       id: "enhanced-psychopathological-comprehensive" as EnhancedAnalysisTypeType,
-      label: "Psychopathology Protocol (Comprehensive)",
+      label: "Psychopathological (Long)",
       description: "4-Phase: Pathology assessment with comprehensive validation",
       icon: AlertTriangle,
       color: "red"
@@ -57,10 +57,10 @@ export default function EnhancedSidebar({ selectedFunction, onFunctionChange }: 
     <aside className="w-80 bg-white border-r border-gray-200 overflow-y-auto" data-testid="sidebar">
       <div className="p-6">
         <h2 className="text-lg font-semibold text-gray-900 mb-4" data-testid="sidebar-title">
-          Enhanced Analysis Types
+          Analysis Modes
         </h2>
         <p className="text-sm text-gray-600 mb-6">
-          Enhanced protocols with anti-midwit calibration, pushback validation, Walmart metrics, and sniper amendments addressing quality issues with standard analysis.
+          Six modes total: Cognitive, Psychological, and Psychopathological evaluation - each with Short (Phase 1) and Long (4-Phase) options.
         </p>
         
         <div className="space-y-3">

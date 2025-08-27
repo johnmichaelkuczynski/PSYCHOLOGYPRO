@@ -4,7 +4,7 @@ import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
 import { useToast } from "@/hooks/use-toast";
 import { apiRequest } from "@/lib/queryClient";
-import type { LLMProviderType, EnhancedAnalysisTypeType } from "@shared/schema";
+import type { LLMProviderType, EnhancedAnalysisTypeType } from "../../shared/schema.js";
 
 interface TextInputProps {
   selectedFunction: EnhancedAnalysisTypeType;
@@ -159,7 +159,7 @@ export default function EnhancedTextInput({ selectedFunction, selectedLLM, onAna
       const formData = new FormData();
       formData.append("file", file);
 
-      const response = await apiRequest("/api/files/parse", {
+      const response = await fetch("/api/files/parse", {
         method: "POST",
         body: formData,
       });
