@@ -6,7 +6,6 @@ import { storage } from "./storage";
 import { LLMService } from "./services/llm-service";
 import { FileService } from "./services/file-service";
 import { StreamingService } from "./services/streaming-service";
-import { ComprehensiveAnalysisService } from "./services/comprehensive-analysis-service";
 import { insertAnalysisSchema, insertDiscussionSchema } from "../shared/schema.js";
 
 // Configure multer for file uploads
@@ -20,7 +19,6 @@ const upload = multer({
 const llmService = new LLMService();
 const fileService = new FileService();
 const streamingService = new StreamingService(llmService, storage);
-const comprehensiveAnalysisService = new ComprehensiveAnalysisService();
 
 export async function registerRoutes(app: Express): Promise<Server> {
   // File parsing endpoint
@@ -51,37 +49,6 @@ export async function registerRoutes(app: Express): Promise<Server> {
         error: "Failed to parse file",
         details: error instanceof Error ? error.message : String(error)
       });
-    }
-  });
-
-  // Comprehensive analysis streaming endpoint
-  app.post("/api/comprehensive-analysis/stream", async (req, res) => {
-    try {
-      const { text, llmProvider } = req.body;
-      
-      if (!text || !llmProvider) {
-        return res.status(400).json({ error: "Text and LLM provider are required" });
-      }
-
-      // Set up Server-Sent Events
-      res.setHeader('Content-Type', 'text/event-stream');
-      res.setHeader('Cache-Control', 'no-cache');
-      res.setHeader('Connection', 'keep-alive');
-      res.setHeader('Access-Control-Allow-Origin', '*');
-
-      // Start comprehensive analysis
-      await comprehensiveAnalysisService.streamComprehensiveAnalysis(
-        { text, llmProvider },
-        (data) => {
-          res.write(`data: ${JSON.stringify(data)}\n\n`);
-        }
-      );
-
-      res.end();
-    } catch (error) {
-      console.error("Comprehensive analysis error:", error);
-      res.write(`data: ${JSON.stringify({ type: 'error', error: error.message })}\n\n`);
-      res.end();
     }
   });
 
@@ -224,85 +191,6 @@ export async function registerRoutes(app: Express): Promise<Server> {
     } catch (error) {
       console.error("Download analysis error:", error);
       res.status(500).json({ error: "Failed to download analysis" });
-    }
-  });
-
-  // Comprehensive analysis endpoint
-  app.post("/api/comprehensive-analysis", async (req, res) => {
-    try {
-      const { text, llmProvider } = req.body;
-      
-      if (!text || !llmProvider) {
-        return res.status(400).json({ error: "Text and LLM provider are required" });
-      }
-      
-      const result = await comprehensiveAnalysisService.runComprehensiveAnalysis({
-        text,
-        llmProvider
-      });
-      
-      res.json(result);
-    } catch (error) {
-      console.error("Comprehensive analysis error:", error);
-      res.status(500).json({ 
-        error: "Failed to run comprehensive analysis",
-        details: error instanceof Error ? error.message : String(error)
-      });
-    }
-  });
-
-  // Comprehensive analysis streaming endpoint
-  app.post("/api/comprehensive-analysis/stream", (req, res) => {
-    try {
-      const { text, llmProvider } = req.body;
-      
-      if (!text || !llmProvider) {
-        return res.status(400).json({ error: "Text and LLM provider are required" });
-      }
-      
-      // Set up SSE headers
-      res.writeHead(200, {
-        'Content-Type': 'text/event-stream',
-        'Cache-Control': 'no-cache',
-        'Connection': 'keep-alive',
-        'Access-Control-Allow-Origin': '*',
-        'Access-Control-Allow-Headers': 'Cache-Control',
-      });
-
-      // Start streaming comprehensive analysis
-      (async () => {
-        try {
-          for await (const update of comprehensiveAnalysisService.streamComprehensiveAnalysis({
-            text,
-            llmProvider
-          })) {
-            res.write(`data: ${JSON.stringify(update)}\n\n`);
-          }
-          
-          // Send completion signal
-          res.write(`data: ${JSON.stringify({ type: 'complete' })}\n\n`);
-          res.end();
-        } catch (error) {
-          console.error("Streaming comprehensive analysis error:", error);
-          res.write(`data: ${JSON.stringify({ 
-            type: 'error', 
-            error: error instanceof Error ? error.message : String(error) 
-          })}\n\n`);
-          res.end();
-        }
-      })();
-
-      // Handle client disconnect
-      req.on('close', () => {
-        console.log("Client disconnected from comprehensive analysis stream");
-      });
-      
-    } catch (error) {
-      console.error("Comprehensive analysis stream setup error:", error);
-      res.status(500).json({ 
-        error: "Failed to start comprehensive analysis stream",
-        details: error instanceof Error ? error.message : String(error)
-      });
     }
   });
 
