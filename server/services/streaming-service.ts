@@ -105,6 +105,25 @@ export class StreamingService {
         case "comprehensive-psychopathological":
           await this.processComprehensivePsychopathologicalAnalysis(analysis);
           break;
+        // Enhanced protocols
+        case "enhanced-cognitive-normal":
+          await this.processCognitiveAnalysis(analysis);
+          break;
+        case "enhanced-cognitive-comprehensive":
+          await this.processComprehensiveCognitiveAnalysis(analysis);
+          break;
+        case "enhanced-psychological-normal":
+          await this.processPsychologicalAnalysis(analysis);
+          break;
+        case "enhanced-psychological-comprehensive":
+          await this.processComprehensivePsychologicalAnalysis(analysis);
+          break;
+        case "enhanced-psychopathological-normal":
+          await this.processPsychopathologicalAnalysis(analysis);
+          break;
+        case "enhanced-psychopathological-comprehensive":
+          await this.processComprehensivePsychopathologicalAnalysis(analysis);
+          break;
         default:
           throw new Error(`Analysis type ${analysis.type} not implemented`);
       }
@@ -211,11 +230,28 @@ export class StreamingService {
     const textChunks = this.chunkTextByTokens(analysis.textContent, maxTokens);
     const textToAnalyze = textChunks.length > 1 ? textChunks[0] : analysis.textContent;
     
-    const prompt = this.llmService.createCognitivePrompt(
-      textToAnalyze,
-      questions,
-      analysis.additionalContext || undefined
-    );
+    // Select appropriate prompt method based on analysis type
+    let prompt: string;
+    if (analysis.type.includes('psychological')) {
+      prompt = this.llmService.createPsychologicalPrompt(
+        textToAnalyze,
+        questions,
+        analysis.additionalContext || undefined
+      );
+    } else if (analysis.type.includes('psychopathological')) {
+      prompt = this.llmService.createPsychopathologicalPrompt(
+        textToAnalyze,
+        questions,
+        analysis.additionalContext || undefined
+      );
+    } else {
+      // Cognitive analysis
+      prompt = this.llmService.createCognitivePrompt(
+        textToAnalyze,
+        questions,
+        analysis.additionalContext || undefined
+      );
+    }
 
     let fullResponse = "";
     
@@ -339,7 +375,7 @@ export class StreamingService {
   }
 
   formatAnalysisForDownload(analysis: Analysis): string {
-    let content = `MIND READER ANALYSIS REPORT\n`;
+    let content = `PSYCHOLOGY PRO ANALYSIS REPORT\n`;
     content += `Generated: ${new Date().toLocaleString()}\n`;
     content += `Analysis Type: ${analysis.type.toUpperCase()}\n`;
     content += `LLM Provider: ${analysis.llmProvider.toUpperCase()}\n\n`;
