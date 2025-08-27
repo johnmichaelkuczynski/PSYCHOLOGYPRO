@@ -1052,4 +1052,463 @@ Provide final, calibrated assessment:`;
 
     return chunks.filter(chunk => chunk.length > 0);
   }
+
+  // Psychology Pro Analysis Methods
+  
+  private psychologyProStreams = new Map<string, ActiveStream>();
+
+  async startPsychologyProAnalysis(analysisId: string, mode: string): Promise<void> {
+    this.processPsychologyProAnalysis(analysisId, mode).catch(error => {
+      console.error(`Psychology Pro analysis ${analysisId} failed:`, error);
+      this.broadcastToPsychologyProStream(analysisId, {
+        type: "error",
+        status: "error",
+        error: error.message
+      });
+    });
+  }
+
+  addPsychologyProClient(analysisId: string, res: any): () => void {
+    if (!this.psychologyProStreams.has(analysisId)) {
+      this.psychologyProStreams.set(analysisId, {
+        callbacks: new Set(),
+        isActive: true
+      });
+    }
+
+    const callback = (data: any) => {
+      try {
+        res.write(`data: ${JSON.stringify(data)}\n\n`);
+      } catch (error) {
+        console.error("Error writing to Psychology Pro stream:", error);
+      }
+    };
+
+    const stream = this.psychologyProStreams.get(analysisId)!;
+    stream.callbacks.add(callback);
+
+    return () => {
+      stream.callbacks.delete(callback);
+      if (stream.callbacks.size === 0) {
+        this.psychologyProStreams.delete(analysisId);
+      }
+    };
+  }
+
+  stopPsychologyProAnalysis(analysisId: string): void {
+    const stream = this.psychologyProStreams.get(analysisId);
+    if (stream) {
+      stream.isActive = false;
+      this.broadcastToPsychologyProStream(analysisId, {
+        type: "stopped",
+        status: "stopped",
+        message: "Psychology Pro analysis stopped by user"
+      });
+      stream.callbacks.clear();
+      this.psychologyProStreams.delete(analysisId);
+    }
+  }
+
+  private broadcastToPsychologyProStream(analysisId: string, data: any): void {
+    const stream = this.psychologyProStreams.get(analysisId);
+    if (stream && stream.isActive) {
+      stream.callbacks.forEach(callback => {
+        try {
+          callback(data);
+        } catch (error) {
+          console.error("Psychology Pro stream callback error:", error);
+        }
+      });
+    }
+  }
+
+  private async processPsychologyProAnalysis(analysisId: string, mode: string): Promise<void> {
+    const analysis = await this.storage.getAnalysis(analysisId);
+    if (!analysis) {
+      throw new Error("Analysis not found");
+    }
+
+    await this.storage.updateAnalysisStatus(analysisId, "streaming");
+
+    this.broadcastToPsychologyProStream(analysisId, {
+      type: "start",
+      status: "streaming",
+      mode: mode,
+      progress: 0
+    });
+
+    try {
+      // Summary and categorization
+      await this.streamPsychologyProSummary(analysis, mode);
+
+      // Process based on mode
+      if (mode.includes('comprehensive')) {
+        await this.processComprehensivePsychologyPro(analysis, mode);
+      } else {
+        await this.processNormalPsychologyPro(analysis, mode);
+      }
+
+      // Complete
+      this.broadcastToPsychologyProStream(analysisId, {
+        type: "complete",
+        status: "completed",
+        progress: 100
+      });
+
+      await this.storage.updateAnalysisStatus(analysisId, "completed");
+    } catch (error) {
+      throw error;
+    }
+  }
+
+  private async streamPsychologyProSummary(analysis: Analysis, mode: string): Promise<void> {
+    const domain = mode.split('-')[0]; // cognitive, psychological, or psychopathological
+    
+    const summaryPrompt = `First, summarize this text and categorize it. Then evaluate it with respect to the general population, not only "advanced" or "pathological" groups. Focus on substance and authenticity.
+
+Text: ${analysis.textContent}`;
+
+    let summaryResponse = "";
+    
+    this.broadcastToPsychologyProStream(analysis.id, {
+      type: "summary_start",
+      status: "streaming",
+      progress: 10
+    });
+
+    for await (const chunk of this.llmService.streamResponse(
+      analysis.llmProvider as any,
+      [{ role: "user", content: summaryPrompt }],
+      (chunk) => {
+        summaryResponse += chunk;
+        this.broadcastToPsychologyProStream(analysis.id, {
+          type: "summary_chunk",
+          content: chunk,
+          status: "streaming"
+        });
+      }
+    )) {}
+
+    this.broadcastToPsychologyProStream(analysis.id, {
+      type: "summary_complete",
+      summary: summaryResponse,
+      status: "streaming",
+      progress: 25
+    });
+  }
+
+  private async processNormalPsychologyPro(analysis: Analysis, mode: string): Promise<void> {
+    const domain = mode.split('-')[0];
+    let questions: string[] = [];
+    
+    // Get questions based on domain
+    switch (domain) {
+      case 'cognitive':
+        questions = this.getPsychologyProCognitiveQuestions();
+        break;
+      case 'psychological':
+        questions = this.getPsychologyProPsychologicalQuestions();
+        break;
+      case 'psychopathological':
+        questions = this.getPsychologyProPsychopathologicalQuestions();
+        break;
+    }
+
+    await this.processPsychologyProQuestions(analysis, questions, domain);
+  }
+
+  private async processComprehensivePsychologyPro(analysis: Analysis, mode: string): Promise<void> {
+    const domain = mode.split('-')[0];
+    
+    // Phase 1: Normal questions
+    await this.processNormalPsychologyPro(analysis, mode);
+    
+    // Phase 2: Pushback Protocol  
+    await this.processPsychologyProPushback(analysis, domain);
+    
+    // Phase 3: Walmart Metric
+    await this.processPsychologyProWalmart(analysis, domain);
+    
+    // Phase 4: Final Validation
+    await this.processPsychologyProValidation(analysis, domain);
+  }
+
+  private async processPsychologyProQuestions(analysis: Analysis, questions: string[], domain: string): Promise<void> {
+    const processedQuestions: any[] = [];
+    
+    for (let i = 0; i < questions.length; i++) {
+      const question = questions[i];
+      
+      const stream = this.psychologyProStreams.get(analysis.id);
+      if (!stream || !stream.isActive) return;
+
+      this.broadcastToPsychologyProStream(analysis.id, {
+        type: "question_start",
+        question: question,
+        questionNumber: i + 1,
+        totalQuestions: questions.length,
+        status: "streaming",
+        progress: 25 + (i / questions.length) * 50
+      });
+
+      const questionPrompt = this.buildPsychologyProPrompt(analysis.textContent, question, domain);
+      
+      let questionResponse = "";
+      for await (const chunk of this.llmService.streamResponse(
+        analysis.llmProvider as any,
+        [{ role: "user", content: questionPrompt }],
+        (chunk) => {
+          questionResponse += chunk;
+          this.broadcastToPsychologyProStream(analysis.id, {
+            type: "question_chunk",
+            content: chunk,
+            questionNumber: i + 1,
+            status: "streaming"
+          });
+        }
+      )) {}
+
+      const score = this.extractScoreFromResponse(questionResponse);
+      
+      const processedQuestion = {
+        question,
+        answer: questionResponse,
+        score,
+        questionNumber: i + 1
+      };
+      
+      processedQuestions.push(processedQuestion);
+
+      this.broadcastToPsychologyProStream(analysis.id, {
+        type: "question_complete",
+        question: processedQuestion,
+        status: "streaming",
+        progress: 25 + ((i + 1) / questions.length) * 50
+      });
+
+      // Brief delay between questions
+      if (i < questions.length - 1) {
+        await new Promise(resolve => setTimeout(resolve, 1000));
+      }
+    }
+
+    this.broadcastToPsychologyProStream(analysis.id, {
+      type: "questions_complete",
+      questions: processedQuestions,
+      status: "streaming",
+      progress: 75
+    });
+  }
+
+  private async processPsychologyProPushback(analysis: Analysis, domain: string): Promise<void> {
+    this.broadcastToPsychologyProStream(analysis.id, {
+      type: "phase_start",
+      phase: "Phase 2: Pushback Protocol",
+      status: "streaming",
+      progress: 80
+    });
+
+    const pushbackPrompt = `Restate your position: Are you sure about your scores? What concrete strengths do higher-scoring individuals have that this author lacks? Re-examine your answers.
+
+Text: ${analysis.textContent}`;
+
+    let pushbackResponse = "";
+    for await (const chunk of this.llmService.streamResponse(
+      analysis.llmProvider as any,
+      [{ role: "user", content: pushbackPrompt }],
+      (chunk) => {
+        pushbackResponse += chunk;
+        this.broadcastToPsychologyProStream(analysis.id, {
+          type: "pushback_chunk",
+          content: chunk,
+          status: "streaming"
+        });
+      }
+    )) {}
+
+    this.broadcastToPsychologyProStream(analysis.id, {
+      type: "pushback_complete",
+      content: pushbackResponse,
+      status: "streaming",
+      progress: 85
+    });
+  }
+
+  private async processPsychologyProWalmart(analysis: Analysis, domain: string): Promise<void> {
+    this.broadcastToPsychologyProStream(analysis.id, {
+      type: "phase_start",
+      phase: "Phase 3: Walmart Metric Enforcement",
+      status: "streaming",
+      progress: 90
+    });
+
+    const walmartPrompt = `If you claim that X% of Walmart patrons have superior ${domain} functioning than this author, provide concrete examples. If you can't, revise your scores.
+
+Text: ${analysis.textContent}`;
+
+    let walmartResponse = "";
+    for await (const chunk of this.llmService.streamResponse(
+      analysis.llmProvider as any,
+      [{ role: "user", content: walmartPrompt }],
+      (chunk) => {
+        walmartResponse += chunk;
+        this.broadcastToPsychologyProStream(analysis.id, {
+          type: "walmart_chunk",
+          content: chunk,
+          status: "streaming"
+        });
+      }
+    )) {}
+
+    this.broadcastToPsychologyProStream(analysis.id, {
+      type: "walmart_complete",
+      content: walmartResponse,
+      status: "streaming",
+      progress: 95
+    });
+  }
+
+  private async processPsychologyProValidation(analysis: Analysis, domain: string): Promise<void> {
+    this.broadcastToPsychologyProStream(analysis.id, {
+      type: "phase_start",
+      phase: "Phase 4: Final Validation",
+      status: "streaming",
+      progress: 98
+    });
+
+    const validationPrompt = `Final validation: Was the subject penalized for unconventional affect or honesty? Does the score reflect authentic integration, not mere social compliance? Is the Walmart metric empirically grounded?
+
+Text: ${analysis.textContent}`;
+
+    let validationResponse = "";
+    for await (const chunk of this.llmService.streamResponse(
+      analysis.llmProvider as any,
+      [{ role: "user", content: validationPrompt }],
+      (chunk) => {
+        validationResponse += chunk;
+        this.broadcastToPsychologyProStream(analysis.id, {
+          type: "validation_chunk",
+          content: chunk,
+          status: "streaming"
+        });
+      }
+    )) {}
+
+    this.broadcastToPsychologyProStream(analysis.id, {
+      type: "validation_complete",
+      content: validationResponse,
+      status: "streaming",
+      progress: 100
+    });
+  }
+
+  private buildPsychologyProPrompt(text: string, question: string, domain: string): string {
+    let basePrompt = `Answer this question in connection with this text. Also give a score out of 100.
+
+A score of N/100 means (100-N)/100 outperform the subject with respect to the parameter defined by the question.
+
+You are not grading. You are answering questions.
+
+`;
+
+    // Add domain-specific instructions
+    switch (domain) {
+      case 'cognitive':
+        basePrompt += `Do not default to cookbook, midwit evaluation protocols. Think very hard about your answers.
+Do not give credit merely for use of jargon or for referencing authorities. Focus on substance.
+This is not a grading app. You grade the intelligence of what you are given.
+Do not overvalue turns of phrase. Do not judge a book by its cover.
+Do not penalize boldness. What makes something smart is that it is insightful. Period.
+
+`;
+        break;
+      case 'psychological':
+        basePrompt += `Do not default to diagnostic checklists; describe configuration of psyche.
+Do not conflate verbal confidence with psychological strength.
+Evaluate relative to the general population, not only "advanced" or "pathological" groups.
+Do not penalize honesty, boldness, or extreme statements if they indicate integration rather than breakdown.
+
+`;
+        break;
+      case 'psychopathological':
+        basePrompt += `Focus on actual pathological indicators, not mere unconventionality.
+Distinguish between adaptive responses and maladaptive patterns.
+Do not pathologize authentic emotional expression or intellectual honesty.
+
+`;
+        break;
+    }
+
+    basePrompt += `Question: ${question}
+
+Text: ${text}`;
+
+    return basePrompt;
+  }
+
+  private getPsychologyProCognitiveQuestions(): string[] {
+    return [
+      "Is it insightful?",
+      "Does it develop points? (Or, if it is a short excerpt, is there evidence that it would develop points if extended)?",
+      "Is the organization merely sequential (just one point after another, little or no logical scaffolding)? Or are the ideas arranged, not just sequentially but hierarchically?",
+      "If the points it makes are not insightful, does it operate skillfully with canons of logic/reasoning?",
+      "Are the points clichés? Or are they 'fresh'?",
+      "Does it use technical jargon to obfuscate or to render more precise?",
+      "Is it organic? Do points develop in an organic, natural way? Do they 'unfold'? Or are they forced and artificial?",
+      "Does it open up new domains? Or, on the contrary, does it shut off inquiry (by conditionalizing further discussion of the matters on acceptance of its internal and possibly very faulty logic)?",
+      "Is it actually intelligent or just the work of somebody who, judging by the subject-matter, is presumed to be intelligent (but may not be)?",
+      "Is it real or is it phony?",
+      "Do the sentences exhibit complex and coherent internal logic?",
+      "Is the passage governed by a strong concept? Or is the only organization driven purely by expository (as opposed to epistemic) norms?",
+      "Is there system-level control over ideas? In other words, does the author seem to recall what he said earlier and to be in a position to integrate it into points he has made since then?",
+      "Are the points 'real'? Are they fresh? Or is some institution or some accepted vein of propaganda or orthodoxy just using the author as a mouth piece?",
+      "Is the writing evasive or direct?",
+      "Are the statements ambiguous?",
+      "Does the progression of the text develop according to who said what or according to what entails or confirms what?",
+      "Does the author use other authors to develop his ideas or to cloak his own lack of ideas?"
+    ];
+  }
+
+  private getPsychologyProPsychologicalQuestions(): string[] {
+    return [
+      "Does the text reveal a stable, coherent self-concept, or is the self fragmented/contradictory?",
+      "Is there evidence of ego strength (resilience, capacity to tolerate conflict/ambiguity), or does the psyche rely on brittle defenses?",
+      "Are defenses primarily mature (sublimation, humor, anticipation), neurotic (intellectualization, repression), or primitive (splitting, denial, projection)?",
+      "Does the writing show integration of affect and thought, or are emotions split off / overly intellectualized?",
+      "Is the author's stance defensive/avoidant or direct/engaged?",
+      "Does the psyche appear narcissistically organized (grandiosity, fragile self-esteem, hunger for validation), or not?",
+      "Are desires/drives expressed openly, displaced, or repressed?",
+      "Does the voice suggest internal conflict (superego vs. id, competing identifications), or monolithic certainty?",
+      "Is there evidence of object constancy (capacity to sustain nuanced view of others) or splitting (others seen as all-good/all-bad)?",
+      "Is aggression integrated (channeled productively) or dissociated/projected?",
+      "Is the author capable of irony/self-reflection, or trapped in compulsive earnestness / defensiveness?",
+      "Does the text suggest psychological growth potential (openness, curiosity, capacity to metabolize experience) or rigidity?",
+      "Is the discourse paranoid / persecutory (others as threats, conspiracies) or reality-based?",
+      "Does the tone reflect authentic engagement with reality, or phony simulation of depth?",
+      "Is the psyche resilient under stress, or fragile / evasive?",
+      "Is there evidence of compulsion or repetition (obsessional returns to the same themes), or flexible progression?",
+      "Does the author show capacity for intimacy / genuine connection, or only instrumental/defended relations?",
+      "Is shame/guilt worked through constructively or disavowed/projected?"
+    ];
+  }
+
+  private getPsychologyProPsychopathologicalQuestions(): string[] {
+    return [
+      "Does the text show evidence of reality testing difficulties or intact contact with reality?",
+      "Are there signs of thought disorder (loose associations, tangentiality, circumstantiality) or coherent thinking?",
+      "Does the author demonstrate impulse control or evidence of impulsivity/disinhibition?",
+      "Is there evidence of mood dysregulation (mania, depression, rapid cycling) or stable affect?",
+      "Are there paranoid ideations or realistic assessment of interpersonal situations?",
+      "Does the text suggest dissociative tendencies or integrated consciousness?",
+      "Are there signs of grandiosity or realistic self-assessment?",
+      "Does the author show capacity for empathy or callous/exploitative attitudes?",
+      "Is there evidence of compulsive behaviors or flexible behavioral patterns?",
+      "Are there indications of substance use problems affecting cognition?",
+      "Does the text reveal trauma responses or resilient coping mechanisms?",
+      "Are there signs of antisocial attitudes or prosocial orientation?",
+      "Does the author demonstrate anxiety management or overwhelming anxiety?",
+      "Is there evidence of self-harm ideation or protective self-regard?",
+      "Are there signs of eating disorder cognitions or healthy relationship with body/food?"
+    ];
+  }
 }

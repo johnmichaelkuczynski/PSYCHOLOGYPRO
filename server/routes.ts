@@ -266,6 +266,77 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // Psychology Pro Routes
+  
+  // Create Psychology Pro analysis
+  app.post("/api/psychology-pro/analyses", async (req, res) => {
+    try {
+      const psychologyProData = z.object({
+        mode: z.enum(["cognitive-normal", "cognitive-comprehensive", "psychological-normal", "psychological-comprehensive", "psychopathological-normal", "psychopathological-comprehensive"]),
+        textContent: z.string(),
+        llmProvider: z.enum(["zhi1", "zhi2", "zhi3", "zhi4"]),
+        chunks: z.array(z.string()).optional()
+      }).parse(req.body);
+      
+      // Convert to regular analysis for storage
+      const analysisData = {
+        type: psychologyProData.mode as any,
+        textContent: psychologyProData.textContent,
+        additionalContext: JSON.stringify({ 
+          psychologyProMode: psychologyProData.mode,
+          chunks: psychologyProData.chunks || []
+        }),
+        llmProvider: psychologyProData.llmProvider
+      };
+      
+      const analysis = await storage.createAnalysis(analysisData);
+      
+      // Start Psychology Pro analysis
+      streamingService.startPsychologyProAnalysis(analysis.id, psychologyProData.mode);
+      
+      res.json({ analysisId: analysis.id });
+    } catch (error) {
+      console.error("Create Psychology Pro analysis error:", error);
+      if (error instanceof z.ZodError) {
+        return res.status(400).json({ error: "Invalid Psychology Pro analysis data", details: error.errors });
+      }
+      res.status(500).json({ error: "Failed to create Psychology Pro analysis" });
+    }
+  });
+
+  // Stream Psychology Pro analysis results
+  app.get("/api/psychology-pro/analyses/:id/stream", (req, res) => {
+    const analysisId = req.params.id;
+    
+    res.writeHead(200, {
+      'Content-Type': 'text/event-stream',
+      'Cache-Control': 'no-cache',
+      'Connection': 'keep-alive',
+      'Access-Control-Allow-Origin': '*',
+      'Access-Control-Allow-Headers': 'Cache-Control'
+    });
+
+    // Send initial connection message
+    res.write(`data: ${JSON.stringify({ type: "connected", message: "Stream connected" })}\n\n`);
+
+    // Add client to streaming service
+    const removeClient = streamingService.addPsychologyProClient(analysisId, res);
+    
+    req.on('close', removeClient);
+    req.on('end', removeClient);
+  });
+
+  // Stop Psychology Pro analysis
+  app.delete("/api/psychology-pro/analyses/:id", async (req, res) => {
+    try {
+      streamingService.stopPsychologyProAnalysis(req.params.id);
+      res.json({ success: true });
+    } catch (error) {
+      console.error("Stop Psychology Pro analysis error:", error);
+      res.status(500).json({ error: "Failed to stop Psychology Pro analysis" });
+    }
+  });
+
   const httpServer = createServer(app);
   return httpServer;
 }
