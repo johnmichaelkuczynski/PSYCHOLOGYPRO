@@ -75,9 +75,18 @@ Preferred communication style: Simple, everyday language.
 - **Replit Integration**: Development environment plugins and error overlays
 - **TypeScript**: Static type checking across the entire codebase
 
-# Recent Changes (August 26, 2025)
+# Recent Changes (August 27, 2025)
 
-## Major Improvements Completed
+## Critical Fixes Completed Today
+✅ **Enhanced Protocol Streaming**: Fixed streaming connection issues in Enhanced Protocol - results now stream in real-time during analysis
+
+✅ **Text Chunking System**: Implemented comprehensive text chunking for documents over 1000 words with user-selectable chunks to prevent app crashes
+
+✅ **Protocol Phase Distinction**: Fixed Normal Protocol to run only Phase 1, while Comprehensive Protocol runs all 4 phases as intended
+
+✅ **File Upload Integration**: Enhanced Protocol now supports all file types (TXT, PDF, DOC, DOCX) with automatic chunking and selection interface
+
+## Major Improvements Completed (August 26, 2025)
 ✅ **PDF Support Added**: Successfully implemented PDF file upload functionality using reliable upload system. PDF files are now uploaded and stored securely in uploads/ directory
 
 ✅ **Application Rebranding**: Changed application name from "Mind Reader" to "Psychology Pro" throughout the codebase and documentation
