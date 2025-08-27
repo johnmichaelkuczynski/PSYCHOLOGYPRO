@@ -156,28 +156,63 @@ export class StreamingService {
   }
 
   private async streamSummary(analysis: Analysis): Promise<void> {
-    const summaryPrompt = `First, summarize this text and categorize it:\n\n${analysis.textContent}`;
+    // Check if text is too long and needs chunking
+    const maxTokens = 6000; // Conservative limit to leave room for prompts
+    const textChunks = this.chunkTextByTokens(analysis.textContent, maxTokens);
     
-    let summary = "";
-    
-    for await (const chunk of this.llmService.streamResponse(
-      analysis.llmProvider as any,
-      [{ role: "user", content: summaryPrompt }],
-      (chunk) => {
-        summary += chunk;
-        this.broadcastToStream(analysis.id, {
-          type: "summary",
-          content: summary
-        });
+    if (textChunks.length === 1) {
+      // Text is short enough for single summary
+      const summaryPrompt = `First, summarize this text and categorize it:\n\n${analysis.textContent}`;
+      
+      let summary = "";
+      for await (const chunk of this.llmService.streamResponse(
+        analysis.llmProvider as any,
+        [{ role: "user", content: summaryPrompt }],
+        (chunk) => {
+          summary += chunk;
+          this.broadcastToStream(analysis.id, {
+            type: "summary",
+            content: summary
+          });
+        }
+      )) {
+        // Stream is handled by the onChunk callback
       }
-    )) {
-      // Stream is handled by the onChunk callback
+    } else {
+      // Text needs to be chunked - provide a note and analyze first chunk only for summary
+      let summary = `Note: This document is ${analysis.textContent.split(' ').length} words long and has been automatically divided into ${textChunks.length} sections for analysis.\n\n`;
+      
+      this.broadcastToStream(analysis.id, {
+        type: "summary",
+        content: summary
+      });
+
+      const summaryPrompt = `First, summarize this section (1 of ${textChunks.length}) from a larger document and categorize it:\n\n${textChunks[0]}`;
+      
+      for await (const chunk of this.llmService.streamResponse(
+        analysis.llmProvider as any,
+        [{ role: "user", content: summaryPrompt }],
+        (chunk) => {
+          summary += chunk;
+          this.broadcastToStream(analysis.id, {
+            type: "summary",
+            content: summary
+          });
+        }
+      )) {
+        // Stream is handled by the onChunk callback
+      }
     }
   }
 
   private async processBatch(analysis: Analysis, questions: string[], batchNumber: number): Promise<void> {
+    // Check if text needs chunking and use first chunk for analysis
+    const maxTokens = 6000;
+    const textChunks = this.chunkTextByTokens(analysis.textContent, maxTokens);
+    const textToAnalyze = textChunks.length > 1 ? textChunks[0] : analysis.textContent;
+    
     const prompt = this.llmService.createCognitivePrompt(
-      analysis.textContent,
+      textToAnalyze,
       questions,
       analysis.additionalContext || undefined
     );
@@ -870,5 +905,40 @@ Provide final, calibrated assessment:`;
         await new Promise(resolve => setTimeout(resolve, stepMs));
       }
     }
+  }
+
+  // Utility method to chunk text by approximate token count
+  private chunkTextByTokens(text: string, maxTokens: number): string[] {
+    // Rough approximation: 1 token ≈ 4 characters for English text
+    const maxChars = maxTokens * 4;
+    
+    if (text.length <= maxChars) {
+      return [text];
+    }
+
+    const chunks: string[] = [];
+    let startIndex = 0;
+
+    while (startIndex < text.length) {
+      let endIndex = Math.min(startIndex + maxChars, text.length);
+      
+      // Try to break at a sentence boundary
+      if (endIndex < text.length) {
+        const lastPeriod = text.lastIndexOf('.', endIndex);
+        const lastExclamation = text.lastIndexOf('!', endIndex);
+        const lastQuestion = text.lastIndexOf('?', endIndex);
+        
+        const lastSentenceEnd = Math.max(lastPeriod, lastExclamation, lastQuestion);
+        
+        if (lastSentenceEnd > startIndex + maxChars * 0.5) {
+          endIndex = lastSentenceEnd + 1;
+        }
+      }
+      
+      chunks.push(text.substring(startIndex, endIndex).trim());
+      startIndex = endIndex;
+    }
+
+    return chunks.filter(chunk => chunk.length > 0);
   }
 }
