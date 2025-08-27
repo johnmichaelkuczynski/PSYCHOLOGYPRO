@@ -34,7 +34,7 @@ export class StreamingService {
     // Start the enhanced analysis processing in the background
     this.processEnhancedAnalysis(analysisId, enhancedType).catch(error => {
       console.error(`Enhanced analysis ${analysisId} failed:`, error);
-      this.broadcastToStream(analysisId, {
+      this.broadcastToEnhancedStream(analysisId, {
         type: "error",
         error: error.message
       });
@@ -474,15 +474,7 @@ export class StreamingService {
   
   private enhancedStreams = new Map<string, ActiveStream>();
   
-  async startEnhancedAnalysis(analysisId: string, enhancedType: string): Promise<void> {
-    this.processEnhancedAnalysis(analysisId, enhancedType).catch(error => {
-      console.error(`Enhanced analysis ${analysisId} failed:`, error);
-      this.broadcastToEnhancedStream(analysisId, {
-        type: "error",
-        error: error.message
-      });
-    });
-  }
+
 
   addEnhancedClient(analysisId: string, res: any): () => void {
     if (!this.enhancedStreams.has(analysisId)) {
@@ -538,15 +530,21 @@ export class StreamingService {
   }
 
   private async processEnhancedAnalysis(analysisId: string, enhancedType: string): Promise<void> {
+    console.log(`Starting enhanced analysis for ${analysisId}, type: ${enhancedType}`);
+    
     const analysis = await this.storage.getAnalysis(analysisId);
     if (!analysis) {
+      console.error("Analysis not found:", analysisId);
       throw new Error("Analysis not found");
     }
 
     const stream = this.enhancedStreams.get(analysisId);
     if (!stream || !stream.isActive) {
+      console.error("No active enhanced stream found for:", analysisId);
       return;
     }
+
+    console.log(`Enhanced stream active for ${analysisId}, callbacks: ${stream.callbacks.size}`);
 
     try {
       const isComprehensive = enhancedType.includes("comprehensive");
@@ -556,13 +554,16 @@ export class StreamingService {
 
       const { questions, instructions } = this.getEnhancedProtocol(analysisMode);
 
+      console.log(`Broadcasting phase start for ${analysisId}`);
       this.broadcastToEnhancedStream(analysisId, {
         type: "phase_start",
         phase: 1,
         message: "Starting Phase 1: Direct Questions"
       });
 
+      console.log(`Starting Phase 1 processing for ${analysisId}`);
       let phase1Results = await this.processEnhancedPhase1(analysis, questions, instructions, analysisMode);
+      console.log(`Phase 1 completed for ${analysisId}, results:`, phase1Results.length);
 
       // For Normal protocol (Short), only run Phase 1
       if (!isComprehensive) {
