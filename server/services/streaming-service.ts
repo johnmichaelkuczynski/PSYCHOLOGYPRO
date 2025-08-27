@@ -762,6 +762,15 @@ Summarize and categorize the presentation.`
         questions: batchQuestions
       });
 
+      // Send each question before processing
+      batchQuestions.forEach((question, idx) => {
+        this.broadcastToEnhancedStream(analysis.id, {
+          type: "question",
+          batch: batchNumber,
+          question: `${i + idx + 1}. ${question}`
+        });
+      });
+
       const prompt = `${instructions}
 
 TEXT: ${analysis.textContent}
