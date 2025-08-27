@@ -75,6 +75,16 @@ Preferred communication style: Simple, everyday language.
 - **Replit Integration**: Development environment plugins and error overlays
 - **TypeScript**: Static type checking across the entire codebase
 
+# Current Status - August 27, 2025
+
+**CRITICAL ISSUE**: Storage layer bug preventing brutal assessment scores from being saved despite streaming system working correctly. User correctly frustrated that academic pretension passage should receive harsh assessment but cannot see actual brutal scores due to technical failure.
+
+**System Status**: 
+- Unfiltered assessment prompts working (configured to destroy pseudo-intellectual writing)
+- Streaming analysis running with brutal honesty instructions
+- Storage layer failing to save results (results field stays null)
+- User unable to see the harsh scores system is generating
+
 # Recent Changes (August 26, 2025)
 
 ## Major Improvements Completed
