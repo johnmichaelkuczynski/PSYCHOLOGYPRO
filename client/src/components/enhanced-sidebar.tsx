@@ -11,43 +11,43 @@ export default function EnhancedSidebar({ selectedFunction, onFunctionChange }: 
   const analysisTypes = [
     {
       id: "enhanced-cognitive-normal" as EnhancedAnalysisTypeType,
-      label: "Cognitive (Normal)",
-      description: "Intelligence analysis - Phase 1 only",
+      label: "Intelligence Protocol (Normal)",
+      description: "Phase 1 only: 18 direct questions with anti-midwit calibration",
       icon: Brain,
       color: "blue"
     },
     {
       id: "enhanced-cognitive-comprehensive" as EnhancedAnalysisTypeType,
-      label: "Cognitive (Comprehensive)",
-      description: "Intelligence analysis - 4-Phase Protocol",
+      label: "Intelligence Protocol (Comprehensive)",
+      description: "4-Phase: Questions + Pushback + Walmart Metric + Final Validation",
       icon: Brain,
       color: "blue"
     },
     {
       id: "enhanced-psychological-normal" as EnhancedAnalysisTypeType,
-      label: "Psychological (Normal)",
-      description: "Psychological profiling - Phase 1 only",
+      label: "Psychological Protocol (Normal)",
+      description: "Phase 1 only: 18 psychological questions with enhanced calibration",
       icon: Zap,
       color: "green"
     },
     {
       id: "enhanced-psychological-comprehensive" as EnhancedAnalysisTypeType,
-      label: "Psychological (Comprehensive)",
-      description: "Psychological profiling - 4-Phase Protocol",
+      label: "Psychological Protocol (Comprehensive)",
+      description: "4-Phase: Psychological profiling with pushback and sniper amendments",
       icon: Zap,
       color: "green"
     },
     {
       id: "enhanced-psychopathological-normal" as EnhancedAnalysisTypeType,
-      label: "Psychopathological (Normal)",
-      description: "Pathology assessment - Phase 1 only",
+      label: "Psychopathology Protocol (Normal)",
+      description: "Phase 1 only: 15 pathology questions with enhanced scoring",
       icon: AlertTriangle,
       color: "red"
     },
     {
       id: "enhanced-psychopathological-comprehensive" as EnhancedAnalysisTypeType,
-      label: "Psychopathological (Comprehensive)",
-      description: "Pathology assessment - 4-Phase Protocol",
+      label: "Psychopathology Protocol (Comprehensive)",
+      description: "4-Phase: Pathology assessment with comprehensive validation",
       icon: AlertTriangle,
       color: "red"
     },
@@ -60,7 +60,7 @@ export default function EnhancedSidebar({ selectedFunction, onFunctionChange }: 
           Enhanced Analysis Types
         </h2>
         <p className="text-sm text-gray-600 mb-6">
-          New 4-phase comprehensive protocols with pushback, Walmart metrics, and sniper amendments for accurate scoring.
+          Enhanced protocols with anti-midwit calibration, pushback validation, Walmart metrics, and sniper amendments addressing quality issues with standard analysis.
         </p>
         
         <div className="space-y-3">

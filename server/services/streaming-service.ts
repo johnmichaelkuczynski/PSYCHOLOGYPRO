@@ -550,85 +550,93 @@ export class StreamingService {
       return {
         questions: [
           "Is it insightful?",
-          "Does it develop points?",
-          "Is the organization hierarchical or merely sequential?",
-          "Does it operate skillfully with logic/reasoning?",
-          "Are the points fresh or cliched?",
-          "Does jargon obfuscate or clarify?",
-          "Do points develop organically?",
-          "Does it open or shut inquiry?",
-          "Is it actually intelligent?",
-          "Is it real or phony?",
-          "Do sentences show internal logic?",
-          "Is it governed by strong concepts?",
-          "Is there system-level control?",
-          "Are points authentic or institutional?",
-          "Is writing direct or evasive?",
-          "Are statements clear or ambiguous?",
-          "Does progression follow logic or authority?",
-          "Does author use others constructively?"
+          "Does it develop points? (Or, if it is a short excerpt, is there evidence that it would develop points if extended)?",
+          "Is the organization merely sequential (just one point after another, little or no logical scaffolding)? Or are the ideas arranged, not just sequentially but hierarchically?",
+          "If the points it makes are not insightful, does it operate skillfully with canons of logic/reasoning?",
+          "Are the points cliches? Or are they 'fresh'?",
+          "Does it use technical jargon to obfuscate or to render more precise?",
+          "Is it organic? Do points develop in an organic, natural way? Do they 'unfold'? Or are they forced and artificial?",
+          "Does it open up new domains? Or, on the contrary, does it shut off inquiry (by conditionalizing further discussion of the matters on acceptance of its internal and possibly very faulty logic)?",
+          "Is it actually intelligent or just the work of somebody who, judging by the subject-matter, is presumed to be intelligent (but may not be)?",
+          "Is it real or is it phony?",
+          "Do the sentences exhibit complex and coherent internal logic?",
+          "Is the passage governed by a strong concept? Or is the only organization driven purely by expository (as opposed to epistemic) norms?",
+          "Is there system-level control over ideas? In other words, does the author seem to recall what he said earlier and to be in a position to integrate it into points he has made since then?",
+          "Are the points 'real'? Are they fresh? Or is some institution or some accepted vein of propaganda or orthodoxy just using the author as a mouth piece?",
+          "Is the writing evasive or direct?",
+          "Are the statements ambiguous?",
+          "Does the progression of the text develop according to who said what or according to what entails or confirms what?",
+          "Does the author use other authors to develop his ideas or to cloak his own lack of ideas?"
         ],
-        instructions: `Answer these questions about this text. Give a score out of 100 for each.
+        instructions: `Answer these questions in connection with this text. Give a score out of 100 for each.
 
-A score of N/100 means (100-N)/100 outperform the author.
+A score of N/100 (e.g. 73/100) means that (100-N)/100 (e.g. 27/100) outperform the author with respect to the parameter defined by the question.
 
-You are not grading. You are answering questions.
+You are not grading. You are answering these questions.
 
-Do not use risk-averse standards. Do not be diplomatic. Think very hard.
+You do not use a risk-averse standard. You do not attempt to be diplomatic. You do not attempt to comply with risk-averse, medium-range IQ, academic norms. You do not make assumptions about the level of the paper; it could be a work of the highest excellence and genius, or it could be the work of a moron.
 
-If a work is genius, say so. Give the score it deserves.
+If a work is a work of genius, you say that, and you say why. You do not shy away from giving what might conventionally be regarded as excessively "superlative" scores. You give it the score it deserves, not the score that a midwit committee would say it deserves.
 
-Focus on substance, not jargon or authorities.
+Think very very very hard about your answers. Do not default to cookbook, midwit evaluation protocols.
 
-Insight is a sniper shot. Truth often looks extreme.
+Do not give credit merely for use of jargon or for referencing authorities. Focus on substance. Only give points for scholarly references/jargon if they unambiguously increase substance.
 
-95-100: Unignorable insight or genius
-80-94: Strong with minor friction  
-<80: Mediocrity or failure
+METAPOINTS:
+1. This is not a grading app. You grade the intelligence of what you are given. If you are given a brilliant fragment, you give it a high score. You are not grading essays. You are not looking for completeness. You tell the LLM not to 'grade'; their job is to answer the questions, period.
 
-Start by summarizing and categorizing the text.`
+2. Do not overvalue turns of phrase. An author speaking confidently is not necessarily "shutting down modes of inquiry". In fact, it is likely to be the opposite. Casual speech does not mean disorganized thoughts. Don't judge a book by its cover.
+
+3. Start by summarizing the text and also categorizing it.
+
+4. Do not change the grading based on the category of the text: if a text is categorized as 'advanced scholarship', still evaluate it with respect to the general population, not with respect only to 'advanced scholarly works.'
+
+5. Do not penalize boldness. Do not take points away for insights that, if correct, stand on their own. Get rid of the idea that "argumentation" is what makes something smart; it isn't. What makes something smart is that it is smart (insightful). Period.`
       };
     } else if (mode === "psychological") {
       return {
         questions: [
-          "Stable self-concept or fragmented?",
-          "Ego strength or brittle defenses?",
-          "Mature, neurotic, or primitive defenses?",
-          "Affect-thought integration?",
-          "Direct/engaged or defensive/avoidant?",
-          "Narcissistic organization?",
-          "Drives: open, displaced, or repressed?",
-          "Internal conflict or monolithic certainty?",
-          "Object constancy or splitting?",
-          "Aggression integrated or projected?",
-          "Self-reflection or defensive earnestness?",
-          "Growth potential or rigidity?",
-          "Paranoid or reality-based?",
-          "Authentic or phony depth?",
-          "Resilient or fragile under stress?",
-          "Compulsive repetition or flexible?",
-          "Capacity for intimacy?",
-          "Shame/guilt: constructive or projected?"
+          "Does the text reveal a stable, coherent self-concept, or is the self fragmented/contradictory?",
+          "Is there evidence of ego strength (resilience, capacity to tolerate conflict/ambiguity), or does the psyche rely on brittle defenses?",
+          "Are defenses primarily mature (sublimation, humor, anticipation), neurotic (intellectualization, repression), or primitive (splitting, denial, projection)?",
+          "Does the writing show integration of affect and thought, or are emotions split off / overly intellectualized?",
+          "Is the author's stance defensive/avoidant or direct/engaged?",
+          "Does the psyche appear narcissistically organized (grandiosity, fragile self-esteem, hunger for validation), or not?",
+          "Are desires/drives expressed openly, displaced, or repressed?",
+          "Does the voice suggest internal conflict (superego vs. id, competing identifications), or monolithic certainty?",
+          "Is there evidence of object constancy (capacity to sustain nuanced view of others) or splitting (others seen as all-good/all-bad)?",
+          "Is aggression integrated (channeled productively) or dissociated/projected?",
+          "Is the author capable of irony/self-reflection, or trapped in compulsive earnestness / defensiveness?",
+          "Does the text suggest psychological growth potential (openness, curiosity, capacity to metabolize experience) or rigidity?",
+          "Is the discourse paranoid / persecutory (others as threats, conspiracies) or reality-based?",
+          "Does the tone reflect authentic engagement with reality, or phony simulation of depth?",
+          "Is the psyche resilient under stress, or fragile / evasive?",
+          "Is there evidence of compulsion or repetition (obsessional returns to the same themes), or flexible progression?",
+          "Does the author show capacity for intimacy / genuine connection, or only instrumental/defended relations?",
+          "Is shame/guilt worked through constructively or disavowed/projected?"
         ],
-        instructions: `Answer these questions about psychological functioning. Score out of 100.
+        instructions: `Answer these questions in connection with this text.
 
-Score means (100-N)/100 have superior psychological functioning.
+Also give a score out of 100.
 
-You are answering questions, not grading.
+A score of N/100 means (100–N)/100 outperform the subject with respect to the psychological capacity defined by the question.
 
-Describe psyche configuration, not diagnostic checklists.
+You are not grading. You are answering questions.
 
-Don't conflate verbal confidence with psychological strength.
+Do not default to diagnostic checklists; describe configuration of psyche.
 
-Evaluate vs. general population.
+Do not conflate verbal confidence with psychological strength.
 
-Don't penalize honesty or boldness if integrated.
+Summarize the text and categorize the psychological presentation (e.g., narcissistic, depressive, obsessional, resilient, fragmented).
 
-95-100: Authentic, integrated psyche
-80-94: Strong with observable defenses
-<80: Rigidity, fragmentation, dissimulation
+Evaluate relative to the general population, not only "advanced" or "pathological" groups.
 
-Summarize and categorize the psychological presentation.`
+Do not penalize honesty, boldness, or extreme statements if they indicate integration rather than breakdown.
+
+Rating scale:
+95–100 = authentic, integrated psyche, unignorable.
+80–94 = strong but with observable defenses / conflict.
+<80 = rigidity, fragmentation, or dissimulation.`
       };
     } else {
       return {
@@ -777,7 +785,19 @@ ${batchQuestions.map((q, idx) => `${i + idx + 1}. ${q}`).join('\n')}`;
     const lowScores = phase1Results.filter(result => result.score < 95);
     
     for (const result of lowScores) {
-      const pushbackPrompt = `You scored this ${result.score}/100, meaning ${100 - result.score}/100 outperform the author. Your position is that ${100 - result.score}/100 have superior functioning. Are you sure?
+      let pushbackPrompt = "";
+      
+      if (mode === "psychological") {
+        pushbackPrompt = `You scored this ${result.score}/100, meaning ${100 - result.score}/100 have superior psychological functioning in this respect. Are you sure?
+
+What exact psychological resource do the outperformers possess (ego strength, affect regulation, capacity for intimacy) that this author lacks?
+
+Question: ${result.question}
+Your answer: ${result.answer}
+
+Re-ask the question de novo:`;
+      } else {
+        pushbackPrompt = `You scored this ${result.score}/100, meaning ${100 - result.score}/100 outperform the author. Your position is that ${100 - result.score}/100 have superior functioning. Are you sure?
 
 What concrete superiority do those ${100 - result.score} people have that this author lacks?
 
@@ -785,6 +805,7 @@ Question: ${result.question}
 Your answer: ${result.answer}
 
 Answer the question de novo:`;
+      }
 
       let pushbackResponse = "";
       for await (const chunk of this.llmService.streamResponse(
@@ -853,13 +874,26 @@ If you claim Walmart patrons outperform the author, provide concrete examples of
       message: "Starting Phase 4: Final Validation"
     });
 
-    const validationPrompt = `Final validation checklist:
+    let validationPrompt = "";
+    
+    if (mode === "psychological") {
+      validationPrompt = `Final validation checklist:
+
+1. Was the subject penalized for unconventional affect or honesty? If yes → recalibrate.
+2. Does the score reflect ego integration and authenticity, not mere social compliance?
+3. Is the Walmart metric grounded in specific superiority, not vague hand-waving?
+4. Ensure no penalizing of unconventional personalities (e.g., depressive honesty, ironic self-awareness).
+
+Provide final, calibrated assessment:`;
+    } else {
+      validationPrompt = `Final validation checklist:
 
 1. Were you penalized for unconventionality vs. actual deficiencies?
 2. Do scores reflect truth density, not norm compliance?
 3. Is the Walmart metric empirically grounded?
 
 Provide final, calibrated assessment:`;
+    }
 
     let validationResponse = "";
     for await (const chunk of this.llmService.streamResponse(
