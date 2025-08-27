@@ -559,7 +559,7 @@ export default function PsychologyPro() {
                   placeholder="Paste or type your text here..."
                   value={textContent}
                   onChange={(e) => handleTextInput(e.target.value)}
-                  className="min-h-[500px] resize-y"
+                  className="min-h-[800px] resize-y"
                   data-testid="textarea-content"
                 />
                 
