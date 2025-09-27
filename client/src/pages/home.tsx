@@ -5,6 +5,7 @@ import LLMSelector from "@/components/llm-selector";
 import TextInput from "@/components/text-input";
 import ResultsPanel from "@/components/results-panel";
 import DiscussionModal from "@/components/discussion-modal";
+import UserMenu from "@/components/auth/user-menu";
 import { Button } from "@/components/ui/button";
 import { useToast } from "@/hooks/use-toast";
 import { apiRequest } from "@/lib/queryClient";
@@ -19,10 +20,16 @@ export default function Home() {
   const [currentAnalysisId, setCurrentAnalysisId] = useState<string | null>(null);
   const [resetKey, setResetKey] = useState(0);
   const [showSavedAnalyses, setShowSavedAnalyses] = useState(false);
+  const [showUserHistory, setShowUserHistory] = useState(false);
 
   const { data: savedAnalyses = [], refetch: refetchSaved } = useQuery<Analysis[]>({
     queryKey: ["/api/analyses/saved"],
     enabled: showSavedAnalyses,
+  });
+
+  const { data: userHistoryAnalyses = [], refetch: refetchHistory } = useQuery<Analysis[]>({
+    queryKey: ["/api/analyses/mine"],
+    enabled: showUserHistory,
   });
 
   const handleNewAnalysis = () => {
@@ -149,6 +156,7 @@ export default function Home() {
               <Button variant="ghost" size="sm" data-testid="settings-button">
                 <Settings className="h-4 w-4" />
               </Button>
+              <UserMenu onShowHistory={() => setShowUserHistory(!showUserHistory)} />
             </div>
           </div>
         </div>
@@ -217,6 +225,41 @@ export default function Home() {
                               setShowSavedAnalyses(false);
                             }}
                             data-testid={`load-analysis-${analysis.id}`}
+                          >
+                            Load
+                          </Button>
+                        </div>
+                      ))}
+                    </div>
+                  )}
+                </div>
+              )}
+              
+              {showUserHistory && (
+                <div className="bg-white border-b border-gray-200 p-4">
+                  <h3 className="text-sm font-medium text-gray-900 mb-3">My Analysis History</h3>
+                  {userHistoryAnalyses.length === 0 ? (
+                    <p className="text-sm text-gray-500">No analyses in your history yet.</p>
+                  ) : (
+                    <div className="space-y-2 max-h-32 overflow-y-auto">
+                      {userHistoryAnalyses.map((analysis) => (
+                        <div key={analysis.id} className="flex items-center justify-between p-2 bg-blue-50 rounded text-sm">
+                          <div>
+                            <span className="font-medium">{analysis.type}</span>
+                            <span className="text-blue-600 ml-2">• {analysis.llmProvider}</span>
+                            <span className="text-gray-400 ml-2">• {new Date(analysis.createdAt!).toLocaleDateString()}</span>
+                            <span className="text-gray-400 ml-2">
+                              • {analysis.status === "completed" ? "Completed" : analysis.saved ? "Saved" : "In Progress"}
+                            </span>
+                          </div>
+                          <Button 
+                            size="sm" 
+                            variant="outline" 
+                            onClick={() => {
+                              setCurrentAnalysisId(analysis.id);
+                              setShowUserHistory(false);
+                            }}
+                            data-testid={`load-user-analysis-${analysis.id}`}
                           >
                             Load
                           </Button>
