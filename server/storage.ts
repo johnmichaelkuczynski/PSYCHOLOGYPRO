@@ -1,7 +1,13 @@
-import { type Analysis, type Discussion, type InsertAnalysis, type InsertDiscussion, analyses, discussions } from "../shared/schema";
+import { type Analysis, type Discussion, type InsertAnalysis, type InsertDiscussion, type User, type InsertUser, analyses, discussions, users } from "../shared/schema";
 import { randomUUID } from "crypto";
 import { db } from "./db";
 import { eq, desc } from "drizzle-orm";
+import session from "express-session";
+import connectPg from "connect-pg-simple";
+import createMemoryStore from "memorystore";
+
+const PostgresSessionStore = connectPg(session);
+const MemoryStore = createMemoryStore(session);
 
 export interface IStorage {
   // Analysis operations
@@ -20,10 +26,28 @@ export interface IStorage {
   
   // Saved analyses
   getSavedAnalyses(): Promise<Analysis[]>;
+  
+  // User operations
+  createUser(user: InsertUser): Promise<User>;
+  getUser(id: number): Promise<User | undefined>;
+  getUserByUsername(username: string): Promise<User | undefined>;
+  
+  // Session storage
+  sessionStore: session.Store;
 }
 
 // Referenced from javascript_database integration
 export class DatabaseStorage implements IStorage {
+  sessionStore: session.Store;
+  
+  constructor() {
+    // Initialize PostgreSQL session store
+    this.sessionStore = new PostgresSessionStore({ 
+      conString: process.env.DATABASE_URL,
+      createTableIfMissing: true 
+    });
+  }
+
   async createAnalysis(insertAnalysis: InsertAnalysis): Promise<Analysis> {
     const [analysis] = await db
       .insert(analyses)
@@ -92,6 +116,31 @@ export class DatabaseStorage implements IStorage {
       .from(analyses)
       .where(eq(analyses.saved, true))
       .orderBy(desc(analyses.createdAt));
+  }
+
+  // User management methods
+  async createUser(insertUser: InsertUser): Promise<User> {
+    const [user] = await db
+      .insert(users)
+      .values(insertUser)
+      .returning();
+    return user;
+  }
+
+  async getUser(id: number): Promise<User | undefined> {
+    const [user] = await db
+      .select()
+      .from(users)
+      .where(eq(users.id, id));
+    return user || undefined;
+  }
+
+  async getUserByUsername(username: string): Promise<User | undefined> {
+    const [user] = await db
+      .select()
+      .from(users)
+      .where(eq(users.username, username));
+    return user || undefined;
   }
 }
 
