@@ -15,7 +15,7 @@ localPort = 5000
 externalPort = 80
 
 [[ports]]
-localPort = 34899
+localPort = 37495
 externalPort = 3001
 
 [[ports]]
@@ -47,4 +47,4 @@ args = "npm run dev"
 waitForPort = 5000
 
 [agent]
-integrations = ["perplexity_v0:1.0.0", "javascript_anthropic:1.0.0", "javascript_object_storage:1.0.0", "javascript_database:1.0.0"]
+integrations = ["perplexity_v0:1.0.0", "javascript_anthropic:1.0.0", "javascript_object_storage:1.0.0", "javascript_database:1.0.0", "javascript_stripe:1.0.0"]

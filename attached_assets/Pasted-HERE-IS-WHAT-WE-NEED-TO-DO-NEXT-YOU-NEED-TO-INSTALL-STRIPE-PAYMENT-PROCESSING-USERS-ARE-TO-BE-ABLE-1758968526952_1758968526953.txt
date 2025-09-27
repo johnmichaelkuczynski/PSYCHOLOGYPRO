@@ -1,0 +1,117 @@
+HERE IS WHAT WE NEED TO DO NEXT. YOU NEED TO INSTALL STRIPE PAYMENT PROCESSING. USERS ARE TO BE ABLE TO USE STRIPE TO PURCHASE CREDITS. I HAVE UPLOADED THE PRICE SCHEDULE, WHICH YOU ARE TO MAKE AVAILABLE TO USERS WHEN THEY PURCHASE, AND I HAVE ALSO DESCSRIBED THE RELATIVE MERITS AND DEMERITS OF THE LLM, WHIHC YOU ARE ALSO TO MAKE AVAILABLE TO USERS WHEN THEY ARE DECISING ON PURCHASES. YOU ARE TO USE THE FOLLOWING ACCOUNT SECRETS: STRIPE_WEBHOOK_SECRET_PSYCHOLOGYPRO STRIPE_PUBLISHABLE_KEY STRIPE_SECRET_KEY ZHI 1 
+
+$5 → 4,275,000 words
+
+$10 → 8,977,500 words
+
+$25 → 23,512,500 words
+
+$50 → 51,300,000 words
+
+$100 → 115,425,000 words
+
+ZHI 2
+
+$5 → 106,840 words
+
+$10 → 224,360 words
+
+$25 → 587,625 words
+
+$50 → 1,282,100 words
+
+$100 → 2,883,400 words
+
+ZHI 3
+
+$5 → 702,000 words
+
+$10 → 1,474,200 words
+
+$25 → 3,861,000 words
+
+$50 → 8,424,000 words
+
+$100 → 18,954,000 words
+
+ZHI 4 
+
+$5 → 6,410,255 words
+
+$10 → 13,461,530 words
+
+$25 → 35,256,400 words
+
+$50 → 76,923,050 words
+
+$100 → 173,176,900 words
+
+ZHI 1 
+
+Merits
+
+Fast, cheap, widely compatible.
+
+Good balance of creativity + accuracy.
+
+Reliable at short/medium rewrites and commercial text.
+
+Demerits
+
+Struggles with very dense scholarly material (drops nuance).
+
+More “AI-detected” feel in raw outputs (less human signal).
+
+Occasionally hallucinates stylistic quirks.
+
+Anthropic (Claude)
+
+ZHI 2 
+
+Excellent on scholarly, philosophical, and “thinking-through” tasks.
+
+Strong at staying consistent in long rewrites.
+
+More “polished” tone, good for academic-sounding prose.
+
+Demerits
+
+By far the most expensive.
+
+Sometimes cautious / verbose, especially when asked for edgy or non-academic rewrites.
+
+Can “over-summarize” instead of fully transforming.
+
+ZHI 3
+
+Merits
+
+Cheapest by far.
+
+Handles bulk text rewriting and simple transformations well.
+
+Decent logical coherence, especially for structured rewriting.
+
+Demerits
+
+Noticeably slower than the others.
+
+Less nuanced on subtle philosophy/literature than Anthropic.
+
+Output can feel mechanical if pushed beyond bulk processing.
+
+ZHI 4
+
+Merits
+
+Very cheap for API calls (currently subsidized).
+
+Good for quick turnarounds, exploratory rewrites.
+
+Sometimes surprisingly concise and pointed.
+
+Demerits
+
+Quality varies — can be shallow compared to Anthropic/OpenAI.
+
+Weak on sustained long-form consistency.
