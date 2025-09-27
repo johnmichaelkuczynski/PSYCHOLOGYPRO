@@ -77,7 +77,20 @@ Preferred communication style: Simple, everyday language.
 
 # Recent Changes (September 27, 2025)
 
-## Latest Major Update - Fast Micro Analysis Implementation
+## Latest Critical Fixes - LLM Provider and User Experience Improvements 
+✅ **ZHI 4 (Perplexity) Fixed**: Updated invalid model name from 'llama-3.1-sonar-large-128k-online' to valid 'sonar-pro' - Perplexity API now working properly
+
+✅ **ZHI 2 (Anthropic) Debugging**: Added debugging infrastructure to diagnose "No content received" errors - configuration verified as correct per current API specifications
+
+✅ **Save Button Enhancement**: Implemented visual saving indicator with spinner animation and "Saving..." text providing immediate user feedback during save operations
+
+✅ **Saved Analysis Count Fix**: Optimized query strategy to immediately update saved analysis count in header after saving, eliminating previous delay
+
+✅ **Session Management Stability**: Resolved session table constraint conflicts that were causing authentication failures - cleaned up database artifacts for stable session handling
+
+✅ **Complete Authentication System**: Successfully tested end-to-end authentication flow including registration, login, logout, user history, and personal analysis management
+
+## Previous Major Update - Fast Micro Analysis Implementation
 ✅ **Ultra-Fast Micro Analysis Types**: Successfully implemented three new high-speed analysis options with dramatically reduced processing times
 
 ✅ **Micro Cognitive Analysis**: Added microcognitive analysis with 1-2 sentence responses per question, reducing analysis time from 10-25 minutes to just a few minutes

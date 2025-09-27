@@ -141,12 +141,6 @@ export class LLMService {
 
               try {
                 const parsed = JSON.parse(data);
-                
-                // Debug logging for Anthropic responses
-                if (provider === "zhi2") {
-                  console.log(`Anthropic response chunk:`, JSON.stringify(parsed, null, 2));
-                }
-                
                 const content = this.extractContentFromResponse(parsed, provider);
                 
                 if (content) {
