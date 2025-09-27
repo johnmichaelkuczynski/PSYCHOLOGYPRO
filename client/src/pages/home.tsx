@@ -5,6 +5,7 @@ import LLMSelector from "@/components/llm-selector";
 import TextInput from "@/components/text-input";
 import ResultsPanel from "@/components/results-panel";
 import DiscussionModal from "@/components/discussion-modal";
+import AuthComponent from "@/components/auth-component";
 import { Button } from "@/components/ui/button";
 import { useToast } from "@/hooks/use-toast";
 import { apiRequest } from "@/lib/queryClient";
@@ -149,6 +150,7 @@ export default function Home() {
               <Button variant="ghost" size="sm" data-testid="settings-button">
                 <Settings className="h-4 w-4" />
               </Button>
+              <AuthComponent />
             </div>
           </div>
         </div>
