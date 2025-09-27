@@ -3,6 +3,9 @@ import { createServer, type Server } from "http";
 import multer from "multer";
 import bcrypt from "bcrypt";
 import { z } from "zod";
+import session from "express-session";
+import connectPgSimple from "connect-pg-simple";
+import { db, pool } from "./db";
 import { storage } from "./storage";
 import { LLMService } from "./services/llm-service";
 import { FileService } from "./services/file-service";
@@ -30,6 +33,9 @@ const llmService = new LLMService();
 const fileService = new FileService();
 const streamingService = new StreamingService(llmService, storage);
 
+// Set up session store
+const PgSession = connectPgSimple(session);
+
 // Authentication middleware
 async function authMiddleware(req: any, res: any, next: any) {
   try {
@@ -48,6 +54,23 @@ async function authMiddleware(req: any, res: any, next: any) {
 }
 
 export async function registerRoutes(app: Express): Promise<Server> {
+  // Configure session middleware
+  app.use(session({
+    store: new PgSession({
+      pool: pool,
+      tableName: 'sessions',
+      createTableIfMissing: true,
+    }),
+    secret: process.env.SESSION_SECRET || 'dev-secret-key-change-in-production',
+    resave: false,
+    saveUninitialized: false,
+    cookie: {
+      secure: false, // Set to true in production with HTTPS
+      httpOnly: true,
+      maxAge: 24 * 60 * 60 * 1000, // 24 hours
+    },
+  }));
+
   // Apply auth middleware to all routes
   app.use(authMiddleware);
 
@@ -59,7 +82,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       // Check if user already exists
       const existingUser = await storage.getUserByUsername(username);
       if (existingUser) {
-        return res.status(400).json({ error: "Username already exists" });
+        return res.status(409).json({ error: "Username already exists" });
       }
       
       // Hash password
@@ -71,7 +94,12 @@ export async function registerRoutes(app: Express): Promise<Server> {
         password: hashedPassword,
       });
       
-      // Set session
+      // Set session - ensure session exists
+      if (!req.session) {
+        console.error("Session not available in request");
+        return res.status(500).json({ error: "Session initialization failed" });
+      }
+      
       (req.session as any).userId = user.id;
       
       res.json({ user: { id: user.id, username: user.username } });
@@ -103,7 +131,12 @@ export async function registerRoutes(app: Express): Promise<Server> {
         return res.status(401).json({ error: "Invalid credentials" });
       }
       
-      // Set session
+      // Set session - ensure session exists
+      if (!req.session) {
+        console.error("Session not available in request");
+        return res.status(500).json({ error: "Session initialization failed" });
+      }
+      
       (req.session as any).userId = user.id;
       
       res.json({ user: { id: user.id, username: user.username } });
