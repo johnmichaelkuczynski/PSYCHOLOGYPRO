@@ -7,6 +7,7 @@ import { LLMService } from "./services/llm-service";
 import { FileService } from "./services/file-service";
 import { StreamingService } from "./services/streaming-service";
 import { insertAnalysisSchema, insertDiscussionSchema } from "../shared/schema.js";
+import { setupAuth } from "./auth";
 
 // Configure multer for file uploads
 const upload = multer({
@@ -21,6 +22,9 @@ const fileService = new FileService();
 const streamingService = new StreamingService(llmService, storage);
 
 export async function registerRoutes(app: Express): Promise<Server> {
+  // Set up authentication (register, login, logout, user routes)
+  setupAuth(app);
+
   // File parsing endpoint
   app.post("/api/files/parse", upload.single("file"), async (req, res) => {
     try {
