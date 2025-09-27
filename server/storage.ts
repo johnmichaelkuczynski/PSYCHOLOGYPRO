@@ -1,5 +1,7 @@
-import { type Analysis, type Discussion, type InsertAnalysis, type InsertDiscussion } from "@shared/schema";
+import { type Analysis, type Discussion, type InsertAnalysis, type InsertDiscussion, analyses, discussions } from "@shared/schema";
 import { randomUUID } from "crypto";
+import { db } from "./db";
+import { eq, desc } from "drizzle-orm";
 
 export interface IStorage {
   // Analysis operations
@@ -17,80 +19,69 @@ export interface IStorage {
   getRecentAnalyses(limit?: number): Promise<Analysis[]>;
 }
 
-export class MemStorage implements IStorage {
-  private analyses: Map<string, Analysis> = new Map();
-  private discussions: Map<string, Discussion> = new Map();
-
+// Referenced from javascript_database integration
+export class DatabaseStorage implements IStorage {
   async createAnalysis(insertAnalysis: InsertAnalysis): Promise<Analysis> {
-    const id = randomUUID();
-    const analysis: Analysis = {
-      ...insertAnalysis,
-      additionalContext: insertAnalysis.additionalContext || null,
-      id,
-      status: "pending",
-      results: null,
-      saved: false,
-      createdAt: new Date(),
-      updatedAt: new Date(),
-    };
-    this.analyses.set(id, analysis);
+    const [analysis] = await db
+      .insert(analyses)
+      .values(insertAnalysis)
+      .returning();
     return analysis;
   }
 
   async getAnalysis(id: string): Promise<Analysis | undefined> {
-    return this.analyses.get(id);
+    const [analysis] = await db
+      .select()
+      .from(analyses)
+      .where(eq(analyses.id, id));
+    return analysis || undefined;
   }
 
   async updateAnalysisStatus(id: string, status: string): Promise<void> {
-    const analysis = this.analyses.get(id);
-    if (analysis) {
-      analysis.status = status;
-      analysis.updatedAt = new Date();
-      this.analyses.set(id, analysis);
-    }
+    await db
+      .update(analyses)
+      .set({ status, updatedAt: new Date() })
+      .where(eq(analyses.id, id));
   }
 
   async updateAnalysisResults(id: string, results: any): Promise<void> {
-    const analysis = this.analyses.get(id);
-    if (analysis) {
-      analysis.results = results;
-      analysis.updatedAt = new Date();
-      this.analyses.set(id, analysis);
-    }
+    await db
+      .update(analyses)
+      .set({ results, updatedAt: new Date() })
+      .where(eq(analyses.id, id));
   }
 
   async markSaved(id: string): Promise<void> {
-    const analysis = this.analyses.get(id);
-    if (analysis) {
-      analysis.saved = true;
-      analysis.updatedAt = new Date();
-      this.analyses.set(id, analysis);
-    }
+    await db
+      .update(analyses)
+      .set({ saved: true, updatedAt: new Date() })
+      .where(eq(analyses.id, id));
   }
 
   async createDiscussion(insertDiscussion: InsertDiscussion): Promise<Discussion> {
-    const id = randomUUID();
-    const discussion: Discussion = {
-      ...insertDiscussion,
-      id,
-      createdAt: new Date(),
-    };
-    this.discussions.set(id, discussion);
+    const [discussion] = await db
+      .insert(discussions)
+      .values(insertDiscussion)
+      .returning();
     return discussion;
   }
 
   async getDiscussionsByAnalysisId(analysisId: string): Promise<Discussion[]> {
-    return Array.from(this.discussions.values())
-      .filter(d => d.analysisId === analysisId)
-      .sort((a, b) => new Date(a.createdAt!).getTime() - new Date(b.createdAt!).getTime());
+    return await db
+      .select()
+      .from(discussions)
+      .where(eq(discussions.analysisId, analysisId))
+      .orderBy(discussions.createdAt);
   }
 
   async getRecentAnalyses(limit: number = 10): Promise<Analysis[]> {
-    return Array.from(this.analyses.values())
-      .filter(a => a.status === "completed")
-      .sort((a, b) => new Date(b.createdAt!).getTime() - new Date(a.createdAt!).getTime())
-      .slice(0, limit);
+    return await db
+      .select()
+      .from(analyses)
+      .where(eq(analyses.status, "completed"))
+      .orderBy(desc(analyses.createdAt))
+      .limit(limit);
   }
 }
 
-export const storage = new MemStorage();
+export const storage = new DatabaseStorage();
