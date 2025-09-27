@@ -25,7 +25,8 @@ export default function Home() {
 
   const { data: savedAnalyses = [], refetch: refetchSaved } = useQuery<Analysis[]>({
     queryKey: ["/api/analyses/saved"],
-    enabled: showSavedAnalyses,
+    // Always fetch saved analyses for the count, but refetch when showing the panel
+    staleTime: showSavedAnalyses ? 0 : 5 * 60 * 1000, // 5 minutes when not showing panel
   });
 
   const { data: userHistoryAnalyses = [], refetch: refetchHistory } = useQuery<Analysis[]>({
