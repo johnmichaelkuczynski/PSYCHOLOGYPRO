@@ -194,6 +194,22 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // Save analysis
+  app.patch("/api/analyses/:id/save", async (req, res) => {
+    try {
+      const analysis = await storage.getAnalysis(req.params.id);
+      if (!analysis) {
+        return res.status(404).json({ error: "Analysis not found" });
+      }
+
+      await storage.markSaved(req.params.id);
+      res.json({ success: true });
+    } catch (error) {
+      console.error("Save analysis error:", error);
+      res.status(500).json({ error: "Failed to save analysis" });
+    }
+  });
+
   const httpServer = createServer(app);
   return httpServer;
 }

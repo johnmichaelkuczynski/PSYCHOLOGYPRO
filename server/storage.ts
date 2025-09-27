@@ -7,6 +7,7 @@ export interface IStorage {
   getAnalysis(id: string): Promise<Analysis | undefined>;
   updateAnalysisStatus(id: string, status: string): Promise<void>;
   updateAnalysisResults(id: string, results: any): Promise<void>;
+  markSaved(id: string): Promise<void>;
   
   // Discussion operations
   createDiscussion(discussion: InsertDiscussion): Promise<Discussion>;
@@ -28,6 +29,7 @@ export class MemStorage implements IStorage {
       id,
       status: "pending",
       results: null,
+      saved: false,
       createdAt: new Date(),
       updatedAt: new Date(),
     };
@@ -52,6 +54,15 @@ export class MemStorage implements IStorage {
     const analysis = this.analyses.get(id);
     if (analysis) {
       analysis.results = results;
+      analysis.updatedAt = new Date();
+      this.analyses.set(id, analysis);
+    }
+  }
+
+  async markSaved(id: string): Promise<void> {
+    const analysis = this.analyses.get(id);
+    if (analysis) {
+      analysis.saved = true;
       analysis.updatedAt = new Date();
       this.analyses.set(id, analysis);
     }
