@@ -25,7 +25,7 @@ export default function Home() {
 
   const { data: savedAnalyses = [], refetch: refetchSaved } = useQuery<Analysis[]>({
     queryKey: ["/api/analyses/saved"],
-    enabled: showSavedAnalyses,
+    enabled: showSavedAnalyses && !!user, // Only fetch saved analyses for authenticated users
   });
 
   const handleNewAnalysis = () => {
@@ -139,15 +139,17 @@ export default function Home() {
               </a>
             </div>
             <div className="flex items-center space-x-4">
-              <Button 
-                variant={showSavedAnalyses ? "default" : "ghost"} 
-                size="sm" 
-                onClick={() => setShowSavedAnalyses(!showSavedAnalyses)}
-                data-testid="saved-analyses-button"
-              >
-                <Bookmark className="h-4 w-4 mr-2" />
-                {user ? `My Analyses (${savedAnalyses.length})` : `Saved (${savedAnalyses.length})`}
-              </Button>
+              {user && (
+                <Button 
+                  variant={showSavedAnalyses ? "default" : "ghost"} 
+                  size="sm" 
+                  onClick={() => setShowSavedAnalyses(!showSavedAnalyses)}
+                  data-testid="saved-analyses-button"
+                >
+                  <Bookmark className="h-4 w-4 mr-2" />
+                  My Analyses ({savedAnalyses.length})
+                </Button>
+              )}
               <Button variant="ghost" size="sm" data-testid="help-button">
                 <HelpCircle className="h-4 w-4" />
               </Button>
