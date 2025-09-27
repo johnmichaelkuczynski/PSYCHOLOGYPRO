@@ -46,10 +46,13 @@ export const LLMProvider = z.enum(["zhi1", "zhi2", "zhi3", "zhi4"]);
 export const AnalysisType = z.enum([
   "cognitive",
   "comprehensive-cognitive", 
+  "microcognitive",
   "psychological",
   "comprehensive-psychological",
+  "micropsychological",
   "psychopathological", 
-  "comprehensive-psychopathological"
+  "comprehensive-psychopathological",
+  "micropsychopathological"
 ]);
 
 export type LLMProviderType = z.infer<typeof LLMProvider>;
