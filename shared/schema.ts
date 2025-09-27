@@ -7,6 +7,8 @@ export const users = pgTable("users", {
   id: integer("id").primaryKey(),
   username: varchar("username").notNull().unique(),
   password: varchar("password").notNull(),
+  credits: integer("credits").notNull().default(0), // User credit balance
+  stripeCustomerId: varchar("stripe_customer_id"), // Stripe customer ID
   createdAt: timestamp("created_at"),
 });
 
@@ -32,6 +34,16 @@ export const discussions = pgTable("discussions", {
   createdAt: timestamp("created_at").defaultNow(),
 });
 
+export const transactions = pgTable("transactions", {
+  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+  userId: integer("user_id").notNull().references(() => users.id, { onDelete: "cascade" }),
+  amount: integer("amount").notNull(), // Amount in dollars
+  credits: integer("credits").notNull(), // Credits purchased
+  stripePaymentIntentId: varchar("stripe_payment_intent_id").notNull(),
+  status: varchar("status").notNull().default("pending"), // 'pending', 'completed', 'failed'
+  createdAt: timestamp("created_at").defaultNow(),
+});
+
 export const insertUserSchema = createInsertSchema(users, {
   username: z.string().min(1),
   password: z.string().min(6),
@@ -54,12 +66,21 @@ export const insertDiscussionSchema = createInsertSchema(discussions).pick({
   sender: true,
 });
 
+export const insertTransactionSchema = createInsertSchema(transactions).pick({
+  userId: true,
+  amount: true,
+  credits: true,
+  stripePaymentIntentId: true,
+});
+
 export type InsertUser = z.infer<typeof insertUserSchema>;
 export type User = typeof users.$inferSelect;
 export type InsertAnalysis = z.infer<typeof insertAnalysisSchema>;
 export type Analysis = typeof analyses.$inferSelect;
 export type InsertDiscussion = z.infer<typeof insertDiscussionSchema>;
 export type Discussion = typeof discussions.$inferSelect;
+export type InsertTransaction = z.infer<typeof insertTransactionSchema>;
+export type Transaction = typeof transactions.$inferSelect;
 
 export const LLMProvider = z.enum(["zhi1", "zhi2", "zhi3", "zhi4"]);
 export const AnalysisType = z.enum([
