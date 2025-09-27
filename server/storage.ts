@@ -1,9 +1,14 @@
-import { type Analysis, type Discussion, type InsertAnalysis, type InsertDiscussion, analyses, discussions } from "../shared/schema";
+import { type Analysis, type Discussion, type InsertAnalysis, type InsertDiscussion, type User, type InsertUser, analyses, discussions, users } from "../shared/schema";
 import { randomUUID } from "crypto";
 import { db } from "./db";
 import { eq, desc } from "drizzle-orm";
 
 export interface IStorage {
+  // User operations
+  createUser(user: InsertUser): Promise<User>;
+  getUserById(id: number): Promise<User | undefined>;
+  getUserByUsername(username: string): Promise<User | undefined>;
+  
   // Analysis operations
   createAnalysis(analysis: InsertAnalysis): Promise<Analysis>;
   getAnalysis(id: string): Promise<Analysis | undefined>;
@@ -19,11 +24,47 @@ export interface IStorage {
   getRecentAnalyses(limit?: number): Promise<Analysis[]>;
   
   // Saved analyses
-  getSavedAnalyses(): Promise<Analysis[]>;
+  getSavedAnalyses(userId?: number): Promise<Analysis[]>;
+  
+  // User-specific analyses
+  getAnalysesByUser(userId: number): Promise<Analysis[]>;
 }
 
 // Referenced from javascript_database integration
 export class DatabaseStorage implements IStorage {
+  // User operations
+  async createUser(insertUser: InsertUser): Promise<User> {
+    const [user] = await db
+      .insert(users)
+      .values(insertUser)
+      .returning();
+    return user;
+  }
+
+  async getUserById(id: number): Promise<User | undefined> {
+    const [user] = await db
+      .select()
+      .from(users)
+      .where(eq(users.id, id));
+    return user || undefined;
+  }
+
+  async getUserByUsername(username: string): Promise<User | undefined> {
+    const [user] = await db
+      .select()
+      .from(users)
+      .where(eq(users.username, username));
+    return user || undefined;
+  }
+
+  async getAnalysesByUser(userId: number): Promise<Analysis[]> {
+    return await db
+      .select()
+      .from(analyses)
+      .where(eq(analyses.userId, userId))
+      .orderBy(desc(analyses.createdAt));
+  }
+
   async createAnalysis(insertAnalysis: InsertAnalysis): Promise<Analysis> {
     const [analysis] = await db
       .insert(analyses)
@@ -86,12 +127,22 @@ export class DatabaseStorage implements IStorage {
       .limit(limit);
   }
 
-  async getSavedAnalyses(): Promise<Analysis[]> {
-    return await db
-      .select()
-      .from(analyses)
-      .where(eq(analyses.saved, true))
-      .orderBy(desc(analyses.createdAt));
+  async getSavedAnalyses(userId?: number): Promise<Analysis[]> {
+    if (userId !== undefined) {
+      // Return user-specific saved analyses
+      return await db
+        .select()
+        .from(analyses)
+        .where(eq(analyses.saved, true) && eq(analyses.userId, userId))
+        .orderBy(desc(analyses.createdAt));
+    } else {
+      // Return global saved analyses (backwards compatibility)
+      return await db
+        .select()
+        .from(analyses)
+        .where(eq(analyses.saved, true))
+        .orderBy(desc(analyses.createdAt));
+    }
   }
 }
 
