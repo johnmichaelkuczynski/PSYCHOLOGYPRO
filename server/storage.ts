@@ -35,6 +35,10 @@ export interface IStorage {
   
   // User-specific analyses
   getAnalysesByUser(userId: number): Promise<Analysis[]>;
+  
+  // Credit consumption
+  consumeUserCredits(userId: number, creditsUsed: number): Promise<void>;
+  checkUserCredits(userId: number, requiredCredits: number): Promise<boolean>;
 }
 
 // Referenced from javascript_database integration
@@ -191,6 +195,26 @@ export class DatabaseStorage implements IStorage {
         .where(eq(analyses.saved, true))
         .orderBy(desc(analyses.createdAt));
     }
+  }
+  
+  // Credit management methods
+  async consumeUserCredits(userId: number, creditsUsed: number): Promise<void> {
+    const user = await this.getUserById(userId);
+    if (!user) {
+      throw new Error('User not found');
+    }
+    
+    const newCredits = Math.max(0, (user.credits || 0) - creditsUsed);
+    await this.updateUserCredits(userId, newCredits);
+  }
+  
+  async checkUserCredits(userId: number, requiredCredits: number): Promise<boolean> {
+    const user = await this.getUserById(userId);
+    if (!user) {
+      return false;
+    }
+    
+    return (user.credits || 0) >= requiredCredits;
   }
 }
 
