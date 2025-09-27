@@ -125,6 +125,19 @@ export default function ResultsPanel({ analysisId, onDiscussionToggle, onNewAnal
     }
   }, [analysis]);
 
+  // Reset all state when analysisId becomes null (NEW ANALYSIS clicked)
+  useEffect(() => {
+    if (!analysisId) {
+      setBatches([]);
+      setSummary("");
+      setStreamingContent({});
+      setCurrentBatch(1);
+      setDelayProgress(0);
+      setIsStopped(false);
+      setShowingSavedResults(false);
+    }
+  }, [analysisId]);
+
   const stopAnalysis = async () => {
     if (!analysisId) return;
     
