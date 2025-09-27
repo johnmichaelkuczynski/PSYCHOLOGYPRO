@@ -8,14 +8,12 @@ import DiscussionModal from "@/components/discussion-modal";
 import AuthComponent from "@/components/auth-component";
 import { Button } from "@/components/ui/button";
 import { useToast } from "@/hooks/use-toast";
-import { useAuth } from "@/hooks/use-auth";
 import { apiRequest } from "@/lib/queryClient";
 import { useQuery } from "@tanstack/react-query";
 import type { LLMProviderType, AnalysisTypeType, Analysis } from "@shared/schema";
 
 export default function Home() {
   const { toast } = useToast();
-  const { user } = useAuth();
   const [selectedFunction, setSelectedFunction] = useState<AnalysisTypeType>("cognitive");
   const [selectedLLM, setSelectedLLM] = useState<LLMProviderType>("zhi1");
   const [isDiscussionOpen, setIsDiscussionOpen] = useState(false);
@@ -25,7 +23,7 @@ export default function Home() {
 
   const { data: savedAnalyses = [], refetch: refetchSaved } = useQuery<Analysis[]>({
     queryKey: ["/api/analyses/saved"],
-    enabled: showSavedAnalyses && !!user, // Only fetch saved analyses for authenticated users
+    enabled: showSavedAnalyses,
   });
 
   const handleNewAnalysis = () => {
@@ -54,9 +52,7 @@ export default function Home() {
       
       toast({
         title: "Analysis saved",
-        description: user 
-          ? "Your analysis has been saved to your personal account." 
-          : "Your analysis has been saved to storage.",
+        description: "Your analysis has been successfully saved to storage.",
       });
     } catch (error) {
       console.error('Save error:', error);
@@ -139,17 +135,15 @@ export default function Home() {
               </a>
             </div>
             <div className="flex items-center space-x-4">
-              {user && (
-                <Button 
-                  variant={showSavedAnalyses ? "default" : "ghost"} 
-                  size="sm" 
-                  onClick={() => setShowSavedAnalyses(!showSavedAnalyses)}
-                  data-testid="saved-analyses-button"
-                >
-                  <Bookmark className="h-4 w-4 mr-2" />
-                  My Analyses ({savedAnalyses.length})
-                </Button>
-              )}
+              <Button 
+                variant={showSavedAnalyses ? "default" : "ghost"} 
+                size="sm" 
+                onClick={() => setShowSavedAnalyses(!showSavedAnalyses)}
+                data-testid="saved-analyses-button"
+              >
+                <Bookmark className="h-4 w-4 mr-2" />
+                Saved ({savedAnalyses.length})
+              </Button>
               <Button variant="ghost" size="sm" data-testid="help-button">
                 <HelpCircle className="h-4 w-4" />
               </Button>
@@ -205,20 +199,9 @@ export default function Home() {
             <div className="flex-1 overflow-hidden">
               {showSavedAnalyses && (
                 <div className="bg-white border-b border-gray-200 p-4">
-                  <h3 className="text-sm font-medium text-gray-900 mb-3">
-                    {user ? `My Personal Analyses` : `Saved Analyses`}
-                  </h3>
+                  <h3 className="text-sm font-medium text-gray-900 mb-3">Saved Analyses</h3>
                   {savedAnalyses.length === 0 ? (
-                    <div className="text-sm text-gray-500">
-                      {user ? (
-                        <p>You haven't saved any analyses yet. Complete an analysis and click "Save Analysis" to save it to your account.</p>
-                      ) : (
-                        <div>
-                          <p className="mb-2">No saved analyses yet.</p>
-                          <p className="text-xs">💡 Sign in to save analyses to your personal account for easy access later!</p>
-                        </div>
-                      )}
-                    </div>
+                    <p className="text-sm text-gray-500">No saved analyses yet.</p>
                   ) : (
                     <div className="space-y-2 max-h-32 overflow-y-auto">
                       {savedAnalyses.map((analysis) => (

@@ -1,7 +1,7 @@
 import { type Analysis, type Discussion, type InsertAnalysis, type InsertDiscussion, type User, type InsertUser, analyses, discussions, users } from "../shared/schema";
 import { randomUUID } from "crypto";
 import { db } from "./db";
-import { eq, desc, and } from "drizzle-orm";
+import { eq, desc } from "drizzle-orm";
 import session from "express-session";
 import connectPg from "connect-pg-simple";
 import createMemoryStore from "memorystore";
@@ -11,11 +11,11 @@ const MemoryStore = createMemoryStore(session);
 
 export interface IStorage {
   // Analysis operations
-  createAnalysis(analysis: InsertAnalysis, userId?: number): Promise<Analysis>;
+  createAnalysis(analysis: InsertAnalysis): Promise<Analysis>;
   getAnalysis(id: string): Promise<Analysis | undefined>;
   updateAnalysisStatus(id: string, status: string): Promise<void>;
   updateAnalysisResults(id: string, results: any): Promise<void>;
-  markSaved(id: string, userId?: number): Promise<void>;
+  markSaved(id: string): Promise<void>;
   
   // Discussion operations
   createDiscussion(discussion: InsertDiscussion): Promise<Discussion>;
@@ -25,8 +25,7 @@ export interface IStorage {
   getRecentAnalyses(limit?: number): Promise<Analysis[]>;
   
   // Saved analyses
-  getSavedAnalyses(): Promise<Analysis[]>; // Global saved analyses (for backwards compatibility)
-  getUserSavedAnalyses(userId: number): Promise<Analysis[]>; // User-specific saved analyses
+  getSavedAnalyses(): Promise<Analysis[]>;
   
   // User operations
   createUser(user: InsertUser): Promise<User>;
@@ -49,11 +48,10 @@ export class DatabaseStorage implements IStorage {
     });
   }
 
-  async createAnalysis(insertAnalysis: InsertAnalysis, userId?: number): Promise<Analysis> {
-    const analysisData = userId ? { ...insertAnalysis, userId } : insertAnalysis;
+  async createAnalysis(insertAnalysis: InsertAnalysis): Promise<Analysis> {
     const [analysis] = await db
       .insert(analyses)
-      .values(analysisData)
+      .values(insertAnalysis)
       .returning();
     return analysis;
   }
@@ -80,14 +78,10 @@ export class DatabaseStorage implements IStorage {
       .where(eq(analyses.id, id));
   }
 
-  async markSaved(id: string, userId?: number): Promise<void> {
-    const updateData: any = { saved: true, updatedAt: new Date() };
-    if (userId) {
-      updateData.userId = userId;
-    }
+  async markSaved(id: string): Promise<void> {
     await db
       .update(analyses)
-      .set(updateData)
+      .set({ saved: true, updatedAt: new Date() })
       .where(eq(analyses.id, id));
   }
 
@@ -121,14 +115,6 @@ export class DatabaseStorage implements IStorage {
       .select()
       .from(analyses)
       .where(eq(analyses.saved, true))
-      .orderBy(desc(analyses.createdAt));
-  }
-
-  async getUserSavedAnalyses(userId: number): Promise<Analysis[]> {
-    return await db
-      .select()
-      .from(analyses)
-      .where(and(eq(analyses.userId, userId), eq(analyses.saved, true)))
       .orderBy(desc(analyses.createdAt));
   }
 
