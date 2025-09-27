@@ -86,6 +86,7 @@ export class StreamingService {
     await this.storage.updateAnalysisStatus(analysisId, "streaming");
 
     try {
+      // Process the analysis and ensure results are saved
       switch (analysis.type) {
         case "cognitive":
           await this.processCognitiveAnalysis(analysis);
@@ -109,6 +110,12 @@ export class StreamingService {
           throw new Error(`Analysis type ${analysis.type} not implemented`);
       }
 
+      // Verify results were actually saved before marking as completed
+      const updatedAnalysis = await this.storage.getAnalysis(analysisId);
+      if (!updatedAnalysis?.results) {
+        throw new Error("Analysis processing completed but results were not saved");
+      }
+
       await this.storage.updateAnalysisStatus(analysisId, "completed");
       
       this.broadcastToStream(analysisId, {
@@ -116,7 +123,17 @@ export class StreamingService {
       });
 
     } catch (error) {
+      const errorMessage = error instanceof Error ? error.message : String(error);
+      console.error(`Analysis ${analysisId} failed:`, error);
       await this.storage.updateAnalysisStatus(analysisId, "error");
+      
+      // Save error information in results
+      await this.storage.updateAnalysisResults(analysisId, {
+        error: errorMessage,
+        failedAt: new Date().toISOString(),
+        type: analysis.type
+      });
+      
       throw error;
     }
   }
@@ -172,19 +189,32 @@ export class StreamingService {
     const summaryPrompt = `First, summarize this text and categorize it:\n\n${analysis.textContent}`;
     
     let summary = "";
+    let hasContent = false;
     
-    for await (const chunk of this.llmService.streamResponse(
-      analysis.llmProvider as any,
-      [{ role: "user", content: summaryPrompt }],
-      (chunk) => {
-        summary += chunk;
-        this.broadcastToStream(analysis.id, {
-          type: "summary",
-          content: summary
-        });
+    try {
+      for await (const chunk of this.llmService.streamResponse(
+        analysis.llmProvider as any,
+        [{ role: "user", content: summaryPrompt }],
+        (chunk) => {
+          summary += chunk;
+          hasContent = true;
+          this.broadcastToStream(analysis.id, {
+            type: "summary",
+            content: summary
+          });
+        }
+      )) {
+        // Stream is handled by the onChunk callback
       }
-    )) {
-      // Stream is handled by the onChunk callback
+      
+      if (!hasContent) {
+        throw new Error("No content received from LLM during summary generation");
+      }
+      
+    } catch (error) {
+      const errorMessage = error instanceof Error ? error.message : String(error);
+      console.error(`Summary generation failed for analysis ${analysis.id}:`, errorMessage);
+      throw new Error(`Summary generation failed: ${errorMessage}`);
     }
     
     return summary;
@@ -198,28 +228,41 @@ export class StreamingService {
     );
 
     let fullResponse = "";
+    let hasContent = false;
     
-    for await (const chunk of this.llmService.streamResponse(
-      analysis.llmProvider as any,
-      [{ role: "user", content: prompt }],
-      (chunk) => {
-        fullResponse += chunk;
-        
-        // Stream the raw response immediately as it comes in - PURE PASSTHROUGH
-        this.broadcastToStream(analysis.id, {
-          type: "raw_stream",
-          batchNumber,
-          rawContent: fullResponse,
-          timestamp: new Date().toLocaleTimeString("en-US", {
-            hour: "numeric",
-            minute: "2-digit", 
-            second: "2-digit",
-            hour12: true,
-          })
-        });
+    try {
+      for await (const chunk of this.llmService.streamResponse(
+        analysis.llmProvider as any,
+        [{ role: "user", content: prompt }],
+        (chunk) => {
+          fullResponse += chunk;
+          hasContent = true;
+          
+          // Stream the raw response immediately as it comes in - PURE PASSTHROUGH
+          this.broadcastToStream(analysis.id, {
+            type: "raw_stream",
+            batchNumber,
+            rawContent: fullResponse,
+            timestamp: new Date().toLocaleTimeString("en-US", {
+              hour: "numeric",
+              minute: "2-digit", 
+              second: "2-digit",
+              hour12: true,
+            })
+          });
+        }
+      )) {
+        // Stream is handled by the onChunk callback
       }
-    )) {
-      // Stream is handled by the onChunk callback
+      
+      if (!hasContent) {
+        throw new Error(`No content received from LLM for batch ${batchNumber}`);
+      }
+      
+    } catch (error) {
+      const errorMessage = error instanceof Error ? error.message : String(error);
+      console.error(`Batch ${batchNumber} processing failed for analysis ${analysis.id}:`, errorMessage);
+      throw new Error(`Batch ${batchNumber} processing failed: ${errorMessage}`);
     }
 
     // Mark batch as complete - NO PARSING, JUST RAW FINAL RESPONSE
@@ -344,42 +387,112 @@ export class StreamingService {
 
   // Process Comprehensive Cognitive Analysis
   private async processComprehensiveCognitiveAnalysis(analysis: Analysis): Promise<void> {
-    await this.streamSummary(analysis);
+    // Step 1: Generate and stream summary
+    const summary = await this.streamSummary(analysis);
+
+    // Step 2: Process questions in batches of 5
     const questions = this.llmService.getComprehensiveCognitiveQuestions();
     const batches = this.createBatches(questions, 5);
-    await this.processBatches(analysis, batches);
+    const batchResults = await this.processBatchesWithResults(analysis, batches);
+
+    // Step 3: Save the complete analysis results
+    const finalResults = {
+      summary,
+      batches: batchResults,
+      questions,
+      type: analysis.type,
+      completedAt: new Date().toISOString()
+    };
+
+    await this.storage.updateAnalysisResults(analysis.id, finalResults);
   }
 
   // Process Psychological Analysis  
   private async processPsychologicalAnalysis(analysis: Analysis): Promise<void> {
-    await this.streamSummary(analysis);
+    // Step 1: Generate and stream summary
+    const summary = await this.streamSummary(analysis);
+
+    // Step 2: Process questions in batches of 5
     const questions = this.llmService.getPsychologicalQuestions();
     const batches = this.createBatches(questions, 5);
-    await this.processBatches(analysis, batches);
+    const batchResults = await this.processBatchesWithResults(analysis, batches);
+
+    // Step 3: Save the complete analysis results
+    const finalResults = {
+      summary,
+      batches: batchResults,
+      questions,
+      type: analysis.type,
+      completedAt: new Date().toISOString()
+    };
+
+    await this.storage.updateAnalysisResults(analysis.id, finalResults);
   }
 
   // Process Comprehensive Psychological Analysis
   private async processComprehensivePsychologicalAnalysis(analysis: Analysis): Promise<void> {
-    await this.streamSummary(analysis);
+    // Step 1: Generate and stream summary
+    const summary = await this.streamSummary(analysis);
+
+    // Step 2: Process questions in batches of 5
     const questions = this.llmService.getComprehensivePsychologicalQuestions();
     const batches = this.createBatches(questions, 5);
-    await this.processBatches(analysis, batches);
+    const batchResults = await this.processBatchesWithResults(analysis, batches);
+
+    // Step 3: Save the complete analysis results
+    const finalResults = {
+      summary,
+      batches: batchResults,
+      questions,
+      type: analysis.type,
+      completedAt: new Date().toISOString()
+    };
+
+    await this.storage.updateAnalysisResults(analysis.id, finalResults);
   }
 
   // Process Psychopathological Analysis
   private async processPsychopathologicalAnalysis(analysis: Analysis): Promise<void> {
-    await this.streamSummary(analysis);
+    // Step 1: Generate and stream summary
+    const summary = await this.streamSummary(analysis);
+
+    // Step 2: Process questions in batches of 5
     const questions = this.llmService.getPsychopathologicalQuestions();
     const batches = this.createBatches(questions, 5);
-    await this.processBatches(analysis, batches);
+    const batchResults = await this.processBatchesWithResults(analysis, batches);
+
+    // Step 3: Save the complete analysis results
+    const finalResults = {
+      summary,
+      batches: batchResults,
+      questions,
+      type: analysis.type,
+      completedAt: new Date().toISOString()
+    };
+
+    await this.storage.updateAnalysisResults(analysis.id, finalResults);
   }
 
   // Process Comprehensive Psychopathological Analysis
   private async processComprehensivePsychopathologicalAnalysis(analysis: Analysis): Promise<void> {
-    await this.streamSummary(analysis);
+    // Step 1: Generate and stream summary
+    const summary = await this.streamSummary(analysis);
+
+    // Step 2: Process questions in batches of 5
     const questions = this.llmService.getComprehensivePsychopathologicalQuestions();
     const batches = this.createBatches(questions, 5);
-    await this.processBatches(analysis, batches);
+    const batchResults = await this.processBatchesWithResults(analysis, batches);
+
+    // Step 3: Save the complete analysis results
+    const finalResults = {
+      summary,
+      batches: batchResults,
+      questions,
+      type: analysis.type,
+      completedAt: new Date().toISOString()
+    };
+
+    await this.storage.updateAnalysisResults(analysis.id, finalResults);
   }
 
   // Shared batch processing logic
@@ -403,5 +516,33 @@ export class StreamingService {
         await this.streamDelay(analysis.id, 10000);
       }
     }
+  }
+
+  // Shared batch processing logic that returns results
+  private async processBatchesWithResults(analysis: Analysis, batches: string[][]): Promise<string[]> {
+    const batchResults: string[] = [];
+    
+    for (let i = 0; i < batches.length; i++) {
+      const currentStream = this.activeStreams.get(analysis.id);
+      if (!currentStream || !currentStream.isActive) {
+        throw new Error("Analysis stopped by user");
+      }
+
+      const batch = batches[i];
+      const batchNumber = i + 1;
+      const batchResponse = await this.processBatch(analysis, batch, batchNumber);
+      batchResults.push(batchResponse);
+
+      const delayStream = this.activeStreams.get(analysis.id);
+      if (!delayStream || !delayStream.isActive) {
+        throw new Error("Analysis stopped by user");
+      }
+
+      if (i < batches.length - 1) {
+        await this.streamDelay(analysis.id, 10000);
+      }
+    }
+    
+    return batchResults;
   }
 }
