@@ -1,4 +1,4 @@
-import { type Analysis, type Discussion, type InsertAnalysis, type InsertDiscussion, analyses, discussions } from "@shared/schema";
+import { type Analysis, type Discussion, type InsertAnalysis, type InsertDiscussion, analyses, discussions } from "../shared/schema";
 import { randomUUID } from "crypto";
 import { db } from "./db";
 import { eq, desc } from "drizzle-orm";
