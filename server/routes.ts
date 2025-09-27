@@ -71,6 +71,19 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // Get saved analyses (must come before parameterized route)
+  app.get("/api/analyses/saved", async (req, res) => {
+    try {
+      console.log("Attempting to get saved analyses...");
+      const savedAnalyses = await storage.getSavedAnalyses();
+      console.log("Found saved analyses:", savedAnalyses.length);
+      res.json(savedAnalyses);
+    } catch (error) {
+      console.error("Get saved analyses error:", error);
+      res.status(500).json({ error: "Failed to get saved analyses" });
+    }
+  });
+
   // Get analysis
   app.get("/api/analyses/:id", async (req, res) => {
     try {
@@ -210,16 +223,6 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  // Get saved analyses
-  app.get("/api/analyses/saved", async (req, res) => {
-    try {
-      const savedAnalyses = await storage.getSavedAnalyses();
-      res.json(savedAnalyses);
-    } catch (error) {
-      console.error("Get saved analyses error:", error);
-      res.status(500).json({ error: "Failed to get saved analyses" });
-    }
-  });
 
   const httpServer = createServer(app);
   return httpServer;
