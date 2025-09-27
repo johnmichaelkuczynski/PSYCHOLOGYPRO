@@ -26,7 +26,7 @@ export class LLMService {
     zhi4: {
       apiKey: process.env.PERPLEXITY_API_KEY || process.env.API_KEY || "",
       baseUrl: "https://api.perplexity.ai",
-      model: "llama-3.1-sonar-large-128k-online",
+      model: "sonar-pro",
     },
   };
 
