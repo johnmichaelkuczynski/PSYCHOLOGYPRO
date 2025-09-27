@@ -10,7 +10,7 @@ import { storage } from "./storage";
 import { LLMService } from "./services/llm-service";
 import { FileService } from "./services/file-service";
 import { StreamingService } from "./services/streaming-service";
-import { insertAnalysisSchema, insertDiscussionSchema, insertUserSchema, insertTransactionSchema, type User } from "../shared/schema.js";
+import { insertAnalysisSchema, insertDiscussionSchema, insertUserSchema, insertTransactionSchema, type User as DbUser } from "../shared/schema";
 import Stripe from "stripe";
 import { PRICING_TIERS } from "../client/src/data/pricing";
 
@@ -18,7 +18,7 @@ import { PRICING_TIERS } from "../client/src/data/pricing";
 declare global {
   namespace Express {
     interface Request {
-      user?: User;
+      user?: Pick<DbUser, "id" | "username" | "credits">;
     }
   }
 }
@@ -39,9 +39,7 @@ const streamingService = new StreamingService(llmService, storage);
 if (!process.env.STRIPE_SECRET_KEY) {
   throw new Error('Missing required Stripe secret: STRIPE_SECRET_KEY');
 }
-const stripe = new Stripe(process.env.STRIPE_SECRET_KEY, {
-  apiVersion: "2023-10-16",
-});
+const stripe = new Stripe(process.env.STRIPE_SECRET_KEY);
 
 // Set up session store
 const PgSession = connectPgSimple(session);
@@ -53,7 +51,7 @@ async function authMiddleware(req: any, res: any, next: any) {
     if (userId) {
       const user = await storage.getUserById(userId);
       if (user) {
-        req.user = user;
+        req.user = { id: user.id, username: user.username, credits: user.credits ?? 0 };
       }
     }
     next();
@@ -453,7 +451,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
         const paymentIntent = event.data.object as Stripe.PaymentIntent;
         const userId = parseInt(paymentIntent.metadata.userId);
         const amount = paymentIntent.amount / 100; // Convert from cents
-        const llmProvider = paymentIntent.metadata.llmProvider as any;
+        const llmProvider = paymentIntent.metadata.llmProvider as 'zhi1' | 'zhi2' | 'zhi3' | 'zhi4';
         
         if (userId && !isNaN(userId)) {
           // Find the pricing tier
