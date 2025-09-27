@@ -123,11 +123,12 @@ export class StreamingService {
 
   private async processCognitiveAnalysis(analysis: Analysis): Promise<void> {
     // Step 1: Generate and stream summary
-    await this.streamSummary(analysis);
+    const summary = await this.streamSummary(analysis);
 
     // Step 2: Process questions in batches of 5
     const questions = this.llmService.getCognitiveQuestions();
     const batches = this.createBatches(questions, 5);
+    const batchResults: string[] = [];
 
     for (let i = 0; i < batches.length; i++) {
       // Check if analysis was stopped
@@ -140,7 +141,8 @@ export class StreamingService {
       const batchNumber = i + 1;
 
       // Process each question in the batch
-      await this.processBatch(analysis, batch, batchNumber);
+      const batchResponse = await this.processBatch(analysis, batch, batchNumber);
+      batchResults.push(batchResponse);
 
       // Check if analysis was stopped before delay
       const delayStream = this.activeStreams.get(analysis.id);
@@ -153,9 +155,20 @@ export class StreamingService {
         await this.streamDelay(analysis.id, 10000);
       }
     }
+
+    // Step 3: Save the complete analysis results
+    const finalResults = {
+      summary,
+      batches: batchResults,
+      questions,
+      type: analysis.type,
+      completedAt: new Date().toISOString()
+    };
+
+    await this.storage.updateAnalysisResults(analysis.id, finalResults);
   }
 
-  private async streamSummary(analysis: Analysis): Promise<void> {
+  private async streamSummary(analysis: Analysis): Promise<string> {
     const summaryPrompt = `First, summarize this text and categorize it:\n\n${analysis.textContent}`;
     
     let summary = "";
@@ -173,9 +186,11 @@ export class StreamingService {
     )) {
       // Stream is handled by the onChunk callback
     }
+    
+    return summary;
   }
 
-  private async processBatch(analysis: Analysis, questions: string[], batchNumber: number): Promise<void> {
+  private async processBatch(analysis: Analysis, questions: string[], batchNumber: number): Promise<string> {
     const prompt = this.llmService.createCognitivePrompt(
       analysis.textContent,
       questions,
@@ -220,6 +235,8 @@ export class StreamingService {
         hour12: true,
       })
     });
+    
+    return fullResponse;
   }
 
   private parseQuestionResponses(response: string, questions: string[]): Array<{
