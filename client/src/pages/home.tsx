@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { Brain, Settings, HelpCircle, Bookmark, Loader2 } from "lucide-react";
+import { Brain, Settings, HelpCircle, Bookmark, Loader2, CreditCard } from "lucide-react";
 import Sidebar from "@/components/sidebar";
 import LLMSelector from "@/components/llm-selector";
 import TextInput from "@/components/text-input";
@@ -160,6 +160,14 @@ export default function Home() {
               </Button>
               <Button variant="ghost" size="sm" data-testid="settings-button">
                 <Settings className="h-4 w-4" />
+              </Button>
+              <Button 
+                variant="ghost" 
+                size="sm" 
+                onClick={() => window.location.href = '/credits'}
+                data-testid="credits-button"
+              >
+                <CreditCard className="h-4 w-4" />
               </Button>
               <UserMenu onShowHistory={() => setShowUserHistory(!showUserHistory)} />
             </div>

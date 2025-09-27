@@ -1,4 +1,4 @@
-import { type Analysis, type Discussion, type InsertAnalysis, type InsertDiscussion, type User, type InsertUser, analyses, discussions, users } from "../shared/schema";
+import { type Analysis, type Discussion, type InsertAnalysis, type InsertDiscussion, type User, type InsertUser, type Transaction, type InsertTransaction, analyses, discussions, users, transactions } from "../shared/schema";
 import { randomUUID } from "crypto";
 import { db } from "./db";
 import { eq, desc } from "drizzle-orm";
@@ -8,6 +8,13 @@ export interface IStorage {
   createUser(user: InsertUser): Promise<User>;
   getUserById(id: number): Promise<User | undefined>;
   getUserByUsername(username: string): Promise<User | undefined>;
+  updateUserCredits(userId: number, credits: number): Promise<void>;
+  updateUserStripeCustomerId(userId: number, stripeCustomerId: string): Promise<User>;
+  
+  // Transaction operations
+  createTransaction(transaction: InsertTransaction): Promise<Transaction>;
+  updateTransactionStatus(id: string, status: string): Promise<void>;
+  getTransactionsByUser(userId: number): Promise<Transaction[]>;
   
   // Analysis operations
   createAnalysis(analysis: InsertAnalysis): Promise<Analysis>;
@@ -63,6 +70,47 @@ export class DatabaseStorage implements IStorage {
       .from(analyses)
       .where(eq(analyses.userId, userId))
       .orderBy(desc(analyses.createdAt));
+  }
+
+  // User management methods
+  async updateUserCredits(userId: number, credits: number): Promise<void> {
+    await db
+      .update(users)
+      .set({ credits })
+      .where(eq(users.id, userId));
+  }
+
+  async updateUserStripeCustomerId(userId: number, stripeCustomerId: string): Promise<User> {
+    const [user] = await db
+      .update(users)
+      .set({ stripeCustomerId })
+      .where(eq(users.id, userId))
+      .returning();
+    return user;
+  }
+
+  // Transaction methods
+  async createTransaction(insertTransaction: InsertTransaction): Promise<Transaction> {
+    const [transaction] = await db
+      .insert(transactions)
+      .values(insertTransaction)
+      .returning();
+    return transaction;
+  }
+
+  async updateTransactionStatus(id: string, status: string): Promise<void> {
+    await db
+      .update(transactions)
+      .set({ status })
+      .where(eq(transactions.id, id));
+  }
+
+  async getTransactionsByUser(userId: number): Promise<Transaction[]> {
+    return await db
+      .select()
+      .from(transactions)
+      .where(eq(transactions.userId, userId))
+      .orderBy(desc(transactions.createdAt));
   }
 
   async createAnalysis(insertAnalysis: InsertAnalysis): Promise<Analysis> {

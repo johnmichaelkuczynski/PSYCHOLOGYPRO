@@ -10,7 +10,9 @@ import { storage } from "./storage";
 import { LLMService } from "./services/llm-service";
 import { FileService } from "./services/file-service";
 import { StreamingService } from "./services/streaming-service";
-import { insertAnalysisSchema, insertDiscussionSchema, insertUserSchema, type User } from "../shared/schema.js";
+import { insertAnalysisSchema, insertDiscussionSchema, insertUserSchema, insertTransactionSchema, type User } from "../shared/schema.js";
+import Stripe from "stripe";
+import { PRICING_TIERS } from "../client/src/data/pricing";
 
 // Extend Express Request to include user
 declare global {
@@ -32,6 +34,14 @@ const upload = multer({
 const llmService = new LLMService();
 const fileService = new FileService();
 const streamingService = new StreamingService(llmService, storage);
+
+// Initialize Stripe
+if (!process.env.STRIPE_SECRET_KEY) {
+  throw new Error('Missing required Stripe secret: STRIPE_SECRET_KEY');
+}
+const stripe = new Stripe(process.env.STRIPE_SECRET_KEY, {
+  apiVersion: "2023-10-16",
+});
 
 // Set up session store
 const PgSession = connectPgSimple(session);
@@ -392,6 +402,120 @@ export async function registerRoutes(app: Express): Promise<Server> {
     } catch (error) {
       console.error("Save analysis error:", error);
       res.status(500).json({ error: "Failed to save analysis" });
+    }
+  });
+
+  // Stripe payment routes
+  app.post("/api/create-payment-intent", async (req, res) => {
+    try {
+      const { amount, llmProvider } = req.body;
+      
+      if (!amount || !PRICING_TIERS.find(tier => tier.amount === amount)) {
+        return res.status(400).json({ error: "Invalid amount" });
+      }
+
+      const paymentIntent = await stripe.paymentIntents.create({
+        amount: Math.round(amount * 100), // Convert to cents
+        currency: "usd",
+        metadata: {
+          userId: req.user?.id?.toString() || 'anonymous',
+          llmProvider: llmProvider || 'zhi1',
+        },
+      });
+      
+      res.json({ clientSecret: paymentIntent.client_secret });
+    } catch (error: any) {
+      console.error("Payment intent error:", error);
+      res.status(500).json({ error: "Error creating payment intent: " + error.message });
+    }
+  });
+
+  // Stripe webhook handler
+  app.post("/api/stripe/webhook", async (req, res) => {
+    try {
+      const sig = req.headers['stripe-signature'];
+      const webhookSecret = process.env.STRIPE_WEBHOOK_SECRET;
+
+      if (!webhookSecret) {
+        console.error('Stripe webhook secret not configured');
+        return res.status(400).send('Webhook secret not configured');
+      }
+
+      let event;
+      try {
+        event = stripe.webhooks.constructEvent(req.body, sig as string, webhookSecret);
+      } catch (err: any) {
+        console.error('Webhook signature verification failed:', err.message);
+        return res.status(400).send(`Webhook Error: ${err.message}`);
+      }
+
+      if (event.type === 'payment_intent.succeeded') {
+        const paymentIntent = event.data.object as Stripe.PaymentIntent;
+        const userId = parseInt(paymentIntent.metadata.userId);
+        const amount = paymentIntent.amount / 100; // Convert from cents
+        const llmProvider = paymentIntent.metadata.llmProvider as any;
+        
+        if (userId && !isNaN(userId)) {
+          // Find the pricing tier
+          const tier = PRICING_TIERS.find(t => t.amount === amount);
+          if (tier && tier.credits[llmProvider]) {
+            const credits = tier.credits[llmProvider];
+            
+            // Create transaction record
+            await storage.createTransaction({
+              userId,
+              amount,
+              credits,
+              stripePaymentIntentId: paymentIntent.id,
+            });
+            
+            // Update user credits
+            const user = await storage.getUserById(userId);
+            if (user) {
+              const newCredits = (user.credits || 0) + credits;
+              await storage.updateUserCredits(userId, newCredits);
+            }
+            
+            // Update transaction status
+            await storage.updateTransactionStatus(paymentIntent.id, 'completed');
+          }
+        }
+      }
+
+      res.json({ received: true });
+    } catch (error: any) {
+      console.error('Webhook error:', error);
+      res.status(500).json({ error: 'Webhook processing failed' });
+    }
+  });
+
+  // Get user credits
+  app.get("/api/user/credits", async (req, res) => {
+    try {
+      if (!req.user) {
+        return res.status(401).json({ error: "Authentication required" });
+      }
+      
+      const user = await storage.getUserById(req.user.id);
+      res.json({ credits: user?.credits || 0 });
+    } catch (error) {
+      console.error("Get credits error:", error);
+      res.status(500).json({ error: "Failed to get credits" });
+    }
+  });
+
+  // Get user transactions
+  app.get("/api/user/transactions", async (req, res) => {
+    try {
+      if (!req.user) {
+        return res.status(401).json({ error: "Authentication required" });
+      }
+      
+      const transactions = await storage.getTransactionsByUser(req.user.id);
+      res.json(transactions);
+    } catch (error) {
+      console.error("Get transactions error:", error);
+      res.status(500).json({ error: "Failed to get transactions" });
     }
   });
 
