@@ -4,9 +4,7 @@ import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Progress } from "@/components/ui/progress";
 import { useStreaming } from "@/hooks/use-streaming";
-import { useQuery } from "@tanstack/react-query";
 import { apiRequest } from "@/lib/queryClient";
-import type { Analysis } from "@shared/schema";
 
 // Strip markdown formatting from text
 function stripMarkdown(text: string): string {
@@ -69,19 +67,8 @@ export default function ResultsPanel({ analysisId, onDiscussionToggle, onNewAnal
   const [delayProgress, setDelayProgress] = useState(0);
   const [streamingContent, setStreamingContent] = useState<{[key: number]: string}>({});
   const [isStopped, setIsStopped] = useState(false);
-  const [showingSavedResults, setShowingSavedResults] = useState(false);
   
-  // Fetch analysis data to check if it has completed results
-  const { data: analysis } = useQuery<Analysis>({
-    queryKey: ["/api/analyses", analysisId],
-    enabled: !!analysisId,
-  });
-  
-  // Determine if we should stream or show saved results
-  const shouldStream = analysisId && !showingSavedResults && 
-    (!analysis || analysis.status !== "completed" || !analysis.results);
-  
-  const { isStreaming, streamData, error } = useStreaming(shouldStream ? analysisId : null, isPaused);
+  const { isStreaming, streamData, error } = useStreaming(analysisId, isPaused);
 
   const handleClearAnalysis = () => {
     setBatches([]);
@@ -90,53 +77,8 @@ export default function ResultsPanel({ analysisId, onDiscussionToggle, onNewAnal
     setCurrentBatch(1);
     setDelayProgress(0);
     setIsStopped(false);
-    setShowingSavedResults(false);
     onNewAnalysis();
   };
-
-  // Load saved results when analysis changes and has completed results
-  useEffect(() => {
-    if (analysis && analysis.status === "completed" && analysis.results) {
-      console.log("Loading saved results for analysis:", analysis.id);
-      setShowingSavedResults(true);
-      
-      // Display the saved results
-      const results = analysis.results as any;
-      if (results.summary) {
-        setSummary(stripMarkdown(results.summary));
-      }
-      
-      // If results contain batch data, display it
-      if (results.batches && Array.isArray(results.batches)) {
-        setBatches(results.batches.map((batch: any, index: number) => ({
-          batchNumber: index + 1,
-          questions: [{ 
-            question: `Batch ${index + 1} - Saved Results`,
-            response: stripMarkdown(batch.response || batch.content || ""),
-            score: batch.score || 0,
-            isComplete: true 
-          }],
-          isComplete: true,
-          timestamp: new Date(analysis.createdAt!).toLocaleTimeString()
-        })));
-      }
-    } else {
-      setShowingSavedResults(false);
-    }
-  }, [analysis]);
-
-  // Reset all state when analysisId becomes null (NEW ANALYSIS clicked)
-  useEffect(() => {
-    if (!analysisId) {
-      setBatches([]);
-      setSummary("");
-      setStreamingContent({});
-      setCurrentBatch(1);
-      setDelayProgress(0);
-      setIsStopped(false);
-      setShowingSavedResults(false);
-    }
-  }, [analysisId]);
 
   const stopAnalysis = async () => {
     if (!analysisId) return;

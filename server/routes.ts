@@ -60,9 +60,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   app.post("/api/analyses", async (req, res) => {
     try {
       const analysisData = insertAnalysisSchema.parse(req.body);
-      // Pass user ID if authenticated
-      const userId = (req.user as any)?.id;
-      const analysis = await storage.createAnalysis(analysisData, userId);
+      const analysis = await storage.createAnalysis(analysisData);
       
       // Start streaming analysis in background
       streamingService.startAnalysis(analysis.id);
@@ -81,18 +79,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   app.get("/api/analyses/saved", async (req, res) => {
     try {
       console.log("Attempting to get saved analyses...");
-      let savedAnalyses;
-      
-      // If user is authenticated, get their personal saved analyses
-      if ((req.user as any)?.id) {
-        console.log("Getting user-specific saved analyses for user:", (req.user as any).id);
-        savedAnalyses = await storage.getUserSavedAnalyses((req.user as any).id);
-      } else {
-        // For non-authenticated users, get global saved analyses (backwards compatibility)
-        console.log("Getting global saved analyses for non-authenticated user");
-        savedAnalyses = await storage.getSavedAnalyses();
-      }
-      
+      const savedAnalyses = await storage.getSavedAnalyses();
       console.log("Found saved analyses:", savedAnalyses.length);
       res.json(savedAnalyses);
     } catch (error) {
@@ -108,13 +95,6 @@ export async function registerRoutes(app: Express): Promise<Server> {
       if (!analysis) {
         return res.status(404).json({ error: "Analysis not found" });
       }
-      
-      // User authorization check: Only the analysis owner can access it
-      const userId = (req.user as any)?.id;
-      if (analysis.userId && analysis.userId !== userId) {
-        return res.status(403).json({ error: "Access denied" });
-      }
-      
       res.json(analysis);
     } catch (error) {
       console.error("Get analysis error:", error);
@@ -135,43 +115,27 @@ export async function registerRoutes(app: Express): Promise<Server> {
   });
 
   // Stream analysis results
-  app.get("/api/analyses/:id/stream", async (req, res) => {
+  app.get("/api/analyses/:id/stream", (req, res) => {
     const analysisId = req.params.id;
     
-    try {
-      // User authorization check: Only the analysis owner can stream it
-      const analysis = await storage.getAnalysis(analysisId);
-      if (!analysis) {
-        return res.status(404).json({ error: "Analysis not found" });
-      }
-      
-      const userId = (req.user as any)?.id;
-      if (analysis.userId && analysis.userId !== userId) {
-        return res.status(403).json({ error: "Access denied" });
-      }
-      
-      // Set up SSE headers
-      res.writeHead(200, {
-        'Content-Type': 'text/event-stream',
-        'Cache-Control': 'no-cache',
-        'Connection': 'keep-alive',
-        'Access-Control-Allow-Origin': '*',
-        'Access-Control-Allow-Headers': 'Cache-Control',
-      });
+    // Set up SSE headers
+    res.writeHead(200, {
+      'Content-Type': 'text/event-stream',
+      'Cache-Control': 'no-cache',
+      'Connection': 'keep-alive',
+      'Access-Control-Allow-Origin': '*',
+      'Access-Control-Allow-Headers': 'Cache-Control',
+    });
 
-      // Start streaming
-      streamingService.streamAnalysis(analysisId, (data) => {
-        res.write(`data: ${JSON.stringify(data)}\n\n`);
-      });
+    // Start streaming
+    streamingService.streamAnalysis(analysisId, (data) => {
+      res.write(`data: ${JSON.stringify(data)}\n\n`);
+    });
 
-      // Handle client disconnect
-      req.on('close', () => {
-        streamingService.stopStreaming(analysisId);
-      });
-    } catch (error) {
-      console.error("Stream authorization error:", error);
-      res.status(500).json({ error: "Failed to authorize stream access" });
-    }
+    // Handle client disconnect
+    req.on('close', () => {
+      streamingService.stopStreaming(analysisId);
+    });
   });
 
   // Contest analysis (create new analysis based on feedback)
@@ -192,9 +156,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
         llmProvider: originalAnalysis.llmProvider,
       };
 
-      // Pass user ID if authenticated
-      const userId = (req.user as any)?.id;
-      const newAnalysis = await storage.createAnalysis(newAnalysisData, userId);
+      const newAnalysis = await storage.createAnalysis(newAnalysisData);
       streamingService.startAnalysis(newAnalysis.id);
       
       res.json({ analysisId: newAnalysis.id });
@@ -257,14 +219,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
         return res.status(404).json({ error: "Analysis not found" });
       }
 
-      // User authorization check: Only the analysis owner can save it
-      const userId = (req.user as any)?.id;
-      if (analysis.userId && analysis.userId !== userId) {
-        return res.status(403).json({ error: "Access denied" });
-      }
-
-      // Pass user ID if authenticated to associate saved analysis with user
-      await storage.markSaved(req.params.id, userId);
+      await storage.markSaved(req.params.id);
       res.json({ success: true });
     } catch (error) {
       console.error("Save analysis error:", error);

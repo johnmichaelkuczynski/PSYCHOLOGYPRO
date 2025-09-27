@@ -19,7 +19,7 @@ export const analyses = pgTable("analyses", {
   status: varchar("status").notNull().default("pending"), // 'pending', 'streaming', 'completed', 'error'
   results: jsonb("results"), // Store the complete analysis results
   saved: boolean("saved").notNull().default(false), // Whether the analysis is saved by user
-  userId: integer("user_id").references(() => users.id), // Links to user account when logged in
+  userId: integer("user_id"), // Optional - only set if user is logged in
   createdAt: timestamp("created_at").defaultNow(),
   updatedAt: timestamp("updated_at").defaultNow(),
 });
