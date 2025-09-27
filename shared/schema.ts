@@ -3,6 +3,13 @@ import { pgTable, text, varchar, timestamp, jsonb, integer, boolean } from "driz
 import { createInsertSchema } from "drizzle-zod";
 import { z } from "zod";
 
+export const users = pgTable("users", {
+  id: integer("id").primaryKey(),
+  username: varchar("username").notNull().unique(),
+  password: varchar("password").notNull(),
+  createdAt: timestamp("created_at"),
+});
+
 export const analyses = pgTable("analyses", {
   id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
   type: varchar("type").notNull(), // 'cognitive', 'psychological', etc.
@@ -12,6 +19,7 @@ export const analyses = pgTable("analyses", {
   status: varchar("status").notNull().default("pending"), // 'pending', 'streaming', 'completed', 'error'
   results: jsonb("results"), // Store the complete analysis results
   saved: boolean("saved").notNull().default(false), // Whether the analysis is saved by user
+  userId: integer("user_id").references(() => users.id, { onDelete: "set null" }), // Optional user association
   createdAt: timestamp("created_at").defaultNow(),
   updatedAt: timestamp("updated_at").defaultNow(),
 });
@@ -24,11 +32,20 @@ export const discussions = pgTable("discussions", {
   createdAt: timestamp("created_at").defaultNow(),
 });
 
+export const insertUserSchema = createInsertSchema(users, {
+  username: z.string().min(1),
+  password: z.string().min(6),
+}).pick({
+  username: true,
+  password: true,
+});
+
 export const insertAnalysisSchema = createInsertSchema(analyses).pick({
   type: true,
   textContent: true,
   additionalContext: true,
   llmProvider: true,
+  userId: true, // Optional user association
 });
 
 export const insertDiscussionSchema = createInsertSchema(discussions).pick({
@@ -37,6 +54,8 @@ export const insertDiscussionSchema = createInsertSchema(discussions).pick({
   sender: true,
 });
 
+export type InsertUser = z.infer<typeof insertUserSchema>;
+export type User = typeof users.$inferSelect;
 export type InsertAnalysis = z.infer<typeof insertAnalysisSchema>;
 export type Analysis = typeof analyses.$inferSelect;
 export type InsertDiscussion = z.infer<typeof insertDiscussionSchema>;
