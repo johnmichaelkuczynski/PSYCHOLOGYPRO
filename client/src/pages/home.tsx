@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { Brain, Settings, HelpCircle, Bookmark } from "lucide-react";
+import { Brain, Settings, HelpCircle, Bookmark, Loader2 } from "lucide-react";
 import Sidebar from "@/components/sidebar";
 import LLMSelector from "@/components/llm-selector";
 import TextInput from "@/components/text-input";
@@ -21,6 +21,7 @@ export default function Home() {
   const [resetKey, setResetKey] = useState(0);
   const [showSavedAnalyses, setShowSavedAnalyses] = useState(false);
   const [showUserHistory, setShowUserHistory] = useState(false);
+  const [isSaving, setIsSaving] = useState(false);
 
   const { data: savedAnalyses = [], refetch: refetchSaved } = useQuery<Analysis[]>({
     queryKey: ["/api/analyses/saved"],
@@ -48,12 +49,13 @@ export default function Home() {
       return;
     }
 
+    setIsSaving(true);
     try {
       await apiRequest("PATCH", `/api/analyses/${currentAnalysisId}/save`);
       
       // Refresh saved analyses if shown
       if (showSavedAnalyses) {
-        refetchSaved();
+        await refetchSaved();
       }
       
       toast({
@@ -67,6 +69,8 @@ export default function Home() {
         description: "Unable to save analysis. Please try again.",
         variant: "destructive",
       });
+    } finally {
+      setIsSaving(false);
     }
   };
 
@@ -186,9 +190,16 @@ export default function Home() {
                     variant="outline" 
                     data-testid="save-analysis-button"
                     onClick={handleSaveAnalysis}
-                    disabled={!currentAnalysisId}
+                    disabled={!currentAnalysisId || isSaving}
                   >
-                    Save Analysis
+                    {isSaving ? (
+                      <>
+                        <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+                        Saving...
+                      </>
+                    ) : (
+                      "Save Analysis"
+                    )}
                   </Button>
                   <Button 
                     variant="outline" 
