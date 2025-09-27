@@ -1,4 +1,4 @@
-import { Lightbulb, Brain, Users, UserCheck, Stethoscope, ClipboardCheck, FileText } from "lucide-react";
+import { Lightbulb, Brain, Users, UserCheck, Stethoscope, ClipboardCheck, FileText, Zap } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import type { AnalysisTypeType } from "@shared/schema";
 
@@ -21,6 +21,12 @@ const FUNCTIONS = [
     available: true,
   },
   {
+    key: "microcognitive" as AnalysisTypeType,
+    label: "Micro Cognitive (Fast)",
+    icon: Zap,
+    available: true,
+  },
+  {
     key: "psychological" as AnalysisTypeType,
     label: "Psychological",
     icon: UserCheck,
@@ -33,6 +39,12 @@ const FUNCTIONS = [
     available: true,
   },
   {
+    key: "micropsychological" as AnalysisTypeType,
+    label: "Micro Psychological (Fast)",
+    icon: Zap,
+    available: true,
+  },
+  {
     key: "psychopathological" as AnalysisTypeType,
     label: "Psychopathological",
     icon: Stethoscope,
@@ -42,6 +54,12 @@ const FUNCTIONS = [
     key: "comprehensive-psychopathological" as AnalysisTypeType,
     label: "Comprehensive Psychopathological",
     icon: ClipboardCheck,
+    available: true,
+  },
+  {
+    key: "micropsychopathological" as AnalysisTypeType,
+    label: "Micro Psychopathological (Fast)",
+    icon: Zap,
     available: true,
   },
 ];
