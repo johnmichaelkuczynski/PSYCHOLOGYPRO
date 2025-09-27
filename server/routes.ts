@@ -60,7 +60,9 @@ export async function registerRoutes(app: Express): Promise<Server> {
   app.post("/api/analyses", async (req, res) => {
     try {
       const analysisData = insertAnalysisSchema.parse(req.body);
-      const analysis = await storage.createAnalysis(analysisData);
+      // Pass user ID if authenticated
+      const userId = (req.user as any)?.id;
+      const analysis = await storage.createAnalysis(analysisData, userId);
       
       // Start streaming analysis in background
       streamingService.startAnalysis(analysis.id);
@@ -79,7 +81,18 @@ export async function registerRoutes(app: Express): Promise<Server> {
   app.get("/api/analyses/saved", async (req, res) => {
     try {
       console.log("Attempting to get saved analyses...");
-      const savedAnalyses = await storage.getSavedAnalyses();
+      let savedAnalyses;
+      
+      // If user is authenticated, get their personal saved analyses
+      if ((req.user as any)?.id) {
+        console.log("Getting user-specific saved analyses for user:", (req.user as any).id);
+        savedAnalyses = await storage.getUserSavedAnalyses((req.user as any).id);
+      } else {
+        // For non-authenticated users, get global saved analyses (backwards compatibility)
+        console.log("Getting global saved analyses for non-authenticated user");
+        savedAnalyses = await storage.getSavedAnalyses();
+      }
+      
       console.log("Found saved analyses:", savedAnalyses.length);
       res.json(savedAnalyses);
     } catch (error) {
@@ -156,7 +169,9 @@ export async function registerRoutes(app: Express): Promise<Server> {
         llmProvider: originalAnalysis.llmProvider,
       };
 
-      const newAnalysis = await storage.createAnalysis(newAnalysisData);
+      // Pass user ID if authenticated
+      const userId = (req.user as any)?.id;
+      const newAnalysis = await storage.createAnalysis(newAnalysisData, userId);
       streamingService.startAnalysis(newAnalysis.id);
       
       res.json({ analysisId: newAnalysis.id });
@@ -219,7 +234,9 @@ export async function registerRoutes(app: Express): Promise<Server> {
         return res.status(404).json({ error: "Analysis not found" });
       }
 
-      await storage.markSaved(req.params.id);
+      // Pass user ID if authenticated to associate saved analysis with user
+      const userId = (req.user as any)?.id;
+      await storage.markSaved(req.params.id, userId);
       res.json({ success: true });
     } catch (error) {
       console.error("Save analysis error:", error);
