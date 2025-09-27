@@ -210,6 +210,17 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // Get saved analyses
+  app.get("/api/analyses/saved", async (req, res) => {
+    try {
+      const savedAnalyses = await storage.getSavedAnalyses();
+      res.json(savedAnalyses);
+    } catch (error) {
+      console.error("Get saved analyses error:", error);
+      res.status(500).json({ error: "Failed to get saved analyses" });
+    }
+  });
+
   const httpServer = createServer(app);
   return httpServer;
 }

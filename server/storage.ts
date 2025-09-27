@@ -17,6 +17,9 @@ export interface IStorage {
   
   // Recent analyses
   getRecentAnalyses(limit?: number): Promise<Analysis[]>;
+  
+  // Saved analyses
+  getSavedAnalyses(): Promise<Analysis[]>;
 }
 
 // Referenced from javascript_database integration
@@ -81,6 +84,14 @@ export class DatabaseStorage implements IStorage {
       .where(eq(analyses.status, "completed"))
       .orderBy(desc(analyses.createdAt))
       .limit(limit);
+  }
+
+  async getSavedAnalyses(): Promise<Analysis[]> {
+    return await db
+      .select()
+      .from(analyses)
+      .where(eq(analyses.saved, true))
+      .orderBy(desc(analyses.createdAt));
   }
 }
 

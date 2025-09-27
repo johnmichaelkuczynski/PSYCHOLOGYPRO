@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { Brain, Settings, HelpCircle } from "lucide-react";
+import { Brain, Settings, HelpCircle, Bookmark } from "lucide-react";
 import Sidebar from "@/components/sidebar";
 import LLMSelector from "@/components/llm-selector";
 import TextInput from "@/components/text-input";
@@ -8,7 +8,8 @@ import DiscussionModal from "@/components/discussion-modal";
 import { Button } from "@/components/ui/button";
 import { useToast } from "@/hooks/use-toast";
 import { apiRequest } from "@/lib/queryClient";
-import type { LLMProviderType, AnalysisTypeType } from "@shared/schema";
+import { useQuery } from "@tanstack/react-query";
+import type { LLMProviderType, AnalysisTypeType, Analysis } from "@shared/schema";
 
 export default function Home() {
   const { toast } = useToast();
@@ -17,6 +18,12 @@ export default function Home() {
   const [isDiscussionOpen, setIsDiscussionOpen] = useState(false);
   const [currentAnalysisId, setCurrentAnalysisId] = useState<string | null>(null);
   const [resetKey, setResetKey] = useState(0);
+  const [showSavedAnalyses, setShowSavedAnalyses] = useState(false);
+
+  const { data: savedAnalyses = [], refetch: refetchSaved } = useQuery<Analysis[]>({
+    queryKey: ["/api/analyses/saved"],
+    enabled: showSavedAnalyses,
+  });
 
   const handleNewAnalysis = () => {
     setCurrentAnalysisId(null);
@@ -36,6 +43,11 @@ export default function Home() {
 
     try {
       await apiRequest("PATCH", `/api/analyses/${currentAnalysisId}/save`);
+      
+      // Refresh saved analyses if shown
+      if (showSavedAnalyses) {
+        refetchSaved();
+      }
       
       toast({
         title: "Analysis saved",
@@ -122,6 +134,15 @@ export default function Home() {
               </a>
             </div>
             <div className="flex items-center space-x-4">
+              <Button 
+                variant={showSavedAnalyses ? "default" : "ghost"} 
+                size="sm" 
+                onClick={() => setShowSavedAnalyses(!showSavedAnalyses)}
+                data-testid="saved-analyses-button"
+              >
+                <Bookmark className="h-4 w-4 mr-2" />
+                Saved ({savedAnalyses.length})
+              </Button>
               <Button variant="ghost" size="sm" data-testid="help-button">
                 <HelpCircle className="h-4 w-4" />
               </Button>
@@ -174,6 +195,37 @@ export default function Home() {
             </div>
 
             <div className="flex-1 overflow-hidden">
+              {showSavedAnalyses && (
+                <div className="bg-white border-b border-gray-200 p-4">
+                  <h3 className="text-sm font-medium text-gray-900 mb-3">Saved Analyses</h3>
+                  {savedAnalyses.length === 0 ? (
+                    <p className="text-sm text-gray-500">No saved analyses yet.</p>
+                  ) : (
+                    <div className="space-y-2 max-h-32 overflow-y-auto">
+                      {savedAnalyses.map((analysis) => (
+                        <div key={analysis.id} className="flex items-center justify-between p-2 bg-gray-50 rounded text-sm">
+                          <div>
+                            <span className="font-medium">{analysis.type}</span>
+                            <span className="text-gray-500 ml-2">• {analysis.llmProvider}</span>
+                            <span className="text-gray-400 ml-2">• {new Date(analysis.createdAt!).toLocaleDateString()}</span>
+                          </div>
+                          <Button 
+                            size="sm" 
+                            variant="outline" 
+                            onClick={() => {
+                              setCurrentAnalysisId(analysis.id);
+                              setShowSavedAnalyses(false);
+                            }}
+                            data-testid={`load-analysis-${analysis.id}`}
+                          >
+                            Load
+                          </Button>
+                        </div>
+                      ))}
+                    </div>
+                  )}
+                </div>
+              )}
               <div className="grid grid-cols-2 h-full">
                 {/* Input Panel */}
                 <div className="border-r border-gray-200 flex flex-col">
