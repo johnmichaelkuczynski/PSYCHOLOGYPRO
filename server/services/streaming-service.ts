@@ -304,7 +304,7 @@ export class StreamingService {
   }
 
   formatAnalysisForDownload(analysis: Analysis): string {
-    let content = `MIND READER ANALYSIS REPORT\n`;
+    let content = `PSYCHOLOGY PRO ANALYSIS REPORT\n`;
     content += `Generated: ${new Date().toLocaleString()}\n`;
     content += `Analysis Type: ${analysis.type.toUpperCase()}\n`;
     content += `LLM Provider: ${analysis.llmProvider.toUpperCase()}\n\n`;

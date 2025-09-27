@@ -1,5 +1,5 @@
 import { sql } from "drizzle-orm";
-import { pgTable, text, varchar, timestamp, jsonb, integer } from "drizzle-orm/pg-core";
+import { pgTable, text, varchar, timestamp, jsonb, integer, boolean } from "drizzle-orm/pg-core";
 import { createInsertSchema } from "drizzle-zod";
 import { z } from "zod";
 
@@ -11,6 +11,7 @@ export const analyses = pgTable("analyses", {
   llmProvider: varchar("llm_provider").notNull(), // 'zhi1', 'zhi2', etc.
   status: varchar("status").notNull().default("pending"), // 'pending', 'streaming', 'completed', 'error'
   results: jsonb("results"), // Store the complete analysis results
+  saved: boolean("saved").notNull().default(false), // Whether the analysis is saved by user
   createdAt: timestamp("created_at").defaultNow(),
   updatedAt: timestamp("updated_at").defaultNow(),
 });

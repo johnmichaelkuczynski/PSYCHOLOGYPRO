@@ -6,9 +6,12 @@ import TextInput from "@/components/text-input";
 import ResultsPanel from "@/components/results-panel";
 import DiscussionModal from "@/components/discussion-modal";
 import { Button } from "@/components/ui/button";
+import { useToast } from "@/hooks/use-toast";
+import { apiRequest } from "@/lib/queryClient";
 import type { LLMProviderType, AnalysisTypeType } from "@shared/schema";
 
 export default function Home() {
+  const { toast } = useToast();
   const [selectedFunction, setSelectedFunction] = useState<AnalysisTypeType>("cognitive");
   const [selectedLLM, setSelectedLLM] = useState<LLMProviderType>("zhi1");
   const [isDiscussionOpen, setIsDiscussionOpen] = useState(false);
@@ -19,6 +22,85 @@ export default function Home() {
     setCurrentAnalysisId(null);
     setIsDiscussionOpen(false);
     setResetKey(prev => prev + 1); // This will force TextInput to reset
+  };
+
+  const handleSaveAnalysis = async () => {
+    if (!currentAnalysisId) {
+      toast({
+        title: "No analysis to save",
+        description: "Please complete an analysis first.",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    try {
+      await apiRequest("PATCH", `/api/analyses/${currentAnalysisId}/save`);
+      
+      toast({
+        title: "Analysis saved",
+        description: "Your analysis has been successfully saved to storage.",
+      });
+    } catch (error) {
+      console.error('Save error:', error);
+      toast({
+        title: "Save failed",
+        description: "Unable to save analysis. Please try again.",
+        variant: "destructive",
+      });
+    }
+  };
+
+  const handleDownloadAnalysis = async () => {
+    if (!currentAnalysisId) {
+      toast({
+        title: "No analysis to download",
+        description: "Please complete an analysis first.",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    try {
+      const response = await fetch(`/api/analyses/${currentAnalysisId}/download`);
+      
+      if (!response.ok) {
+        throw new Error('Download failed');
+      }
+
+      const blob = await response.blob();
+      const url = window.URL.createObjectURL(blob);
+      const link = document.createElement('a');
+      link.href = url;
+      
+      // Get filename from Content-Disposition header or use default
+      const contentDisposition = response.headers.get('Content-Disposition');
+      let filename = `analysis_${currentAnalysisId}.txt`;
+      if (contentDisposition) {
+        const filenameMatch = contentDisposition.match(/filename="(.+)"/i);
+        if (filenameMatch) {
+          filename = filenameMatch[1];
+        }
+      }
+      
+      link.download = filename;
+      document.body.appendChild(link);
+      link.click();
+      window.URL.revokeObjectURL(url);
+      document.body.removeChild(link);
+
+      toast({
+        title: "Download complete",
+        description: "Analysis results have been downloaded as a text file.",
+      });
+    } catch (error) {
+      console.error('Download error:', error);
+      toast({
+        title: "Download failed",
+        description: "Unable to download analysis. Please try again.",
+        variant: "destructive",
+      });
+    }
   };
 
   return (
@@ -71,10 +153,20 @@ export default function Home() {
                   </p>
                 </div>
                 <div className="flex items-center space-x-3">
-                  <Button variant="outline" data-testid="save-analysis-button">
+                  <Button 
+                    variant="outline" 
+                    data-testid="save-analysis-button"
+                    onClick={handleSaveAnalysis}
+                    disabled={!currentAnalysisId}
+                  >
                     Save Analysis
                   </Button>
-                  <Button variant="outline" data-testid="download-analysis-button">
+                  <Button 
+                    variant="outline" 
+                    data-testid="download-analysis-button"
+                    onClick={handleDownloadAnalysis}
+                    disabled={!currentAnalysisId}
+                  >
                     Download TXT
                   </Button>
                 </div>
