@@ -94,17 +94,26 @@ export class StreamingService {
         case "comprehensive-cognitive":
           await this.processComprehensiveCognitiveAnalysis(analysis);
           break;
+        case "microcognitive":
+          await this.processMicrocognitiveAnalysis(analysis);
+          break;
         case "psychological":
           await this.processPsychologicalAnalysis(analysis);
           break;
         case "comprehensive-psychological":
           await this.processComprehensivePsychologicalAnalysis(analysis);
           break;
+        case "micropsychological":
+          await this.processMicropsychologicalAnalysis(analysis);
+          break;
         case "psychopathological":
           await this.processPsychopathologicalAnalysis(analysis);
           break;
         case "comprehensive-psychopathological":
           await this.processComprehensivePsychopathologicalAnalysis(analysis);
+          break;
+        case "micropsychopathological":
+          await this.processMicropsychopathologicalAnalysis(analysis);
           break;
         default:
           throw new Error(`Analysis type ${analysis.type} not implemented`);
@@ -544,5 +553,185 @@ export class StreamingService {
     }
     
     return batchResults;
+  }
+
+  // Process Micro Cognitive Analysis (ultra-fast, concise responses)
+  private async processMicrocognitiveAnalysis(analysis: Analysis): Promise<void> {
+    // Step 1: Generate and stream summary
+    const summary = await this.streamSummary(analysis);
+
+    // Step 2: Process questions in batches of 5 with micro prompts
+    const questions = this.llmService.getMicrocognitiveQuestions();
+    const batches = this.createBatches(questions, 5);
+    const batchResults = await this.processMicroBatchesWithResults(analysis, batches, 'microcognitive');
+
+    // Step 3: Save the complete analysis results
+    const finalResults = {
+      summary,
+      batches: batchResults,
+      questions,
+      type: analysis.type,
+      completedAt: new Date().toISOString()
+    };
+
+    await this.storage.updateAnalysisResults(analysis.id, finalResults);
+  }
+
+  // Process Micro Psychological Analysis (ultra-fast, concise responses)
+  private async processMicropsychologicalAnalysis(analysis: Analysis): Promise<void> {
+    // Step 1: Generate and stream summary
+    const summary = await this.streamSummary(analysis);
+
+    // Step 2: Process questions in batches of 5 with micro prompts
+    const questions = this.llmService.getMicropsychologicalQuestions();
+    const batches = this.createBatches(questions, 5);
+    const batchResults = await this.processMicroBatchesWithResults(analysis, batches, 'micropsychological');
+
+    // Step 3: Save the complete analysis results
+    const finalResults = {
+      summary,
+      batches: batchResults,
+      questions,
+      type: analysis.type,
+      completedAt: new Date().toISOString()
+    };
+
+    await this.storage.updateAnalysisResults(analysis.id, finalResults);
+  }
+
+  // Process Micro Psychopathological Analysis (ultra-fast, concise responses)
+  private async processMicropsychopathologicalAnalysis(analysis: Analysis): Promise<void> {
+    // Step 1: Generate and stream summary
+    const summary = await this.streamSummary(analysis);
+
+    // Step 2: Process questions in batches of 5 with micro prompts
+    const questions = this.llmService.getMicropsychopathologicalQuestions();
+    const batches = this.createBatches(questions, 5);
+    const batchResults = await this.processMicroBatchesWithResults(analysis, batches, 'micropsychopathological');
+
+    // Step 3: Save the complete analysis results
+    const finalResults = {
+      summary,
+      batches: batchResults,
+      questions,
+      type: analysis.type,
+      completedAt: new Date().toISOString()
+    };
+
+    await this.storage.updateAnalysisResults(analysis.id, finalResults);
+  }
+
+  // Shared micro batch processing logic that returns results with micro prompts
+  private async processMicroBatchesWithResults(analysis: Analysis, batches: string[][], microType: 'microcognitive' | 'micropsychological' | 'micropsychopathological'): Promise<string[]> {
+    const batchResults: string[] = [];
+    
+    for (let i = 0; i < batches.length; i++) {
+      const currentStream = this.activeStreams.get(analysis.id);
+      if (!currentStream || !currentStream.isActive) {
+        throw new Error("Analysis stopped by user");
+      }
+
+      const batch = batches[i];
+      const batchNumber = i + 1;
+      const batchResponse = await this.processMicroBatch(analysis, batch, batchNumber, microType);
+      batchResults.push(batchResponse);
+
+      const delayStream = this.activeStreams.get(analysis.id);
+      if (!delayStream || !delayStream.isActive) {
+        throw new Error("Analysis stopped by user");
+      }
+
+      if (i < batches.length - 1) {
+        await this.streamDelay(analysis.id, 10000);
+      }
+    }
+    
+    return batchResults;
+  }
+
+  // Process micro batch using appropriate micro prompt
+  private async processMicroBatch(analysis: Analysis, questions: string[], batchNumber: number, microType: 'microcognitive' | 'micropsychological' | 'micropsychopathological'): Promise<string> {
+    let prompt: string;
+    
+    // Use appropriate micro prompt based on type
+    switch (microType) {
+      case 'microcognitive':
+        prompt = this.llmService.createMicrocognitivePrompt(
+          analysis.textContent,
+          questions,
+          analysis.additionalContext || undefined
+        );
+        break;
+      case 'micropsychological':
+        prompt = this.llmService.createMicropsychologicalPrompt(
+          analysis.textContent,
+          questions,
+          analysis.additionalContext || undefined
+        );
+        break;
+      case 'micropsychopathological':
+        prompt = this.llmService.createMicropsychopathologicalPrompt(
+          analysis.textContent,
+          questions,
+          analysis.additionalContext || undefined
+        );
+        break;
+      default:
+        throw new Error(`Unknown micro type: ${microType}`);
+    }
+
+    let fullResponse = "";
+    let hasContent = false;
+    
+    try {
+      for await (const chunk of this.llmService.streamResponse(
+        analysis.llmProvider as any,
+        [{ role: "user", content: prompt }],
+        (chunk) => {
+          fullResponse += chunk;
+          hasContent = true;
+          
+          // Stream the raw response immediately as it comes in - PURE PASSTHROUGH
+          this.broadcastToStream(analysis.id, {
+            type: "raw_stream",
+            batchNumber,
+            rawContent: fullResponse,
+            timestamp: new Date().toLocaleTimeString("en-US", {
+              hour: "numeric",
+              minute: "2-digit", 
+              second: "2-digit",
+              hour12: true,
+            })
+          });
+        }
+      )) {
+        // Stream is handled by the onChunk callback
+      }
+      
+      if (!hasContent) {
+        throw new Error(`No content received from LLM for micro batch ${batchNumber}`);
+      }
+      
+    } catch (error) {
+      const errorMessage = error instanceof Error ? error.message : String(error);
+      console.error(`Micro batch ${batchNumber} processing failed for analysis ${analysis.id}:`, errorMessage);
+      throw new Error(`Micro batch ${batchNumber} processing failed: ${errorMessage}`);
+    }
+
+    // Mark batch as complete - NO PARSING, JUST RAW FINAL RESPONSE
+    this.broadcastToStream(analysis.id, {
+      type: "batch_complete", 
+      batchNumber,
+      finalRawResponse: fullResponse,
+      isComplete: true,
+      timestamp: new Date().toLocaleTimeString("en-US", {
+        hour: "numeric",
+        minute: "2-digit",
+        second: "2-digit", 
+        hour12: true,
+      })
+    });
+    
+    return fullResponse;
   }
 }
