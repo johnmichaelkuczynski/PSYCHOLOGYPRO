@@ -327,6 +327,107 @@ If your initial answers fail to validate the points in this addendum, they must 
     return prompt;
   }
 
+  // Create MICRO cognitive prompt - same questions but much shorter responses
+  createMicrocognitivePrompt(textContent: string, questions: string[], additionalContext?: string): string {
+    let prompt = `🚨 MICRO COGNITIVE ANALYSIS - ULTRA-CONCISE MODE 🚨
+
+CRITICAL: PROVIDE ONLY 1-2 SENTENCE RESPONSES PER QUESTION FOR SPEED.
+
+KEY INSTRUCTION: Your responses must be extremely brief - maximum 1-2 sentences per question. Focus on the core assessment without lengthy explanations.
+
+SCORING: Use the same intelligence standards but express judgments concisely.
+
+`;
+
+    if (additionalContext) {
+      prompt += `Additional Context: ${additionalContext}\n\n`;
+    }
+    
+    prompt += `TEXT TO ANALYZE:
+${textContent}
+
+QUESTIONS TO ANSWER:
+${questions.map((q, i) => `${i + 1}. ${q}`).join('\n')}
+
+INSTRUCTIONS:
+First, provide a 1-sentence summary and categorization.
+
+For each question:
+1. Give a direct 1-2 sentence assessment
+2. Score from 1-100 (high scores = good performance)  
+3. One sentence justification
+
+KEEP ALL RESPONSES EXTREMELY BRIEF FOR SPEED.`;
+
+    return prompt;
+  }
+
+  // Create MICRO psychological prompt - same questions but much shorter responses  
+  createMicropsychologicalPrompt(textContent: string, questions: string[], additionalContext?: string): string {
+    let prompt = `🚨 MICRO PSYCHOLOGICAL ANALYSIS - ULTRA-CONCISE MODE 🚨
+
+CRITICAL: PROVIDE ONLY 1-2 SENTENCE RESPONSES PER QUESTION FOR SPEED.
+
+KEY INSTRUCTION: Your responses must be extremely brief - maximum 1-2 sentences per question. Focus on the core psychological assessment without lengthy explanations.
+
+`;
+
+    if (additionalContext) {
+      prompt += `Additional Context: ${additionalContext}\n\n`;
+    }
+    
+    prompt += `TEXT TO ANALYZE:
+${textContent}
+
+QUESTIONS TO ANSWER:
+${questions.map((q, i) => `${i + 1}. ${q}`).join('\n')}
+
+INSTRUCTIONS:
+First, provide a 1-sentence summary and categorization.
+
+For each question:
+1. Give a direct 1-2 sentence psychological assessment
+2. Score from 1-100 (high scores = good performance)  
+3. One sentence justification
+
+KEEP ALL RESPONSES EXTREMELY BRIEF FOR SPEED.`;
+
+    return prompt;
+  }
+
+  // Create MICRO psychopathological prompt - same questions but much shorter responses
+  createMicropsychopathologicalPrompt(textContent: string, questions: string[], additionalContext?: string): string {
+    let prompt = `🚨 MICRO PSYCHOPATHOLOGICAL ANALYSIS - ULTRA-CONCISE MODE 🚨
+
+CRITICAL: PROVIDE ONLY 1-2 SENTENCE RESPONSES PER QUESTION FOR SPEED.
+
+KEY INSTRUCTION: Your responses must be extremely brief - maximum 1-2 sentences per question. Focus on the core pathological assessment without lengthy explanations.
+
+`;
+
+    if (additionalContext) {
+      prompt += `Additional Context: ${additionalContext}\n\n`;
+    }
+    
+    prompt += `TEXT TO ANALYZE:
+${textContent}
+
+QUESTIONS TO ANSWER:
+${questions.map((q, i) => `${i + 1}. ${q}`).join('\n')}
+
+INSTRUCTIONS:
+First, provide a 1-sentence summary and categorization.
+
+For each question:
+1. Give a direct 1-2 sentence psychopathological assessment
+2. Score from 1-100 (high scores = good performance)  
+3. One sentence justification
+
+KEEP ALL RESPONSES EXTREMELY BRIEF FOR SPEED.`;
+
+    return prompt;
+  }
+
   // Comprehensive Cognitive Questions (more extensive set)
   getComprehensiveCognitiveQuestions(): string[] {
     return [
@@ -401,6 +502,68 @@ If your initial answers fail to validate the points in this addendum, they must 
       "ARE THERE SIGNS OF ANTISOCIAL OR PROSOCIAL ORIENTATION?",
       "DOES THE WORK DISPLAY PSYCHOPATHIC OR EMPATHIC CHARACTERISTICS?",
       "IS THERE EVIDENCE OF DEVELOPMENTAL TRAUMA IMPACT ON COGNITION?"
+    ];
+  }
+
+  // Micro Cognitive Questions (same questions, much shorter responses)
+  getMicrocognitiveQuestions(): string[] {
+    return [
+      "IS IT INSIGHTFUL?",
+      "DOES IT DEVELOP POINTS? (OR, IF IT IS A SHORT EXCERPT, IS THERE EVIDENCE THAT IT WOULD DEVELOP POINTS IF EXTENDED)?",
+      "IS THE ORGANIZATION MERELY SEQUENTIAL (JUST ONE POINT AFTER ANOTHER, LITTLE OR NO LOGICAL SCAFFOLDING)? OR ARE THE IDEAS ARRANGED, NOT JUST SEQUENTIALLY BUT HIERARCHICALLY?",
+      "IF THE POINTS IT MAKES ARE NOT INSIGHTFUL, DOES IT OPERATE SKILLFULLY WITH CANONS OF LOGIC/REASONING.",
+      "ARE THE POINTS CLICHES? OR ARE THEY \"FRESH\"?",
+      "DOES IT USE TECHNICAL JARGON TO OBFUSCATE OR TO RENDER MORE PRECISE?",
+      "IS IT ORGANIC? DO POINTS DEVELOP IN AN ORGANIC, NATURAL WAY? DO THEY 'UNFOLD'? OR ARE THEY FORCED AND ARTIFICIAL?",
+      "DOES IT OPEN UP NEW DOMAINS? OR, ON THE CONTRARY, DOES IT SHUT OFF INQUIRY (BY CONDITIONALIZING FURTHER DISCUSSION OF THE MATTERS ON ACCEPTANCE OF ITS INTERNAL AND POSSIBLY VERY FAULTY LOGIC)?",
+      "IS IT ACTUALLY INTELLIGENT OR JUST THE WORK OF SOMEBODY WHO, JUDGING BY THE SUBJECT-MATTER, IS PRESUMED TO BE INTELLIGENT (BUT MAY NOT BE)?",
+      "IS IT REAL OR IS IT PHONY?",
+      "DO THE SENTENCES EXHIBIT COMPLEX AND COHERENT INTERNAL LOGIC?",
+      "IS THE PASSAGE GOVERNED BY A STRONG CONCEPT? OR IS THE ONLY ORGANIZATION DRIVEN PURELY BY EXPOSITORY (AS OPPOSED TO EPISTEMIC) NORMS?",
+      "IS THERE SYSTEM-LEVEL CONTROL OVER IDEAS? IN OTHER WORDS, DOES THE AUTHOR SEEM TO RECALL WHAT HE SAID EARLIER AND TO BE IN A POSITION TO INTEGRATE IT INTO POINTS HE HAS MADE SINCE THEN?",
+      "ARE THE POINTS 'REAL'? ARE THEY FRESH? OR IS SOME INSTITUTION OR SOME ACCEPTED VEIN OF PROPAGANDA OR ORTHODOXY JUST USING THE AUTHOR AS A MOUTH PIECE?",
+      "IS THE WRITING EVASIVE OR DIRECT?",
+      "ARE THE STATEMENTS AMBIGUOUS?",
+      "DOES THE PROGRESSION OF THE TEXT DEVELOP ACCORDING TO WHO SAID WHAT OR ACCORDING TO WHAT ENTAILS OR CONFIRMS WHAT?",
+      "DOES THE AUTHOR USE OTHER AUTHORS TO DEVELOP HIS IDEAS OR TO CLOAK HIS OWN LACK OF IDEAS?",
+      "ARE THERE TERMS THAT ARE UNDEFINED BUT SHOULD BE DEFINED, IN THE SENSE THAT, WITHOUT DEFINITIONS, IT IS DIFFICULT OR IMPOSSIBLE TO KNOW WHAT IS BEING SAID OR THEREFORE TO EVALUATE WHAT IS BEING SAID?",
+      "ARE THERE \"FREE VARIABLES\" IN THE TEXT? IE ARE THERE QUALIFICATIONS OR POINTS THAT ARE MADE BUT DO NOT CONNECT TO ANYTHING LATER OR EARLIER?",
+      "DO NEW STATEMENTS DEVELOP OUT OF OLD ONES? OR ARE THEY MERELY \"ADDED\" TO PREVIOUS ONES, WITHOUT IN ANY SENSE BEING GENERATED BY THEM?",
+      "DO NEW STATEMENTS CLARIFY OR DO THEY LEAD TO MORE LACK OF CLARITY?",
+      "IS THE PASSAGE ACTUALLY (PALPABLY) SMART? OR IS ONLY \"PRESUMPTION-SMART\"? IE IS IT \"SMART\" ONLY IN THE SENSE THAT THERE EXISTS A PRESUMPTION THAT A DUMB PERSON WOULD NOT REFERENCE SUCH DOCTRINES?",
+      "IF YOUR JUDGMENT IS THAT IT IS INSIGHTFUL, CAN YOU STATEMENT THAT INSIGHT IN A SINGLE SENTENCE? OR IF IT CONTAINS MULTIPLE INSIGHTS, CAN YOU STATE THOSE INSIGHTS, ONE PER SENTENCE?"
+    ];
+  }
+
+  // Micro Psychological Questions (same questions, much shorter responses)
+  getMicropsychologicalQuestions(): string[] {
+    return [
+      "WHAT PSYCHOLOGICAL PROFILE EMERGES FROM THE WRITING STYLE?",
+      "DOES THE AUTHOR DISPLAY INTELLECTUAL COURAGE OR COWARDICE?",
+      "IS THERE EVIDENCE OF INTELLECTUAL HONESTY OR SELF-DECEPTION?",
+      "WHAT LEVEL OF EMOTIONAL INTELLIGENCE IS DEMONSTRATED?",
+      "DOES THE AUTHOR SHOW CAPACITY FOR SELF-REFLECTION?",
+      "IS THERE EVIDENCE OF PSYCHOLOGICAL RIGIDITY OR FLEXIBILITY?",
+      "WHAT MOTIVATIONAL PATTERNS CAN BE INFERRED?",
+      "DOES THE WRITING SUGGEST NARCISSISTIC OR HUMBLE TENDENCIES?",
+      "IS THERE EVIDENCE OF ANXIETY OR CONFIDENCE IN THE PRESENTATION?",
+      "WHAT LEVEL OF PSYCHOLOGICAL SOPHISTICATION IS DISPLAYED?"
+    ];
+  }
+
+  // Micro Psychopathological Questions (same questions, much shorter responses)
+  getMicropsychopathologicalQuestions(): string[] {
+    return [
+      "ARE THERE SIGNS OF COGNITIVE DISTORTIONS OR CLEAR THINKING?",
+      "DOES THE REASONING SUGGEST PATHOLOGICAL OR HEALTHY MENTAL PROCESSES?",
+      "IS THERE EVIDENCE OF PARANOID THINKING OR APPROPRIATE SKEPTICISM?",
+      "DOES THE WORK DISPLAY GRANDIOSITY OR APPROPRIATE SELF-ASSESSMENT?",
+      "ARE THERE SIGNS OF DELUSIONAL THINKING OR REALITY-BASED REASONING?",
+      "DOES THE AUTHOR SHOW CAPACITY FOR LOGICAL COHERENCE?",
+      "IS THERE EVIDENCE OF OBSESSIVE-COMPULSIVE PATTERNS IN THE REASONING?",
+      "DOES THE WORK SUGGEST MANIC OR BALANCED MENTAL STATES?",
+      "ARE THERE SIGNS OF DISSOCIATION OR INTEGRATED THINKING?",
+      "DOES THE REASONING SUGGEST PSYCHOTIC OR NEUROTIC ORGANIZATION?"
     ];
   }
 }
