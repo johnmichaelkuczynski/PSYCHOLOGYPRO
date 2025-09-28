@@ -62,7 +62,7 @@ export const PRICING_TIERS: PricingTier[] = [
 
 export const LLM_INFO: Record<LLMProviderType, LLMInfo> = {
   zhi1: {
-    name: "ZHI 1 (OpenAI)",
+    name: "ZHI 1",
     merits: [
       "Fast, cheap, widely compatible",
       "Good balance of creativity + accuracy",
@@ -75,7 +75,7 @@ export const LLM_INFO: Record<LLMProviderType, LLMInfo> = {
     ],
   },
   zhi2: {
-    name: "ZHI 2 (Anthropic Claude)",
+    name: "ZHI 2",
     merits: [
       "Excellent on scholarly, philosophical, and \"thinking-through\" tasks",
       "Strong at staying consistent in long rewrites",
@@ -88,7 +88,7 @@ export const LLM_INFO: Record<LLMProviderType, LLMInfo> = {
     ],
   },
   zhi3: {
-    name: "ZHI 3 (DeepSeek)",
+    name: "ZHI 3",
     merits: [
       "Cheapest by far",
       "Handles bulk text rewriting and simple transformations well",
@@ -101,7 +101,7 @@ export const LLM_INFO: Record<LLMProviderType, LLMInfo> = {
     ],
   },
   zhi4: {
-    name: "ZHI 4 (Perplexity)",
+    name: "ZHI 4",
     merits: [
       "Very cheap for API calls (currently subsidized)",
       "Good for quick turnarounds, exploratory rewrites",
