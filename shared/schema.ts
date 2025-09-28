@@ -4,12 +4,12 @@ import { createInsertSchema } from "drizzle-zod";
 import { z } from "zod";
 
 export const users = pgTable("users", {
-  id: integer("id").primaryKey(),
+  id: serial("id").primaryKey(),
   username: varchar("username").notNull().unique(),
   password: varchar("password").notNull(),
   credits: integer("credits").notNull().default(0), // User credit balance
   stripeCustomerId: varchar("stripe_customer_id"), // Stripe customer ID
-  createdAt: timestamp("created_at"),
+  createdAt: timestamp("created_at").defaultNow(),
 });
 
 export const analyses = pgTable("analyses", {
