@@ -75,7 +75,22 @@ Preferred communication style: Simple, everyday language.
 - **Replit Integration**: Development environment plugins and error overlays
 - **TypeScript**: Static type checking across the entire codebase
 
-# Recent Changes (September 27, 2025)
+# Recent Changes (September 28, 2025)
+
+## Critical Bug Fix - ZHI 4 (Perplexity) Streaming Issue Resolution
+✅ **ZHI 4 Garbled Text Issue Resolved**: Fixed critical streaming decoder bug that was causing Perplexity (ZHI 4) to produce fragmented, nonsensical text output during analysis
+
+✅ **Stream Decoder Enhancement**: Implemented proper UTF-8 streaming support with `{ stream: true }` parameter to handle partial character sequences across network chunks
+
+✅ **Buffering System Added**: Created intelligent buffering mechanism to accumulate text chunks and prevent JSON data from being truncated mid-line during Server-Sent Events processing
+
+✅ **Line Processing Fix**: Enhanced line splitting logic to retain incomplete lines in buffer for next iteration, ensuring complete JSON parsing and coherent text assembly
+
+✅ **Production Security**: Added development-only debug logging to prevent user content exposure in production environments while maintaining debugging capability for development
+
+✅ **End-to-End Validation**: Comprehensive testing confirms ZHI 4 (Perplexity) now produces coherent, well-formatted analysis responses that stream properly in real-time, achieving parity with other providers
+
+# Previous Changes (September 27, 2025)
 
 ## Latest Critical Fixes - LLM Provider and User Experience Improvements 
 ✅ **ZHI 4 (Perplexity) Fixed**: Updated invalid model name from 'llama-3.1-sonar-large-128k-online' to valid 'sonar-pro' - Perplexity API now working properly
