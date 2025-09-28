@@ -12,10 +12,12 @@ import { Link, useLocation } from "wouter";
 
 // Make sure to call `loadStripe` outside of a component's render to avoid
 // recreating the `Stripe` object on every render.
-if (!import.meta.env.VITE_STRIPE_PUBLIC_KEY) {
+const stripePublicKey = import.meta.env.VITE_STRIPE_PUBLIC_KEY;
+console.log('Stripe public key found:', !!stripePublicKey);
+if (!stripePublicKey) {
   throw new Error('Missing required Stripe key: VITE_STRIPE_PUBLIC_KEY');
 }
-const stripePromise = loadStripe(import.meta.env.VITE_STRIPE_PUBLIC_KEY);
+const stripePromise = loadStripe(stripePublicKey);
 
 const CheckoutForm = ({ amount, llmProvider }: { amount: number; llmProvider: LLMProviderType }) => {
   const stripe = useStripe();
@@ -145,12 +147,19 @@ export default function Checkout() {
 
   useEffect(() => {
     // Create PaymentIntent as soon as the page loads
+    console.log('Creating payment intent for amount:', amount, 'provider:', llmProvider);
     apiRequest("POST", "/api/create-payment-intent", { amount, llmProvider })
       .then((data) => {
+        console.log('Payment intent created successfully:', !!data.clientSecret);
         setClientSecret(data.clientSecret);
       })
       .catch((error) => {
         console.error('Payment intent creation failed:', error);
+        toast({
+          title: "Payment Setup Failed",
+          description: "Unable to initialize payment. Please try again.",
+          variant: "destructive",
+        });
       });
   }, [amount, llmProvider]);
 
