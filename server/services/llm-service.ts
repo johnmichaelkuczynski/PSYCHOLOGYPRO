@@ -123,32 +123,54 @@ export class LLMService {
       }
 
       const decoder = new TextDecoder();
+      let buffer = ''; // Buffer to handle incomplete chunks
 
       try {
         while (true) {
           const { done, value } = await reader.read();
           if (done) break;
 
-          const chunk = decoder.decode(value);
-          const lines = chunk.split('\n');
+          // Decode chunk and add to buffer
+          const chunk = decoder.decode(value, { stream: true });
+          buffer += chunk;
+          
+          // Process complete lines
+          const lines = buffer.split('\n');
+          
+          // Keep the last incomplete line in the buffer for next iteration
+          buffer = lines.pop() || '';
 
           for (const line of lines) {
             if (line.startsWith('data: ')) {
-              const data = line.slice(6);
+              const data = line.slice(6).trim();
               if (data === '[DONE]') {
                 return;
               }
 
               try {
                 const parsed = JSON.parse(data);
+                
+                // Debug logging for Perplexity responses (development only)
+                if (provider === 'zhi4' && process.env.NODE_ENV === 'development') {
+                  console.log('🔍 Perplexity raw response chunk:', JSON.stringify(parsed, null, 2));
+                }
+                
                 const content = this.extractContentFromResponse(parsed, provider);
+                
+                // Debug logging for extracted content (development only)
+                if (provider === 'zhi4' && content && process.env.NODE_ENV === 'development') {
+                  console.log('✅ Perplexity extracted content:', JSON.stringify(content));
+                }
                 
                 if (content) {
                   onChunk?.(content);
                   yield content;
                 }
               } catch (error) {
-                // Skip parsing errors for individual chunks
+                // Enhanced error logging for Perplexity
+                if (provider === 'zhi4') {
+                  console.error('❌ Perplexity JSON parse error:', error, 'Raw data:', data);
+                }
                 continue;
               }
             }
