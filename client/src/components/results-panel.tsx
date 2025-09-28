@@ -68,13 +68,6 @@ export default function ResultsPanel({ analysisId, onDiscussionToggle, onNewAnal
   const [streamingContent, setStreamingContent] = useState<{[key: number]: string}>({});
   const [isStopped, setIsStopped] = useState(false);
   
-  // AI Detection state
-  const [aiDetectionStatus, setAiDetectionStatus] = useState<string>("");
-  const [aiDetectionResult, setAiDetectionResult] = useState<any>(null);
-  const [aiDetectionMessage, setAiDetectionMessage] = useState<string>("");
-  const [aiDetectionSeverity, setAiDetectionSeverity] = useState<'high' | 'medium' | 'low' | null>(null);
-  const [isAIGenerated, setIsAIGenerated] = useState<boolean>(false);
-  
   const { isStreaming, streamData, error } = useStreaming(analysisId, isPaused);
 
   const handleClearAnalysis = () => {
@@ -84,12 +77,6 @@ export default function ResultsPanel({ analysisId, onDiscussionToggle, onNewAnal
     setCurrentBatch(1);
     setDelayProgress(0);
     setIsStopped(false);
-    // Clear AI detection state
-    setAiDetectionStatus("");
-    setAiDetectionResult(null);
-    setAiDetectionMessage("");
-    setAiDetectionSeverity(null);
-    setIsAIGenerated(false);
     onNewAnalysis();
   };
 
@@ -149,17 +136,6 @@ export default function ResultsPanel({ analysisId, onDiscussionToggle, onNewAnal
         }
       } else if (streamData.type === "stopped") {
         setIsStopped(true);
-      } else if (streamData.type === "ai_detection") {
-        setAiDetectionStatus(streamData.message || "Running AI detection...");
-      } else if (streamData.type === "ai_detection_complete") {
-        setAiDetectionResult(streamData.aiDetection);
-        setAiDetectionMessage(streamData.message || "");
-        setAiDetectionSeverity(streamData.severity);
-        setIsAIGenerated(streamData.isAIGenerated || false);
-        setAiDetectionStatus(""); // Clear status message
-      } else if (streamData.type === "warning") {
-        // Handle AI detection warnings - could be displayed as alerts
-        console.log("AI Detection Warning:", streamData.message);
       }
     }
   }, [streamData]);
@@ -270,68 +246,6 @@ export default function ResultsPanel({ analysisId, onDiscussionToggle, onNewAnal
               <div className="text-sm text-gray-700 leading-relaxed">
                 <div className={`streaming-text ${summary ? 'complete' : ''}`}>
                   {summary}
-                </div>
-              </div>
-            </div>
-          )}
-
-          {/* AI Detection Status */}
-          {aiDetectionStatus && (
-            <div className="bg-yellow-50 border-l-4 border-yellow-400 p-4 rounded-r-md mb-6" data-testid="ai-detection-status">
-              <div className="flex items-center">
-                <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-yellow-600 mr-2"></div>
-                <span className="text-sm font-medium text-yellow-800">{aiDetectionStatus}</span>
-              </div>
-            </div>
-          )}
-
-          {/* AI Detection Results */}
-          {aiDetectionResult && (
-            <div 
-              className={`border-l-4 p-4 rounded-r-md mb-6 ${
-                aiDetectionSeverity === 'high' ? 'bg-red-50 border-red-400' :
-                aiDetectionSeverity === 'medium' ? 'bg-orange-50 border-orange-400' :
-                'bg-green-50 border-green-400'
-              }`}
-              data-testid="ai-detection-result"
-            >
-              <h4 className="font-medium text-gray-900 mb-2">🤖 AI Content Detection Results</h4>
-              <div className="text-sm leading-relaxed mb-3">
-                <p className={`font-medium ${
-                  aiDetectionSeverity === 'high' ? 'text-red-800' :
-                  aiDetectionSeverity === 'medium' ? 'text-orange-800' :
-                  'text-green-800'
-                }`}>
-                  {aiDetectionMessage}
-                </p>
-              </div>
-              
-              {/* AI Detection Details */}
-              <div className="grid grid-cols-3 gap-4 text-xs">
-                <div className="text-center">
-                  <div className="font-medium text-gray-600">Human</div>
-                  <div className="text-lg font-bold text-green-600">
-                    {Math.round((aiDetectionResult.class_probabilities?.human || 0) * 100)}%
-                  </div>
-                </div>
-                <div className="text-center">
-                  <div className="font-medium text-gray-600">AI Generated</div>
-                  <div className="text-lg font-bold text-red-600">
-                    {Math.round((aiDetectionResult.class_probabilities?.ai || 0) * 100)}%
-                  </div>
-                </div>
-                <div className="text-center">
-                  <div className="font-medium text-gray-600">Mixed</div>
-                  <div className="text-lg font-bold text-orange-600">
-                    {Math.round((aiDetectionResult.class_probabilities?.mixed || 0) * 100)}%
-                  </div>
-                </div>
-              </div>
-              
-              <div className="mt-3 pt-3 border-t border-gray-200">
-                <div className="text-xs text-gray-600">
-                  Classification: <span className="font-medium">{aiDetectionResult.document_classification}</span> | 
-                  Confidence: <span className="font-medium">{aiDetectionResult.confidence_category}</span>
                 </div>
               </div>
             </div>
