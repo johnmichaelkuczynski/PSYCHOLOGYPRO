@@ -8,6 +8,10 @@ import { setupVite, serveStatic, log } from "./vite";
 const app = express();
 
 app.use(cors({ origin: true, credentials: true }));
+
+// Stripe webhook needs raw body for signature verification - must come before express.json()
+app.use('/api/stripe/webhook', express.raw({ type: 'application/json' }));
+
 app.use(express.json({ limit: "1mb" }));
 app.use(express.urlencoded({ extended: false }));
 
