@@ -4,7 +4,7 @@ import { createInsertSchema } from "drizzle-zod";
 import { z } from "zod";
 
 export const users = pgTable("users", {
-  id: serial("id").primaryKey(),
+  id: integer("id").primaryKey(),
   username: varchar("username").notNull().unique(),
   password: varchar("password").notNull(),
   credits: integer("credits").notNull().default(0), // User credit balance
