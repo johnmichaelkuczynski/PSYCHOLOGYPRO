@@ -432,7 +432,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   app.post("/api/stripe/webhook", async (req, res) => {
     try {
       const sig = req.headers['stripe-signature'];
-      const webhookSecret = process.env.STRIPE_WEBHOOK_SECRET;
+      const webhookSecret = process.env.STRIPE_WEBHOOK_SECRET_PSYCHOLOGYPRO;
 
       if (!webhookSecret) {
         console.error('Stripe webhook secret not configured');
