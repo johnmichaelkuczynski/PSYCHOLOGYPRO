@@ -20,6 +20,7 @@ export const analyses = pgTable("analyses", {
   llmProvider: varchar("llm_provider").notNull(), // 'zhi1', 'zhi2', etc.
   status: varchar("status").notNull().default("pending"), // 'pending', 'streaming', 'completed', 'error'
   results: jsonb("results"), // Store the complete analysis results
+  aiDetection: jsonb("ai_detection"), // Store AI detection results from GPTZero
   saved: boolean("saved").notNull().default(false), // Whether the analysis is saved by user
   userId: integer("user_id").references(() => users.id, { onDelete: "set null" }), // Optional user association
   createdAt: timestamp("created_at").defaultNow(),

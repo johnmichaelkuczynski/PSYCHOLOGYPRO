@@ -1,6 +1,7 @@
 import type { Analysis } from "../../shared/schema.js";
 import type { IStorage } from "../storage";
 import { LLMService } from "./llm-service";
+import { AIDetectionService } from "./ai-detection-service";
 
 interface StreamCallback {
   (data: any): void;
@@ -13,11 +14,14 @@ interface ActiveStream {
 
 export class StreamingService {
   private activeStreams = new Map<string, ActiveStream>();
+  private aiDetectionService: AIDetectionService;
 
   constructor(
     private llmService: LLMService,
     private storage: IStorage
-  ) {}
+  ) {
+    this.aiDetectionService = new AIDetectionService();
+  }
 
   async startAnalysis(analysisId: string): Promise<void> {
     // Start the analysis processing in the background
@@ -100,6 +104,42 @@ export class StreamingService {
     await this.storage.updateAnalysisStatus(analysisId, "streaming");
 
     try {
+      // First, run AI detection on the text content
+      this.broadcastToStream(analysisId, {
+        type: "ai_detection",
+        message: "Running AI detection check..."
+      });
+
+      const aiDetectionResult = await this.aiDetectionService.detectAI(analysis.textContent);
+      
+      // Store AI detection results (temporarily skip if column doesn't exist)
+      try {
+        await this.storage.updateAnalysisAIDetection(analysisId, aiDetectionResult);
+      } catch (error) {
+        console.log("AI detection storage skipped - database column not yet available");
+      }
+      
+      // Broadcast AI detection results to UI
+      const isAIGenerated = this.aiDetectionService.isAIGenerated(aiDetectionResult);
+      const detectionMessage = this.aiDetectionService.getDetectionMessage(aiDetectionResult);
+      const severity = this.aiDetectionService.getDetectionSeverity(aiDetectionResult);
+      
+      this.broadcastToStream(analysisId, {
+        type: "ai_detection_complete",
+        aiDetection: aiDetectionResult,
+        isAIGenerated,
+        message: detectionMessage,
+        severity
+      });
+
+      // If content is flagged as AI-generated, show warning but continue with analysis
+      if (isAIGenerated) {
+        this.broadcastToStream(analysisId, {
+          type: "warning",
+          message: "⚠️ AI-GENERATED CONTENT DETECTED - Proceeding with analysis for educational purposes, but results may not reflect genuine human cognitive patterns."
+        });
+      }
+
       // Process the analysis and ensure results are saved
       switch (analysis.type) {
         case "cognitive":
