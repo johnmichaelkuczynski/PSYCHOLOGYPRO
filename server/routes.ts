@@ -405,13 +405,20 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
   // Stripe payment routes
   app.post("/api/create-payment-intent", async (req, res) => {
+    console.log("=== CREATE PAYMENT INTENT REQUEST ===");
+    console.log("Request body:", req.body);
+    console.log("User:", req.user);
+    
     try {
       const { amount, llmProvider } = req.body;
+      console.log("Extracted amount:", amount, "llmProvider:", llmProvider);
       
       if (!amount || !PRICING_TIERS.find(tier => tier.amount === amount)) {
+        console.log("Amount validation failed. Available amounts:", PRICING_TIERS.map(t => t.amount));
         return res.status(400).json({ error: "Invalid amount" });
       }
 
+      console.log("Creating Stripe PaymentIntent...");
       const paymentIntent = await stripe.paymentIntents.create({
         amount: Math.round(amount * 100), // Convert to cents
         currency: "usd",
@@ -420,6 +427,9 @@ export async function registerRoutes(app: Express): Promise<Server> {
           llmProvider: llmProvider || 'zhi1',
         },
       });
+      
+      console.log("PaymentIntent created successfully:", paymentIntent.id);
+      console.log("Client secret length:", paymentIntent.client_secret?.length || 0);
       
       res.json({ clientSecret: paymentIntent.client_secret });
     } catch (error: any) {
