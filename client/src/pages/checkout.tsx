@@ -128,42 +128,62 @@ const CheckoutForm = ({ amount, llmProvider }: { amount: number; llmProvider: LL
 
 export default function Checkout() {
   const [clientSecret, setClientSecret] = useState("");
-  const [amount, setAmount] = useState<number>(5);
-  const [llmProvider, setLlmProvider] = useState<LLMProviderType>("zhi1");
+  const [amount, setAmount] = useState<number | null>(null);
+  const [llmProvider, setLlmProvider] = useState<LLMProviderType | null>(null);
+  const [urlParamsLoaded, setUrlParamsLoaded] = useState(false);
+  const { toast } = useToast();
 
-  // Parse URL parameters
+  // Parse URL parameters first
   useEffect(() => {
     const urlParams = new URLSearchParams(window.location.search);
     const amountParam = urlParams.get('amount');
     const providerParam = urlParams.get('provider');
     
-    if (amountParam) {
-      setAmount(parseInt(amountParam));
-    }
-    if (providerParam && ["zhi1", "zhi2", "zhi3", "zhi4"].includes(providerParam)) {
-      setLlmProvider(providerParam as LLMProviderType);
-    }
+    const parsedAmount = amountParam ? parseInt(amountParam) : 5;
+    const parsedProvider = (providerParam && ["zhi1", "zhi2", "zhi3", "zhi4"].includes(providerParam)) 
+      ? providerParam as LLMProviderType 
+      : "zhi1";
+    
+    setAmount(parsedAmount);
+    setLlmProvider(parsedProvider);
+    setUrlParamsLoaded(true);
   }, []);
 
   useEffect(() => {
-    // Create PaymentIntent as soon as the page loads
-    console.log('Creating payment intent for amount:', amount, 'provider:', llmProvider);
+    // Only create PaymentIntent after URL params are loaded
+    if (!urlParamsLoaded || amount === null || llmProvider === null) {
+      console.log('Waiting for URL params to load...', { urlParamsLoaded, amount, llmProvider });
+      return;
+    }
+    
+    console.log('=== FRONTEND: Creating payment intent ===');
+    console.log('Amount:', amount, 'Provider:', llmProvider);
+    console.log('URL loaded:', urlParamsLoaded);
+    
     apiRequest("POST", "/api/create-payment-intent", { amount, llmProvider })
-      .then((data) => {
-        console.log('Payment intent created successfully:', !!data.clientSecret);
+      .then(async (response) => {
+        console.log('=== FRONTEND: Payment intent response ===');
+        console.log('Response received:', response);
+        console.log('Response ok:', response.ok);
+        
+        const data = await response.json();
+        console.log('JSON data:', data);
+        console.log('Client secret exists:', !!data.clientSecret);
+        console.log('Client secret length:', data.clientSecret?.length || 0);
         setClientSecret(data.clientSecret);
       })
       .catch((error) => {
-        console.error('Payment intent creation failed:', error);
+        console.error('=== FRONTEND: Payment intent creation failed ===');
+        console.error('Error:', error);
         toast({
           title: "Payment Setup Failed",
           description: "Unable to initialize payment. Please try again.",
           variant: "destructive",
         });
       });
-  }, [amount, llmProvider]);
+  }, [urlParamsLoaded, amount, llmProvider, toast]);
 
-  if (!clientSecret) {
+  if (!clientSecret || amount === null || llmProvider === null) {
     return (
       <div className="h-screen flex items-center justify-center">
         <div className="animate-spin w-8 h-8 border-4 border-primary border-t-transparent rounded-full" aria-label="Loading"/>
