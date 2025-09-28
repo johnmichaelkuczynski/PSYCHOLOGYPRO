@@ -21,7 +21,6 @@ export interface IStorage {
   getAnalysis(id: string): Promise<Analysis | undefined>;
   updateAnalysisStatus(id: string, status: string): Promise<void>;
   updateAnalysisResults(id: string, results: any): Promise<void>;
-  updateAnalysisAIDetection(id: string, aiDetection: any): Promise<void>;
   markSaved(id: string): Promise<void>;
   
   // Discussion operations
@@ -119,24 +118,9 @@ export class DatabaseStorage implements IStorage {
   }
 
   async createAnalysis(insertAnalysis: InsertAnalysis): Promise<Analysis> {
-    // Temporarily exclude aiDetection field until schema is synced
-    const analysisData = {
-      id: insertAnalysis.id,
-      type: insertAnalysis.type,
-      textContent: insertAnalysis.textContent,
-      additionalContext: insertAnalysis.additionalContext,
-      llmProvider: insertAnalysis.llmProvider,
-      status: 'pending',
-      results: null,
-      saved: false,
-      userId: insertAnalysis.userId,
-      createdAt: new Date(),
-      updatedAt: new Date()
-    };
-    
     const [analysis] = await db
       .insert(analyses)
-      .values(analysisData)
+      .values(insertAnalysis)
       .returning();
     return analysis;
   }
@@ -160,13 +144,6 @@ export class DatabaseStorage implements IStorage {
     await db
       .update(analyses)
       .set({ results, updatedAt: new Date() })
-      .where(eq(analyses.id, id));
-  }
-
-  async updateAnalysisAIDetection(id: string, aiDetection: any): Promise<void> {
-    await db
-      .update(analyses)
-      .set({ aiDetection, updatedAt: new Date() })
       .where(eq(analyses.id, id));
   }
 
@@ -203,32 +180,17 @@ export class DatabaseStorage implements IStorage {
   }
 
   async getSavedAnalyses(userId?: number): Promise<Analysis[]> {
-    // Select only existing columns to avoid aiDetection column error
-    const selectFields = {
-      id: analyses.id,
-      type: analyses.type,
-      textContent: analyses.textContent,
-      additionalContext: analyses.additionalContext,
-      llmProvider: analyses.llmProvider,
-      status: analyses.status,
-      results: analyses.results,
-      saved: analyses.saved,
-      userId: analyses.userId,
-      createdAt: analyses.createdAt,
-      updatedAt: analyses.updatedAt
-    };
-    
     if (userId !== undefined) {
       // Return user-specific saved analyses
       return await db
-        .select(selectFields)
+        .select()
         .from(analyses)
         .where(eq(analyses.saved, true) && eq(analyses.userId, userId))
         .orderBy(desc(analyses.createdAt));
     } else {
       // Return global saved analyses (backwards compatibility)
       return await db
-        .select(selectFields)
+        .select()
         .from(analyses)
         .where(eq(analyses.saved, true))
         .orderBy(desc(analyses.createdAt));
