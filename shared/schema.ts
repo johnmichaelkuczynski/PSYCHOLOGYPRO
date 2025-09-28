@@ -1,15 +1,15 @@
 import { sql } from "drizzle-orm";
-import { pgTable, text, varchar, timestamp, jsonb, integer, boolean, serial } from "drizzle-orm/pg-core";
+import { pgTable, text, varchar, timestamp, jsonb, integer, boolean } from "drizzle-orm/pg-core";
 import { createInsertSchema } from "drizzle-zod";
 import { z } from "zod";
 
 export const users = pgTable("users", {
-  id: serial("id").primaryKey(),
+  id: integer("id").primaryKey(),
   username: varchar("username").notNull().unique(),
   password: varchar("password").notNull(),
   credits: integer("credits").notNull().default(0), // User credit balance
   stripeCustomerId: varchar("stripe_customer_id"), // Stripe customer ID
-  createdAt: timestamp("created_at").defaultNow(),
+  createdAt: timestamp("created_at"),
 });
 
 export const analyses = pgTable("analyses", {
