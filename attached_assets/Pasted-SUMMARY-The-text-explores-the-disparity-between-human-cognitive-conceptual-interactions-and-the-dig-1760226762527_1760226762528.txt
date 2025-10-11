@@ -1,0 +1,76 @@
+SUMMARY: The text explores the disparity between human cognitive conceptual interactions and the digital structure organization of language, disputing equating thought processes with digital computations. CATEGORIZATION: Philosophy / Cognitive Linguistics.
+ASSESSMENT: Yes, the text is insightful. SCORE: 85. JUSTIFICATION: It challenges the common perspective of equating human cognition to computer-like processes.
+ASSESSMENT: Evidence suggests points would be developed if extended. SCORE: 70. JUSTIFICATION: The text initiates several aspects (lexical disparity, digital structures, cognition) that hint at potential elaboration.
+ASSESSMENT: Ideas are arranged hierarchically, refined and detailed as the argument progresses. SCORE: 85. JUSTIFICATION: The author builds an argument from foundational concepts to conclusions about thought and computation.
+ASSESSMENT: The text operates skillfully with canons of logic and reasoning. SCORE: 90. JUSTIFICATION: The argument proceeds logically from premises to conclusions about the nature of cognition and language.
+ASSESSMENT: The points made are fresh and not cliches. SCORE: 90. JUSTIFICATION: The contention of cognitive processes and language structure being distinct from digital computations is a novel argument.
+Batch 2 - Live Response
+SUMMARY AND CATEGORIZATION:
+The abstract discusses the dissimilarity between cognitive abilities and language expressions with a focus on the non-digital nature of the former.
+USE OF TECHNICAL JARGON
+Assessment: Yes, it uses technical jargon to render more precise.
+Score: 80
+Justification: The words used are technical but necessary to lay out the ideas being explored.
+ORGANIC DEVELOPMENT 
+Assessment: The argument develops organically.
+Score: 85
+Justification: Points build naturally on each other to lead to the final conclusion.
+OPENING UP NEW DOMAINS
+Assessment: The abstract does open up new domains for inquiry.
+Score: 75
+Justification: It argues against common contention, inviting further study of concept and expression interaction.
+INTELLIGENCE OF THE WORK
+Assessment: It seems like a work of intelligence.
+Score: 80
+Justification: The author presents an innovative viewpoint on how cognitive abilities and language expressions relate.
+REAL OR PHONY
+Assessment: It comes across as real.
+Score: 90
+Justification: It presents a complex, well-argued hypothesis that seems well-grounded in scholarly thought.
+Batch 3 - Live Response
+Summary: The abstract argues the disconnect between language and cognitive abilities, asserting that thought-processes do not mirror computer-based, digital computations. 
+Yes, the sentences exhibit complex and coherent internal logic.
+   Score: 85
+   Justification: The author logically presents the difference between the nature of the words and the concepts they represent.
+The passage is governed by the strong concept of disconnection between cognitive abilities and language.
+   Score: 80
+   Justification: The author consistently centres on the argument that language cannot fully reflect cognitive abilities.
+Yes, there is system-level control over ideas.
+   Score: 85
+   Justification: The author carries the initial concept throughout the text, incorporating it into subsequent arguments.
+The points seem 'real' and are potentially fresh in comparison to orthodox views of language symmetry with cognition.
+   Score: 70
+   Justification: The abstract presents a novel perspective, challenging commonly-held views of cognition-language parallels.
+The writing is direct.
+   Score: 90
+   Justification: The author directly makes their points, detailing the respective dispositions of language and cognitive abilities
+Batch 4 - Live Response
+Summary: The abstract discusses the inherent difference between concepts and language expression, highlighting that the relations between words don't necessarily reflect cognitive abilities, and rejecting the idea that our thoughts mirror digital computations.
+AMBIGUITY: 
+Assessment: There are certain ambiguities in the statements, more so because of abstract philosophical language. 
+Score: 65 
+Justification: There are clear points made, but there's room for interpretation, particularly considering the key terms weren't defined.
+TEXT PROGRESSION: 
+Assessment: The text progresses according to what entails or confirms what.
+Score: 85 
+Justification: The author develops an argument, moving from smaller statements that get progressively interlinked in a logical manner. 
+USE OF OTHER AUTHORS: 
+Assessment: There seems to be no apparent use of any other authors to develop the argument.
+Score: N/A 
+Justification: The text doesn't reveal any reference or influences from other authors' ideas.
+UNDEFINED TERMS: 
+Assessment: Yes, critical terms such as "extended object", "digital structures" are left undefined.
+Score: 60 
+Justification: The discussion could be clearer and more easily weighed if essential terminology was properly explained.
+FREE VARIABLES: 
+Assessment: There do not seem to be "free variables" in the text.
+Score: 95 
+Justification: Most points made are connective and contribute to the overall argument that the author is positing.
+Batch 5 - Final Results
+11:52:18 PM
+Q
+Batch 5 - Raw LLM Response
+
+SUMMARY: The abstract discusses the non-alignment between linguistic structures and cognitive processes, asserting that human thought processes are vastly different from digital computations. New statements in this text develop out of old ones by building upon previously established concepts. SCORE: 80 JUSTIFICATION: The author progressively develops their argument, establishing a complex chain of thought. The new statements generally clarify the central argument but may induce complexity due to the abstract ideas involved. SCORE: 65 JUSTIFICATION: While they expand on and deepens the thesis, some concepts may require prior knowledge or further explanation for general clarity. The passage is palpably smart, engaging with complex ideas about cognition, language, and digital structures. SCORE: 85 JUSTIFICATION: It requires a comprehensive understanding of philosophy of mind, cognitive science, and linguistics to produce this thought. INSIGHT: The interconnection of concepts in cognition does not directly mirror the construction of language or digital computations. SCORE: 85 JUSTIFICATION: It challenges a simplistic view of the relationship between language, thought, and computer computation, contributing to ongoing debates in cognitive science.
+View Quotations
+Discuss This Analysis
