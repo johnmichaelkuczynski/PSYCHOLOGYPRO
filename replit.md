@@ -75,7 +75,18 @@ Preferred communication style: Simple, everyday language.
 - **Replit Integration**: Development environment plugins and error overlays
 - **TypeScript**: Static type checking across the entire codebase
 
-# Recent Changes (September 28, 2025)
+# Recent Changes (October 14, 2025)
+
+## Instructional Video Integration
+✅ **Instructional Video Link Added**: Successfully integrated prominent but small link to instructional video in application header
+
+✅ **User Guidance Enhancement**: Added video icon (🎬) with "Instructional Video" text in header navigation, providing easy access to usage instructions
+
+✅ **Asset Serving Configuration**: Configured Express server to serve attached_assets directory, enabling direct video access at `/attached_assets/PSYCHOLOGY PRO_1760412898315.mp4`
+
+✅ **New Tab Viewing**: Link opens video in new browser tab for seamless user experience without disrupting current analysis workflow
+
+# Previous Changes (September 28, 2025)
 
 ## Critical Bug Fix - ZHI 4 (Perplexity) Streaming Issue Resolution
 ✅ **ZHI 4 Garbled Text Issue Resolved**: Fixed critical streaming decoder bug that was causing Perplexity (ZHI 4) to produce fragmented, nonsensical text output during analysis
