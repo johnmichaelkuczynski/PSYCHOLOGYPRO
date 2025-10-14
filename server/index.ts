@@ -53,6 +53,8 @@ app.use("/uploads", express.static(path.resolve("uploads"), {
   setHeaders(res) { res.setHeader("Content-Type", "application/pdf"); }
 }));
 
+app.use("/attached_assets", express.static(path.resolve("attached_assets")));
+
 app.use("/api/upload", uploadRouter);
 app.use("/api/extract", extractRouter);
 

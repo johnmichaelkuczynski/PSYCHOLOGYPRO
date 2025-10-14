@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { Brain, Settings, HelpCircle, Bookmark, Loader2, CreditCard } from "lucide-react";
+import { Brain, Settings, HelpCircle, Bookmark, Loader2, CreditCard, Video } from "lucide-react";
 import Sidebar from "@/components/sidebar";
 import LLMSelector from "@/components/llm-selector";
 import TextInput from "@/components/text-input";
@@ -143,6 +143,16 @@ export default function Home() {
                 data-testid="contact-link"
               >
                 Contact Us
+              </a>
+              <a 
+                href="/attached_assets/PSYCHOLOGY%20PRO_1760412898315.mp4"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="flex items-center gap-1 text-sm text-blue-600 hover:text-blue-800 underline ml-3"
+                data-testid="instructional-video-link"
+              >
+                <Video className="h-3.5 w-3.5" />
+                Instructional Video
               </a>
             </div>
             <div className="flex items-center space-x-4">
