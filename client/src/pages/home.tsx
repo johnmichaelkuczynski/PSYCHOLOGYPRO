@@ -145,7 +145,7 @@ export default function Home() {
                 Contact Us
               </a>
               <a 
-                href="/attached_assets/PSYCHOLOGY%20PRO_1760412898315.mp4"
+                href="https://www.youtube.com/watch?v=0hIA4NsETZw"
                 target="_blank"
                 rel="noopener noreferrer"
                 className="flex items-center gap-1 text-sm text-blue-600 hover:text-blue-800 underline ml-3"
