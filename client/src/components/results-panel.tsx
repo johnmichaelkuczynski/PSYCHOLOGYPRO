@@ -4,7 +4,6 @@ import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Progress } from "@/components/ui/progress";
 import { useStreaming } from "@/hooks/use-streaming";
-import { apiRequest } from "@/lib/queryClient";
 
 // Strip markdown formatting from text
 function stripMarkdown(text: string): string {
@@ -296,19 +295,16 @@ export default function ResultsPanel({ analysisId, onDiscussionToggle, onNewAnal
                               {q.response}
                             </div>
                           </div>
-                          <div className="mt-3 flex items-center space-x-4">
-                            {q.score > 0 && (
+                          {q.score > 0 && (
+                            <div className="mt-3">
                               <Badge 
                                 className={`score-badge ${getScoreVariant(q.score)}`}
                                 data-testid={`score-${batch.batchNumber}-${idx}`}
                               >
                                 Score: {q.score}/100
                               </Badge>
-                            )}
-                            <Button variant="ghost" size="sm" className="text-xs text-gray-500 hover:text-gray-700">
-                              View Quotations
-                            </Button>
-                          </div>
+                            </div>
+                          )}
                         </div>
                       </div>
                     </div>
