@@ -108,7 +108,14 @@ export class FileService {
       return result.value;
     } catch (error) {
       console.error('Word parsing error:', error);
-      throw new Error('Failed to parse Word document');
+      
+      // Check if this is an old .doc file (not .docx)
+      const errorMessage = error instanceof Error ? error.message : String(error);
+      if (errorMessage.includes('are you sure this is a docx file')) {
+        throw new Error('This appears to be an old .doc file. Please convert it to .docx format (open in Word and Save As .docx), or save it as a PDF or TXT file instead. Only .docx files are supported, not the old .doc format.');
+      }
+      
+      throw new Error('Failed to parse Word document. Please ensure the file is a valid .docx file.');
     }
   }
 
