@@ -703,9 +703,15 @@ export class StreamingService {
             fullResponse += chunk;
             hasContent = true;
             this.broadcastToStream(analysis.id, {
-              type: "chunk",
-              content: chunk,
-              batch: batchNumber
+              type: "raw_stream",
+              batchNumber,
+              rawContent: fullResponse,
+              timestamp: new Date().toLocaleTimeString("en-US", {
+                hour: "numeric",
+                minute: "2-digit",
+                second: "2-digit",
+                hour12: true,
+              })
             });
           }
         )) {
@@ -721,7 +727,31 @@ export class StreamingService {
         throw new Error(`MBTI batch processing failed: ${errorMessage}`);
       }
 
+      // Mark batch as complete
+      this.broadcastToStream(analysis.id, {
+        type: "batch_complete",
+        batchNumber,
+        finalRawResponse: fullResponse,
+        isComplete: true,
+        timestamp: new Date().toLocaleTimeString("en-US", {
+          hour: "numeric",
+          minute: "2-digit",
+          second: "2-digit",
+          hour12: true,
+        })
+      });
+
       batchResults.push(fullResponse);
+
+      // Add delay between batches
+      const delayStream = this.activeStreams.get(analysis.id);
+      if (!delayStream || !delayStream.isActive) {
+        throw new Error("Analysis stopped by user");
+      }
+
+      if (i < batches.length - 1) {
+        await this.streamDelay(analysis.id, 10000);
+      }
     }
 
     // Step 3: Request final MBTI type determination
@@ -743,9 +773,15 @@ export class StreamingService {
           finalResponse += chunk;
           hasContent = true;
           this.broadcastToStream(analysis.id, {
-            type: "chunk",
-            content: chunk,
-            batch: "final"
+            type: "raw_stream",
+            batchNumber: "final",
+            rawContent: finalResponse,
+            timestamp: new Date().toLocaleTimeString("en-US", {
+              hour: "numeric",
+              minute: "2-digit",
+              second: "2-digit",
+              hour12: true,
+            })
           });
         }
       )) {
@@ -760,6 +796,20 @@ export class StreamingService {
       console.error(`MBTI final determination failed:`, errorMessage);
       throw new Error(`MBTI final determination failed: ${errorMessage}`);
     }
+
+    // Mark final determination as complete
+    this.broadcastToStream(analysis.id, {
+      type: "batch_complete",
+      batchNumber: "final",
+      finalRawResponse: finalResponse,
+      isComplete: true,
+      timestamp: new Date().toLocaleTimeString("en-US", {
+        hour: "numeric",
+        minute: "2-digit",
+        second: "2-digit",
+        hour12: true,
+      })
+    });
 
     // Step 4: Save the complete analysis results
     const finalResults = {
@@ -813,9 +863,15 @@ export class StreamingService {
             fullResponse += chunk;
             hasContent = true;
             this.broadcastToStream(analysis.id, {
-              type: "chunk",
-              content: chunk,
-              batch: batchNumber
+              type: "raw_stream",
+              batchNumber,
+              rawContent: fullResponse,
+              timestamp: new Date().toLocaleTimeString("en-US", {
+                hour: "numeric",
+                minute: "2-digit",
+                second: "2-digit",
+                hour12: true,
+              })
             });
           }
         )) {
@@ -831,7 +887,31 @@ export class StreamingService {
         throw new Error(`Comprehensive MBTI batch processing failed: ${errorMessage}`);
       }
 
+      // Mark batch as complete
+      this.broadcastToStream(analysis.id, {
+        type: "batch_complete",
+        batchNumber,
+        finalRawResponse: fullResponse,
+        isComplete: true,
+        timestamp: new Date().toLocaleTimeString("en-US", {
+          hour: "numeric",
+          minute: "2-digit",
+          second: "2-digit",
+          hour12: true,
+        })
+      });
+
       batchResults.push(fullResponse);
+
+      // Add delay between batches
+      const delayStream = this.activeStreams.get(analysis.id);
+      if (!delayStream || !delayStream.isActive) {
+        throw new Error("Analysis stopped by user");
+      }
+
+      if (i < batches.length - 1) {
+        await this.streamDelay(analysis.id, 10000);
+      }
     }
 
     // Step 3: Request final MBTI type determination
@@ -853,9 +933,15 @@ export class StreamingService {
           finalResponse += chunk;
           hasContent = true;
           this.broadcastToStream(analysis.id, {
-            type: "chunk",
-            content: chunk,
-            batch: "final"
+            type: "raw_stream",
+            batchNumber: "final",
+            rawContent: finalResponse,
+            timestamp: new Date().toLocaleTimeString("en-US", {
+              hour: "numeric",
+              minute: "2-digit",
+              second: "2-digit",
+              hour12: true,
+            })
           });
         }
       )) {
@@ -870,6 +956,20 @@ export class StreamingService {
       console.error(`Comprehensive MBTI final determination failed:`, errorMessage);
       throw new Error(`Comprehensive MBTI final determination failed: ${errorMessage}`);
     }
+
+    // Mark final determination as complete
+    this.broadcastToStream(analysis.id, {
+      type: "batch_complete",
+      batchNumber: "final",
+      finalRawResponse: finalResponse,
+      isComplete: true,
+      timestamp: new Date().toLocaleTimeString("en-US", {
+        hour: "numeric",
+        minute: "2-digit",
+        second: "2-digit",
+        hour12: true,
+      })
+    });
 
     // Step 4: Save the complete analysis results
     const finalResults = {
@@ -923,9 +1023,15 @@ export class StreamingService {
             fullResponse += chunk;
             hasContent = true;
             this.broadcastToStream(analysis.id, {
-              type: "chunk",
-              content: chunk,
-              batch: batchNumber
+              type: "raw_stream",
+              batchNumber,
+              rawContent: fullResponse,
+              timestamp: new Date().toLocaleTimeString("en-US", {
+                hour: "numeric",
+                minute: "2-digit",
+                second: "2-digit",
+                hour12: true,
+              })
             });
           }
         )) {
@@ -941,7 +1047,31 @@ export class StreamingService {
         throw new Error(`Micro MBTI batch processing failed: ${errorMessage}`);
       }
 
+      // Mark batch as complete
+      this.broadcastToStream(analysis.id, {
+        type: "batch_complete",
+        batchNumber,
+        finalRawResponse: fullResponse,
+        isComplete: true,
+        timestamp: new Date().toLocaleTimeString("en-US", {
+          hour: "numeric",
+          minute: "2-digit",
+          second: "2-digit",
+          hour12: true,
+        })
+      });
+
       batchResults.push(fullResponse);
+
+      // Add delay between batches
+      const delayStream = this.activeStreams.get(analysis.id);
+      if (!delayStream || !delayStream.isActive) {
+        throw new Error("Analysis stopped by user");
+      }
+
+      if (i < batches.length - 1) {
+        await this.streamDelay(analysis.id, 10000);
+      }
     }
 
     // Step 3: Request brief final MBTI type determination
@@ -963,9 +1093,15 @@ export class StreamingService {
           finalResponse += chunk;
           hasContent = true;
           this.broadcastToStream(analysis.id, {
-            type: "chunk",
-            content: chunk,
-            batch: "final"
+            type: "raw_stream",
+            batchNumber: "final",
+            rawContent: finalResponse,
+            timestamp: new Date().toLocaleTimeString("en-US", {
+              hour: "numeric",
+              minute: "2-digit",
+              second: "2-digit",
+              hour12: true,
+            })
           });
         }
       )) {
@@ -980,6 +1116,20 @@ export class StreamingService {
       console.error(`Micro MBTI final determination failed:`, errorMessage);
       throw new Error(`Micro MBTI final determination failed: ${errorMessage}`);
     }
+
+    // Mark final determination as complete
+    this.broadcastToStream(analysis.id, {
+      type: "batch_complete",
+      batchNumber: "final",
+      finalRawResponse: finalResponse,
+      isComplete: true,
+      timestamp: new Date().toLocaleTimeString("en-US", {
+        hour: "numeric",
+        minute: "2-digit",
+        second: "2-digit",
+        hour12: true,
+      })
+    });
 
     // Step 4: Save the complete analysis results
     const finalResults = {
