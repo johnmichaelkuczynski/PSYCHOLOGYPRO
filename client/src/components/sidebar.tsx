@@ -1,4 +1,4 @@
-import { Lightbulb, Brain, Users, UserCheck, Stethoscope, ClipboardCheck, FileText, Zap } from "lucide-react";
+import { Lightbulb, Brain, Users, UserCheck, Stethoscope, ClipboardCheck, FileText, Zap, User } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import type { AnalysisTypeType } from "@shared/schema";
 
@@ -60,6 +60,12 @@ const FUNCTIONS = [
     key: "micropsychopathological" as AnalysisTypeType,
     label: "Micro Psychopathological (Fast)",
     icon: Zap,
+    available: true,
+  },
+  {
+    key: "mbti" as AnalysisTypeType,
+    label: "MBTI",
+    icon: User,
     available: true,
   },
 ];

@@ -588,4 +588,113 @@ KEEP ALL RESPONSES EXTREMELY BRIEF FOR SPEED.`;
       "DOES THE REASONING SUGGEST PSYCHOTIC OR NEUROTIC ORGANIZATION?"
     ];
   }
+
+  // MBTI Questions
+  getMBTIQuestions(): string[] {
+    return [
+      "I. INTROVERSION VS EXTRAVERSION: Does the text emphasize inner thoughts and reflection, or external events and social interaction?",
+      "I. INTROVERSION VS EXTRAVERSION: Is the author more focused on subjective experience (\"I think/feel\") or shared/group dynamics (\"we,\" \"people\")?",
+      "I. INTROVERSION VS EXTRAVERSION: Does the work explore solitude, retreat, and internal processing—or engagement, action, or outward expression?",
+      "I. INTROVERSION VS EXTRAVERSION: Are ideas developed internally and abstractly—or through dialogue, examples, and external interactions?",
+      "I. INTROVERSION VS EXTRAVERSION: Is emotional expression restrained and implied—or direct, open, and outwardly engaged?",
+      
+      "II. SENSING VS INTUITION: Does the writing focus on concrete details, sensory description, and observable facts (S) or possibilities, patterns, and abstractions (N)?",
+      "II. SENSING VS INTUITION: Are examples literal and rooted in physical experience—or metaphoric, symbolic, or hypothetical?",
+      "II. SENSING VS INTUITION: Does the author favor step-by-step description—or leaps to conceptual insight and synthesis?",
+      "II. SENSING VS INTUITION: Are time, sequence, and practical procedures emphasized—or timeless principles and overarching meaning?",
+      "II. SENSING VS INTUITION: Does the author show trust in past experience and tradition—or interest in innovation, speculation, and potential futures?",
+      
+      "III. THINKING VS FEELING: Is the reasoning structured around logic, consistency, and objective principles—or values, ethics, and human impact?",
+      "III. THINKING VS FEELING: Does the author handle disagreement through argument and critique—or through empathy, harmony, and relational tone?",
+      "III. THINKING VS FEELING: Are judgments justified by cause-and-effect reasoning—or by moral relevance and personal meaning?",
+      "III. THINKING VS FEELING: Does the text prioritize truth over tone—or tone over blunt accuracy?",
+      "III. THINKING VS FEELING: Are emotions analyzed as data—or used as persuasive elements tied to human wellbeing?",
+      
+      "IV. JUDGING VS PERCEIVING: Is the structure of the writing tight, organized, and conclusive—or open-ended, exploratory, and flexible?",
+      "IV. JUDGING VS PERCEIVING: Does the author express certainty and closure—or ambiguity and willingness to leave questions unresolved?",
+      "IV. JUDGING VS PERCEIVING: Is time handled with plans, deadlines, and deliberate pacing—or spontaneity and fluid transitions?",
+      "IV. JUDGING VS PERCEIVING: Are definitions fixed and categories stable—or shifting, provisional, and context-dependent?",
+      "IV. JUDGING VS PERCEIVING: Does the argument move linearly toward conclusions—or circle, revise, and adapt as it unfolds?",
+      
+      "V. DEEPER INDIRECT MBTI SIGNALS: Does the text show preference for systemic analysis—or narrative, emotional resonance?",
+      "V. DEEPER INDIRECT MBTI SIGNALS: Are values universalized and principled—or personal and relational?",
+      "V. DEEPER INDIRECT MBTI SIGNALS: Does the author rely on internal intuition (private insight) or external data and observation?",
+      "V. DEEPER INDIRECT MBTI SIGNALS: Is conflict treated as a problem to solve logically—or to reconcile interpersonally?",
+      "V. DEEPER INDIRECT MBTI SIGNALS: Does the work prioritize control, predictability, and structure—or openness to uncertainty and adaptation?",
+      "V. DEEPER INDIRECT MBTI SIGNALS: Is language precise and utilitarian—or expressive, aesthetic, or symbolic?",
+      "V. DEEPER INDIRECT MBTI SIGNALS: Does the narrative voice depend on established rules—or break conventions playfully or freely?",
+      "V. DEEPER INDIRECT MBTI SIGNALS: Are future possibilities extrapolated logically—or imagined freely and creatively?",
+      "V. DEEPER INDIRECT MBTI SIGNALS: Do characters (or the narrator) suppress personal feelings to maintain objectivity—or elevate emotional truth?",
+      "V. DEEPER INDIRECT MBTI SIGNALS: Is the tone disciplined and purposeful—or improvisational and fluid?"
+    ];
+  }
+
+  createMBTIPrompt(textContent: string, questions: string[], additionalContext?: string): string {
+    let prompt = `MBTI PERSONALITY TYPE ANALYSIS PROTOCOL
+
+You are analyzing a text to determine the author's probable MBTI personality type based on their writing style and content.
+
+MBTI FRAMEWORK:
+- I (Introversion) vs E (Extraversion)
+- S (Sensing) vs N (Intuition)
+- T (Thinking) vs F (Feeling)
+- J (Judging) vs P (Perceiving)
+
+Your task is to answer the following questions about the text with specific evidence and examples:
+
+`;
+
+    if (additionalContext) {
+      prompt += `Additional Context: ${additionalContext}\n\n`;
+    }
+
+    prompt += `TEXT TO ANALYZE:\n${textContent}\n\nQUESTIONS:\n`;
+    questions.forEach((q, i) => {
+      prompt += `\n${i + 1}. ${q}\n`;
+    });
+
+    prompt += `\n\nFor each question, provide a detailed answer with specific evidence from the text. Be thorough and cite examples.`;
+
+    return prompt;
+  }
+
+  createMBTIFinalPrompt(textContent: string, analysisResults: string[]): string {
+    let prompt = `MBTI TYPE DETERMINATION
+
+Based on your analysis of the text across all MBTI dimensions, determine the author's most probable MBTI personality type.
+
+PREVIOUS ANALYSIS RESULTS:
+${analysisResults.map((result, i) => `\nBatch ${i + 1}:\n${result}\n`).join('\n')}
+
+TEXT ANALYZED:
+${textContent}
+
+FINAL TASK:
+1. Synthesize all your previous answers
+2. Determine which preference is stronger in each dimension:
+   - I or E (Introversion vs Extraversion)
+   - S or N (Sensing vs Intuition)
+   - T or F (Thinking vs Feeling)
+   - J or P (Judging vs Perceiving)
+
+3. State the final MBTI type (e.g., INTJ, ENFP, ISTJ, etc.)
+
+4. Provide a comprehensive explanation of why this type fits the writing, with specific examples from the text
+
+5. Note any ambiguities or competing indicators
+
+FORMAT YOUR RESPONSE AS:
+**DETERMINED MBTI TYPE: [TYPE]**
+
+**REASONING:**
+[Detailed explanation for each dimension]
+
+**CONFIDENCE LEVEL:**
+[High/Medium/Low and why]
+
+**ALTERNATIVE CONSIDERATIONS:**
+[Any close alternative types and why they were not chosen]`;
+
+    return prompt;
+  }
 }

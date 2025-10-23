@@ -75,7 +75,20 @@ Preferred communication style: Simple, everyday language.
 - **Replit Integration**: Development environment plugins and error overlays
 - **TypeScript**: Static type checking across the entire codebase
 
-# Recent Changes (October 18, 2025)
+# Recent Changes (October 23, 2025)
+
+## MBTI Personality Type Analysis Function Added
+✅ **New MBTI Function**: Added comprehensive MBTI personality type determination based on written text analysis
+
+✅ **30-Question Protocol**: Implemented complete MBTI assessment protocol covering all four dimensions (I/E, S/N, T/F, J/P) with 5 questions per category plus 10 deeper indirect signals
+
+✅ **Structured Analysis**: MBTI analysis processes questions in batches with final type determination including confidence levels and alternative considerations
+
+✅ **Credit System Integration**: MBTI analysis costs 1,800 credits (between psychological and cognitive analysis pricing)
+
+✅ **Complete Integration**: MBTI fully integrated into sidebar, schema, streaming service, and LLM service with all four ZHI providers supported
+
+# Previous Changes (October 18, 2025)
 
 ## Instructional Video Update
 ✅ **YouTube Video Integration**: Updated instructional video link in application header to YouTube video (https://www.youtube.com/watch?v=0hIA4NsETZw)

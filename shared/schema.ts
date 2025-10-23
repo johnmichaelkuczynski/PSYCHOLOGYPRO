@@ -92,7 +92,8 @@ export const AnalysisType = z.enum([
   "micropsychological",
   "psychopathological", 
   "comprehensive-psychopathological",
-  "micropsychopathological"
+  "micropsychopathological",
+  "mbti"
 ]);
 
 export type LLMProviderType = z.infer<typeof LLMProvider>;
