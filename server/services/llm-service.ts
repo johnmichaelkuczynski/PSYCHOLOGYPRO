@@ -589,7 +589,7 @@ KEEP ALL RESPONSES EXTREMELY BRIEF FOR SPEED.`;
     ];
   }
 
-  // MBTI Questions
+  // MBTI Questions (Normal)
   getMBTIQuestions(): string[] {
     return [
       "I. INTROVERSION VS EXTRAVERSION: Does the text emphasize inner thoughts and reflection, or external events and social interaction?",
@@ -627,6 +627,35 @@ KEEP ALL RESPONSES EXTREMELY BRIEF FOR SPEED.`;
       "V. DEEPER INDIRECT MBTI SIGNALS: Do characters (or the narrator) suppress personal feelings to maintain objectivity—or elevate emotional truth?",
       "V. DEEPER INDIRECT MBTI SIGNALS: Is the tone disciplined and purposeful—or improvisational and fluid?"
     ];
+  }
+
+  // Comprehensive MBTI Questions (Extended with deeper analysis)
+  getComprehensiveMBTIQuestions(): string[] {
+    return [
+      ...this.getMBTIQuestions(),
+      
+      // Additional deep cognitive function analysis
+      "COGNITIVE FUNCTIONS - NI/NE: Does the text reveal patterns of introverted intuition (Ni: convergent vision, singular insight) or extraverted intuition (Ne: divergent possibilities, multiple connections)?",
+      "COGNITIVE FUNCTIONS - SI/SE: Does sensory engagement show introverted sensing (Si: internal sensory memory, comfort with familiar) or extraverted sensing (Se: external sensory present, engagement with immediate)?",
+      "COGNITIVE FUNCTIONS - TI/TE: Does logical structure demonstrate introverted thinking (Ti: internal logical consistency, precision) or extraverted thinking (Te: external efficiency, objective organization)?",
+      "COGNITIVE FUNCTIONS - FI/FE: Does value judgment reflect introverted feeling (Fi: internal value alignment, authenticity) or extraverted feeling (Fe: external harmony, social rapport)?",
+      
+      // Communication style depth
+      "COMMUNICATION DEPTH: Does the author's communication prioritize depth over breadth, or breadth over depth?",
+      "ABSTRACTION PREFERENCE: How does the author balance abstract concepts versus concrete applications?",
+      "INTERPERSONAL STANCE: Does the writing reveal comfort with interpersonal tension or preference for interpersonal harmony?",
+      "DECISION-MAKING EVIDENCE: What evidence exists for how the author weighs logical analysis versus human considerations in complex decisions?",
+      "INFORMATION PROCESSING: Does the text suggest preference for gathering more information or reaching conclusions?",
+      
+      // Additional contextual signals
+      "STRESS RESPONSES: Are there any indicators of how the author responds under stress or pressure based on their writing?",
+      "MOTIVATION PATTERNS: What underlying motivations can be inferred about what drives the author's intellectual or creative work?"
+    ];
+  }
+
+  // Micro MBTI Questions (Streamlined, same questions but expecting brief responses)
+  getMicroMBTIQuestions(): string[] {
+    return this.getMBTIQuestions();
   }
 
   createMBTIPrompt(textContent: string, questions: string[], additionalContext?: string): string {
@@ -696,5 +725,40 @@ FORMAT YOUR RESPONSE AS:
 [Any close alternative types and why they were not chosen]`;
 
     return prompt;
+  }
+
+  createMicroMBTIPrompt(textContent: string, questions: string[], additionalContext?: string): string {
+    let prompt = `MICRO MBTI ANALYSIS - BRIEF RESPONSES REQUIRED
+
+Analyze this text for MBTI personality type indicators. Give VERY BRIEF answers (1-2 sentences maximum per question).
+
+`;
+
+    if (additionalContext) {
+      prompt += `Additional Context: ${additionalContext}\n\n`;
+    }
+
+    prompt += `TEXT TO ANALYZE:\n${textContent}\n\nQUESTIONS (Answer each BRIEFLY):\n`;
+    questions.forEach((q, i) => {
+      prompt += `\n${i + 1}. ${q}\n`;
+    });
+
+    prompt += `\n\nIMPORTANT: Keep all responses to 1-2 sentences maximum. Be concise and direct.`;
+
+    return prompt;
+  }
+
+  createMicroMBTIFinalPrompt(textContent: string, analysisResults: string[]): string {
+    return `MICRO MBTI TYPE DETERMINATION - BRIEF FORMAT
+
+Based on your analysis, state the most probable MBTI type with brief justification.
+
+PREVIOUS ANALYSIS:
+${analysisResults.map((result, i) => `Batch ${i + 1}: ${result}`).join('\n\n')}
+
+Provide:
+1. **TYPE:** [4-letter type]
+2. **KEY EVIDENCE:** [2-3 sentences of strongest indicators]
+3. **CONFIDENCE:** [High/Medium/Low]`;
   }
 }

@@ -68,6 +68,18 @@ const FUNCTIONS = [
     icon: User,
     available: true,
   },
+  {
+    key: "comprehensive-mbti" as AnalysisTypeType,
+    label: "Comprehensive MBTI",
+    icon: User,
+    available: true,
+  },
+  {
+    key: "micro-mbti" as AnalysisTypeType,
+    label: "Micro MBTI (Fast)",
+    icon: Zap,
+    available: true,
+  },
 ];
 
 const RECENT_ANALYSES: string[] = [];

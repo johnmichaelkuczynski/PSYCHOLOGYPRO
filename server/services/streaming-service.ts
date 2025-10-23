@@ -132,6 +132,12 @@ export class StreamingService {
         case "mbti":
           await this.processMBTIAnalysis(analysis);
           break;
+        case "comprehensive-mbti":
+          await this.processComprehensiveMBTIAnalysis(analysis);
+          break;
+        case "micro-mbti":
+          await this.processMicroMBTIAnalysis(analysis);
+          break;
         default:
           throw new Error(`Analysis type ${analysis.type} not implemented`);
       }
@@ -401,6 +407,8 @@ export class StreamingService {
       "comprehensive-psychopathological": 4000,
       micropsychopathological: 400,
       mbti: 1800,
+      "comprehensive-mbti": 4500,
+      "micro-mbti": 600,
     } as const;
 
     return ANALYSIS_CREDIT_COST[analysisType as keyof typeof ANALYSIS_CREDIT_COST] || 2000;
@@ -751,6 +759,226 @@ export class StreamingService {
       const errorMessage = error instanceof Error ? error.message : String(error);
       console.error(`MBTI final determination failed:`, errorMessage);
       throw new Error(`MBTI final determination failed: ${errorMessage}`);
+    }
+
+    // Step 4: Save the complete analysis results
+    const finalResults = {
+      summary,
+      batches: batchResults,
+      finalDetermination: finalResponse,
+      questions,
+      type: analysis.type,
+      completedAt: new Date().toISOString()
+    };
+
+    await this.storage.updateAnalysisResults(analysis.id, finalResults);
+  }
+
+  // Process Comprehensive MBTI Analysis (Extended with cognitive functions)
+  private async processComprehensiveMBTIAnalysis(analysis: Analysis): Promise<void> {
+    // Step 1: Generate and stream summary
+    const summary = await this.streamSummary(analysis);
+
+    // Step 2: Process comprehensive questions in batches of 7 (42 total questions)
+    const questions = this.llmService.getComprehensiveMBTIQuestions();
+    const batches = this.createBatches(questions, 7);
+    const batchResults: string[] = [];
+
+    for (let i = 0; i < batches.length; i++) {
+      const currentStream = this.activeStreams.get(analysis.id);
+      if (!currentStream || !currentStream.isActive) {
+        throw new Error("Analysis stopped by user");
+      }
+
+      const batch = batches[i];
+      const batchNumber = i + 1;
+      
+      this.broadcastToStream(analysis.id, {
+        type: "progress",
+        message: `Processing batch ${batchNumber} of ${batches.length}`,
+        batch: batchNumber,
+        totalBatches: batches.length
+      });
+
+      const mbtiPrompt = this.llmService.createMBTIPrompt(analysis.textContent, batch, analysis.additionalContext || undefined);
+      
+      let fullResponse = "";
+      let hasContent = false;
+      
+      try {
+        for await (const chunk of this.llmService.streamResponse(
+          analysis.llmProvider as any,
+          [{ role: "user", content: mbtiPrompt }],
+          (chunk: string) => {
+            fullResponse += chunk;
+            hasContent = true;
+            this.broadcastToStream(analysis.id, {
+              type: "chunk",
+              content: chunk,
+              batch: batchNumber
+            });
+          }
+        )) {
+          // Stream is handled by the onChunk callback
+        }
+        
+        if (!hasContent) {
+          throw new Error("No content received from LLM");
+        }
+      } catch (error) {
+        const errorMessage = error instanceof Error ? error.message : String(error);
+        console.error(`Comprehensive MBTI batch ${batchNumber} failed:`, errorMessage);
+        throw new Error(`Comprehensive MBTI batch processing failed: ${errorMessage}`);
+      }
+
+      batchResults.push(fullResponse);
+    }
+
+    // Step 3: Request final MBTI type determination
+    this.broadcastToStream(analysis.id, {
+      type: "progress",
+      message: "Determining MBTI type with cognitive functions analysis..."
+    });
+
+    const finalPrompt = this.llmService.createMBTIFinalPrompt(analysis.textContent, batchResults);
+    
+    let finalResponse = "";
+    let hasContent = false;
+    
+    try {
+      for await (const chunk of this.llmService.streamResponse(
+        analysis.llmProvider as any,
+        [{ role: "user", content: finalPrompt }],
+        (chunk: string) => {
+          finalResponse += chunk;
+          hasContent = true;
+          this.broadcastToStream(analysis.id, {
+            type: "chunk",
+            content: chunk,
+            batch: "final"
+          });
+        }
+      )) {
+        // Stream is handled by the onChunk callback
+      }
+      
+      if (!hasContent) {
+        throw new Error("No content received from LLM for final determination");
+      }
+    } catch (error) {
+      const errorMessage = error instanceof Error ? error.message : String(error);
+      console.error(`Comprehensive MBTI final determination failed:`, errorMessage);
+      throw new Error(`Comprehensive MBTI final determination failed: ${errorMessage}`);
+    }
+
+    // Step 4: Save the complete analysis results
+    const finalResults = {
+      summary,
+      batches: batchResults,
+      finalDetermination: finalResponse,
+      questions,
+      type: analysis.type,
+      completedAt: new Date().toISOString()
+    };
+
+    await this.storage.updateAnalysisResults(analysis.id, finalResults);
+  }
+
+  // Process Micro MBTI Analysis (Fast, concise responses)
+  private async processMicroMBTIAnalysis(analysis: Analysis): Promise<void> {
+    // Step 1: Generate and stream summary
+    const summary = await this.streamSummary(analysis);
+
+    // Step 2: Process questions in batches of 6 with micro prompts
+    const questions = this.llmService.getMicroMBTIQuestions();
+    const batches = this.createBatches(questions, 6);
+    const batchResults: string[] = [];
+
+    for (let i = 0; i < batches.length; i++) {
+      const currentStream = this.activeStreams.get(analysis.id);
+      if (!currentStream || !currentStream.isActive) {
+        throw new Error("Analysis stopped by user");
+      }
+
+      const batch = batches[i];
+      const batchNumber = i + 1;
+      
+      this.broadcastToStream(analysis.id, {
+        type: "progress",
+        message: `Processing batch ${batchNumber} of ${batches.length}`,
+        batch: batchNumber,
+        totalBatches: batches.length
+      });
+
+      const microPrompt = this.llmService.createMicroMBTIPrompt(analysis.textContent, batch, analysis.additionalContext || undefined);
+      
+      let fullResponse = "";
+      let hasContent = false;
+      
+      try {
+        for await (const chunk of this.llmService.streamResponse(
+          analysis.llmProvider as any,
+          [{ role: "user", content: microPrompt }],
+          (chunk: string) => {
+            fullResponse += chunk;
+            hasContent = true;
+            this.broadcastToStream(analysis.id, {
+              type: "chunk",
+              content: chunk,
+              batch: batchNumber
+            });
+          }
+        )) {
+          // Stream is handled by the onChunk callback
+        }
+        
+        if (!hasContent) {
+          throw new Error("No content received from LLM");
+        }
+      } catch (error) {
+        const errorMessage = error instanceof Error ? error.message : String(error);
+        console.error(`Micro MBTI batch ${batchNumber} failed:`, errorMessage);
+        throw new Error(`Micro MBTI batch processing failed: ${errorMessage}`);
+      }
+
+      batchResults.push(fullResponse);
+    }
+
+    // Step 3: Request brief final MBTI type determination
+    this.broadcastToStream(analysis.id, {
+      type: "progress",
+      message: "Determining MBTI type..."
+    });
+
+    const finalPrompt = this.llmService.createMicroMBTIFinalPrompt(analysis.textContent, batchResults);
+    
+    let finalResponse = "";
+    let hasContent = false;
+    
+    try {
+      for await (const chunk of this.llmService.streamResponse(
+        analysis.llmProvider as any,
+        [{ role: "user", content: finalPrompt }],
+        (chunk: string) => {
+          finalResponse += chunk;
+          hasContent = true;
+          this.broadcastToStream(analysis.id, {
+            type: "chunk",
+            content: chunk,
+            batch: "final"
+          });
+        }
+      )) {
+        // Stream is handled by the onChunk callback
+      }
+      
+      if (!hasContent) {
+        throw new Error("No content received from LLM for final determination");
+      }
+    } catch (error) {
+      const errorMessage = error instanceof Error ? error.message : String(error);
+      console.error(`Micro MBTI final determination failed:`, errorMessage);
+      throw new Error(`Micro MBTI final determination failed: ${errorMessage}`);
     }
 
     // Step 4: Save the complete analysis results
