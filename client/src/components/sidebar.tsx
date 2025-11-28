@@ -9,6 +9,12 @@ interface SidebarProps {
 
 const FUNCTIONS = [
   {
+    key: "microcognitive" as AnalysisTypeType,
+    label: "Micro Cognitive (Fast)",
+    icon: Zap,
+    available: true,
+  },
+  {
     key: "cognitive" as AnalysisTypeType,
     label: "Cognitive",
     icon: Lightbulb,
@@ -21,8 +27,8 @@ const FUNCTIONS = [
     available: true,
   },
   {
-    key: "microcognitive" as AnalysisTypeType,
-    label: "Micro Cognitive (Fast)",
+    key: "micropsychological" as AnalysisTypeType,
+    label: "Micro Psychological (Fast)",
     icon: Zap,
     available: true,
   },
@@ -39,8 +45,8 @@ const FUNCTIONS = [
     available: true,
   },
   {
-    key: "micropsychological" as AnalysisTypeType,
-    label: "Micro Psychological (Fast)",
+    key: "micropsychopathological" as AnalysisTypeType,
+    label: "Micro Psychopathological (Fast)",
     icon: Zap,
     available: true,
   },
@@ -57,8 +63,8 @@ const FUNCTIONS = [
     available: true,
   },
   {
-    key: "micropsychopathological" as AnalysisTypeType,
-    label: "Micro Psychopathological (Fast)",
+    key: "micro-mbti" as AnalysisTypeType,
+    label: "Micro MBTI (Fast)",
     icon: Zap,
     available: true,
   },
@@ -72,12 +78,6 @@ const FUNCTIONS = [
     key: "comprehensive-mbti" as AnalysisTypeType,
     label: "Comprehensive MBTI",
     icon: User,
-    available: true,
-  },
-  {
-    key: "micro-mbti" as AnalysisTypeType,
-    label: "Micro MBTI (Fast)",
-    icon: Zap,
     available: true,
   },
 ];
