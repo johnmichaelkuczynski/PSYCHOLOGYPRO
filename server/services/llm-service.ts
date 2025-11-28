@@ -686,30 +686,36 @@ KEEP ALL RESPONSES EXTREMELY BRIEF FOR SPEED.`;
   }
 
   createMBTIPrompt(textContent: string, questions: string[], additionalContext?: string): string {
-    let prompt = `MBTI PERSONALITY TYPE ANALYSIS PROTOCOL
+    let prompt = `MBTI PERSONALITY TYPE ANALYSIS - VERDICT REQUIRED
 
-You are analyzing a text to determine the author's probable MBTI personality type based on their writing style and content.
+You are analyzing a text to determine the author's probable MBTI personality type.
 
-MBTI FRAMEWORK:
-- I (Introversion) vs E (Extraversion)
-- S (Sensing) vs N (Intuition)
-- T (Thinking) vs F (Feeling)
-- J (Judging) vs P (Perceiving)
+CRITICAL: For EACH question, you MUST end with a CLEAR VERDICT using this format:
+**VERDICT: [Preference] - [reason in 1 sentence]**
 
-Your task is to answer the following questions about the text with specific evidence and examples:
+Examples of correct verdicts:
+- **VERDICT: I (Introversion) - The author prioritizes internal reflection over external engagement**
+- **VERDICT: E (Extraversion) - The writing emphasizes interaction and external stimulation**
+- **VERDICT: S (Sensing) - Focus on concrete facts and observable details**
+- **VERDICT: N (Intuition) - Emphasis on patterns, abstractions, and possibilities**
+- **VERDICT: T (Thinking) - Logic and objective analysis drive the reasoning**
+- **VERDICT: F (Feeling) - Values and human impact drive the reasoning**
+- **VERDICT: J (Judging) - Writing is structured and conclusive**
+- **VERDICT: P (Perceiving) - Writing is exploratory and open-ended**
 
+TEXT TO ANALYZE:
+${textContent}
+
+${additionalContext ? `\nADDITIONAL CONTEXT: ${additionalContext}\n` : ''}
+
+QUESTIONS - Answer each one with 2-3 sentences of evidence, then state your verdict:
 `;
 
-    if (additionalContext) {
-      prompt += `Additional Context: ${additionalContext}\n\n`;
-    }
-
-    prompt += `TEXT TO ANALYZE:\n${textContent}\n\nQUESTIONS:\n`;
     questions.forEach((q, i) => {
       prompt += `\n${i + 1}. ${q}\n`;
     });
 
-    prompt += `\n\nFor each question, provide a detailed answer with specific evidence from the text. Be thorough and cite examples.`;
+    prompt += `\n\nCRITICAL RULE: Every single answer MUST end with a **VERDICT:** line. No exceptions. If you don't include a verdict for a question, that answer is INVALID.`;
 
     return prompt;
   }
@@ -755,22 +761,25 @@ FORMAT YOUR RESPONSE AS:
   }
 
   createMicroMBTIPrompt(textContent: string, questions: string[], additionalContext?: string): string {
-    let prompt = `MICRO MBTI ANALYSIS - BRIEF RESPONSES REQUIRED
+    let prompt = `MICRO MBTI ANALYSIS - VERDICT REQUIRED (ULTRA-BRIEF)
 
-Analyze this text for MBTI personality type indicators. Give VERY BRIEF answers (1-2 sentences maximum per question).
+Analyze this text for MBTI type. For EACH question:
+1. Give 1 sentence of evidence
+2. State verdict: I/E, S/N, T/F, or J/P
 
+TEXT:
+${textContent}
+
+${additionalContext ? `\nCONTEXT: ${additionalContext}\n` : ''}
+
+QUESTIONS (1 sentence evidence + verdict for each):
 `;
 
-    if (additionalContext) {
-      prompt += `Additional Context: ${additionalContext}\n\n`;
-    }
-
-    prompt += `TEXT TO ANALYZE:\n${textContent}\n\nQUESTIONS (Answer each BRIEFLY):\n`;
     questions.forEach((q, i) => {
       prompt += `\n${i + 1}. ${q}\n`;
     });
 
-    prompt += `\n\nIMPORTANT: Keep all responses to 1-2 sentences maximum. Be concise and direct.`;
+    prompt += `\n\nFORMAT EACH ANSWER: [Evidence sentence] **VERDICT: [I/E/S/N/T/F/J/P]**\n\nMUST include verdict for every question.`;
 
     return prompt;
   }
