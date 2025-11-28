@@ -394,9 +394,18 @@ ANTI-HEDGING RULE: Do not say "could be more developed" if work passes ALL tests
 
 CRITICAL: Detect whether text EXECUTES reasoning or merely ANNOUNCES it.
 
+🚨 MANDATORY SCORING RULE 🚨
+Score is DETERMINED by test results, not intuition:
+- IF BULLSHIT TEST = YES (could write without understanding) → SCORE MUST BE ≤ 50, PERIOD
+- IF PSEUDO-INTELLECTUAL RED FLAGS FOUND → SCORE MUST BE ≤ 50, PERIOD  
+- IF EXECUTION TEST FAILS (announces instead of executes) → SCORE MUST BE ≤ 50, PERIOD
+- IF ALL TESTS PASS → THEN score based on quality (50-100)
+
+YOU CANNOT GIVE HIGH SCORES TO FLAGGED TEXT. The tests override intuition.
+
 🚨 BULLSHIT TEST (MANDATORY) 🚨
 "Could someone write this without understanding the subject?"
-- YES = max score 50 (announcing without executing)
+- YES = MUST score ≤ 50 (no exceptions, no hedging)
 - NO = continue analysis
 
 🚨 PSEUDO-INTELLECTUAL RED FLAGS (AUTOMATIC CEILING: 50) 🚨
@@ -404,11 +413,18 @@ CRITICAL: Detect whether text EXECUTES reasoning or merely ANNOUNCES it.
 - Announced claims without execution: "I develop a novel framework" but framework never appears in text
 - Free variables: Points that connect to nothing else
 - Independent sentences: Remove any sentence, does nothing break? = no logical chain exists
+- Pattern without substance: Same structure repeated with different topics
 
-🚨 EXECUTION MARKERS (80+) 🚨
-- Each claim generates the next (not just "and also")
-- Remove one claim = entire reasoning collapses
-- Distinctions actually CAUSE subsequent reasoning moves
+🚨 EXECUTION TEST 🚨
+Does EACH SENTENCE/CLAIM generate the NEXT one?
+- EXECUTES: "X means Y; therefore Z" - clear dependency
+- ANNOUNCES: "First X. Second Y. Third Z." - no logical dependency, just listing
+
+🚨 LOGICAL CHAIN TEST 🚨
+Map claims in order: Claim1 → Claim2 → Claim3
+Remove Claim2: Does chain still work?
+- NO (chain breaks) = load-bearing = EXECUTING = can score higher
+- YES (chain still works) = independent = ANNOUNCING = must score ≤ 50
 
 `;
 
@@ -423,13 +439,29 @@ QUESTIONS TO ANSWER:
 ${questions.map((q, i) => `${i + 1}. ${q}`).join('\n')}
 
 FOR EACH QUESTION:
-1. EXECUTES or ANNOUNCES? (1 sentence)
-2. QUOTE: One sentence/phrase proving your answer
-3. CHAIN: Show 2-3 sequential claims and their dependencies
-4. LOGICAL TEST: Remove one claim - does chain collapse? YES=real thinking, NO=announcement
-5. SCORE 1-100 with tier
+1. BULLSHIT TEST: YES or NO? (Can someone write this without understanding?)
+2. PSEUDO-INTELLECTUAL FLAGS: Present? YES or NO?
+3. EXECUTION TEST: EXECUTES or ANNOUNCES?
+4. LOGICAL CHAIN: Map 2-3 claims. Show dependencies.
+5. SCORE: Apply mandatory rule above
+   - If ANY test failed: SCORE ≤ 50 (no exceptions)
+   - If ALL tests passed: SCORE 50-100 based on depth/originality
 
-CRITICAL: If you find empty sequencing ("First... Then...") without logical generation between steps, that's PSEUDO-INTELLECTUAL. Score ≤ 50.`;
+EXAMPLE OF FORCED CEILING:
+Text: "First, philosophy examines foundations. Second, logic applies rules. Third, conclusions emerge."
+BULLSHIT TEST: YES - anyone can write this template
+PSEUDO-FLAGS: YES - "First...Second...Third" with no logical generation
+EXECUTION: ANNOUNCES (just listing steps, not executing logic)
+MANDATORY SCORE: ≤ 50 (PERIOD - cannot be higher)
+
+EXAMPLE OF LEGITIMATE SCORING:
+Text: "Worship requires supernatural belief (not answerable to empirical facts). High regard requires only admiration (answerable to fact). This explains why cults survive via narrative shift but fall via resource shift."
+BULLSHIT TEST: NO - requires understanding functional difference between faith-based and fact-based authority
+PSEUDO-FLAGS: NO - each claim generates next; chain is necessary
+EXECUTION: EXECUTES (each claim depends on prior ones; remove any, chain breaks)
+SCORE: 75+ (all tests pass; quality shows genuine reasoning)
+
+CRITICAL: Do not hedging by scoring 65-70 "just to be safe". The tests are the safety. If tests pass → score properly. If tests fail → stay ≤50.`;
 
     return prompt;
   }
