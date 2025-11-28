@@ -208,6 +208,7 @@ export class LLMService {
       case "zhi1": // OpenAI
       case "zhi3": // DeepSeek  
       case "zhi4": // Perplexity
+      case "zhi5": // Grok
         return parsed.choices?.[0]?.delta?.content || null;
         
       case "zhi2": // Anthropic
