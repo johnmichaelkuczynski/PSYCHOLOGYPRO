@@ -388,77 +388,89 @@ ANTI-HEDGING RULE: Do not say "could be more developed" if work passes ALL tests
     return prompt;
   }
 
-  // Create MICRO cognitive prompt - SHOW ALL WORK, NO HIDING
+  // Create MICRO cognitive prompt - FORMAL LOGIC STRUCTURE (no hiding possible)
   createMicrocognitivePrompt(textContent: string, questions: string[], additionalContext?: string): string {
-    let prompt = `🚨 MICRO COGNITIVE ANALYSIS - EXECUTION VERIFICATION WITH PROOF 🚨
+    let prompt = `🚨 MICRO COGNITIVE ANALYSIS - FORMAL LOGIC VERIFICATION 🚨
 
-Your job: Determine if the text EXECUTES (genuine reasoning) or ANNOUNCES (fake reasoning).
+Your task: Map the text's reasoning as FORMAL LOGIC. This exposes bullshit immediately.
 
-YOU MUST SHOW YOUR WORK FOR EVERY ANSWER. Hide nothing. Show the logical chain. Show the test results. Show WHY you scored it that way.
+FOR EACH QUESTION, ANSWER WITH THIS EXACT FORMAT. NOTHING ELSE:
 
-FOR EACH QUESTION, PROVIDE EXACTLY THIS STRUCTURE (NO DEVIATIONS):
+---FORMAL STRUCTURE---
+CLAIM_1: [exact quote from text]
+CLAIM_2: [exact quote from text]  
+CLAIM_3: [exact quote from text]
 
-1️⃣ LOGICAL CHAIN (mandatory):
-   Write out the sequential claims in the text for this question:
-   Claim A: [EXACT QUOTE]
-   Claim B: [EXACT QUOTE]  
-   Claim C: [EXACT QUOTE]
-   Show dependencies: A→B (B requires A to work) or A. B. (B is independent)
+LOGIC_MAP:
+Claim1 AND/OR/IMPLIES Claim2 AND/OR/IMPLIES Claim3
 
-2️⃣ REMOVAL TEST (mandatory):
-   Pick the middle claim. Remove it mentally.
-   Question: "If I remove [Claim B], does [Claim A] still lead to [Claim C]?"
-   Answer: YES (chain works without it = ANNOUNCING) or NO (chain breaks = EXECUTING)
+LOAD_BEARING_TEST:
+Remove Claim2. Is the reasoning still valid?
+[YES = independent, announcement / NO = dependent, execution]
 
-3️⃣ UNDERSTANDING TEST (mandatory):
-   "Could a language model generate this exact reasoning chain without understanding the subject?"
-   YES (it's template logic anyone knows) or NO (requires actual subject knowledge)
+TEMPLATE_TEST:
+Is this reasoning structure known to every educated person?
+[YES = bullshit, you've seen this template / NO = requires actual knowledge]
 
-4️⃣ VERDICT (mandatory):
-   If Removal Test = YES (chain independent): PSEUDO-INTELLECTUAL, SCORE ≤ 50
-   If Understanding Test = YES (template logic): BULLSHIT, SCORE ≤ 50
-   If both NO: GENUINE EXECUTION, SCORE 50-100 based on depth
+SCORE_RULE:
+If Load_Bearing = YES: score ≤ 50
+If Template = YES: score ≤ 50
+If both NO: score 50-100
 
-5️⃣ SCORE (mandatory):
-   Show exact number. Never hedge with 65-70. Either ≤50 or 50-100+.
+FINAL_SCORE: [number only]
 
----
+---END FORMAL STRUCTURE---
 
-CRITICAL EXAMPLES:
+EXAMPLES (FOLLOW EXACTLY):
 
-FRAUDULENT EXAMPLE:
-Text: "First I analyze the concept. Then I critique the position. Finally I synthesize the view."
-LOGICAL CHAIN: 
-  - Claim A: "I analyze the concept" 
-  - Claim B: "I critique the position"
-  - Claim C: "I synthesize the view"
-  - Dependencies: A. B. C. (independent - just listing)
-REMOVAL TEST: Remove B. Does "I analyze" lead to "I synthesize"? YES - still works. INDEPENDENT.
-UNDERSTANDING TEST: Could a model generate "first...then...finally" structure? YES - it's a universal template.
-VERDICT: PSEUDO-INTELLECTUAL. Score ≤ 50.
+FRAUDULENT:
+CLAIM_1: "First I examine the philosophy."
+CLAIM_2: "Then I critique the position."
+CLAIM_3: "Finally I argue for synthesis."
 
-GENUINE EXAMPLE:
-Text: "Worship requires supernatural authority (not answerable to facts). Admiration requires only excellence (answerable to facts). This explains why cults need narrative changes (factual shifts break them) while remaining stable through resource changes."
-LOGICAL CHAIN:
-  - Claim A: "Worship = supernatural authority (immune to facts)"
-  - Claim B: "Admiration = excellence (vulnerable to facts)"  
-  - Claim C: "Cults need narrative changes; resources don't matter"
-  - Dependencies: C requires both A and B (A≠B distinction GENERATES C)
-REMOVAL TEST: Remove B (admiration definition). Does A still lead to C? NO - you need the distinction to explain why cults behave this way. LOAD-BEARING.
-UNDERSTANDING TEST: Could a model generate this without understanding why supernatural authority ≠ factual excellence? NO - requires functional reasoning.
-VERDICT: GENUINE EXECUTION. Score 80/100.
+LOGIC_MAP:
+Claim1 . Claim2 . Claim3 (dots = no connection)
 
----
+LOAD_BEARING_TEST:
+Remove Claim2. Does Claim1 still lead to Claim3? YES. They're independent.
 
-${additionalContext ? `ADDITIONAL CONTEXT: ${additionalContext}\n\n` : ''}
+TEMPLATE_TEST:
+Is "first...then...finally" a universal template? YES.
+
+FINAL_SCORE: 22
+
+---END---
+
+GENUINE:
+CLAIM_1: "Worship requires supernatural belief (non-empirical)"
+CLAIM_2: "Admiration requires only excellence (empirical)"
+CLAIM_3: "Cults survive narrative shifts but collapse on resource shifts"
+
+LOGIC_MAP:
+Claim1 ≠ Claim2 IMPLIES Claim3 (the difference generates the result)
+
+LOAD_BEARING_TEST:
+Remove Claim2. Does Claim1 alone explain why cults behave this way? NO. The distinction is essential.
+
+TEMPLATE_TEST:
+Would a random person generate this specific contrast? NO. Requires understanding what makes supernatural belief functionally different from factual excellence.
+
+FINAL_SCORE: 78
+
+---END---
+
+DO NOT ADD ANALYSIS, COMMENTARY, OR EXPLANATION. ONLY THE FORMAL STRUCTURE ABOVE.
+DO NOT EXPLAIN YOUR REASONING. THE LOGIC_MAP SPEAKS FOR ITSELF.
+
+${additionalContext ? `CONTEXT: ${additionalContext}\n\n` : ''}
 
 TEXT TO ANALYZE:
 ${textContent}
 
-QUESTIONS:
+QUESTIONS TO ANSWER:
 ${questions.map((q, i) => `${i + 1}. ${q}`).join('\n')}
 
-RESPOND WITH STRUCTURE ABOVE. SHOW ALL WORK. NO SHORTCUTS. NO HIDING.`;
+FOR EACH QUESTION, OUTPUT ONLY THE FORMAL STRUCTURE. NOTHING ELSE. START NOW:`;
 
     return prompt;
   }

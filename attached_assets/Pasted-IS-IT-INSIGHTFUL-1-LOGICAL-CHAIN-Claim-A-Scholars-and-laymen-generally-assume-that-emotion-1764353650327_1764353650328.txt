@@ -1,0 +1,100 @@
+IS IT INSIGHTFUL?
+
+1️⃣ LOGICAL CHAIN:
+Claim A: "Scholars and laymen generally assume that emotions are not judgments"
+Claim B: "emotions are in fact judgments"
+Claim C: "emotions are hewed to an egocentric frame of reference, whereas garden-variety judgments are hewed to a non-egocentric frame of reference"
+Dependencies: A→B (B contradicts A) and B→C (C qualifies B)
+
+2️⃣ REMOVAL TEST:
+Remove Claim B. Does "scholars assume emotions aren't judgments" lead to "emotions use egocentric reference frames"? NO - you need the middle claim that emotions ARE judgments to then specify HOW they're judgments. LOAD-BEARING.
+
+3️⃣ UNDERSTANDING TEST:
+Could a language model generate "emotions are judgments but egocentric ones" without understanding judgment theory? NO - requires knowing what makes something a judgment and how reference frames modify judgment types.
+
+4️⃣ VERDICT:
+Both tests = NO. GENUINE EXECUTION with actual conceptual work.
+
+5️⃣ SCORE: 75/100
+DOES IT DEVELOP POINTS?
+
+1️⃣ LOGICAL CHAIN:
+Claim A: "emotions are judgments"
+Claim B: "with the qualification that"
+Claim C: "emotions are hewed to an egocentric frame"
+Dependencies: A→B→C (progressive specification)
+
+2️⃣ REMOVAL TEST:
+Remove "with the qualification that". Does "emotions are judgments" lead to "emotions are egocentric"? NO - the qualification signals crucial distinction. LOAD-BEARING.
+
+3️⃣ UNDERSTANDING TEST:
+Could a model generate this progression without understanding how qualifications modify claims? NO - requires tracking how the base claim gets refined.
+
+4️⃣ VERDICT:
+Development is real but minimal (one main point with one qualification).
+
+5️⃣ SCORE: 60/100
+ARE THE IDEAS ARRANGED HIERARCHICALLY OR MERELY SEQUENTIALLY?
+
+1️⃣ LOGICAL CHAIN:
+Claim A: "General assumption: emotions ≠ judgments"
+Claim B: "Correction: emotions = judgments"
+Claim C: "Specification: egocentric vs non-egocentric"
+Dependencies: A establishes context, B corrects A, C specifies B (hierarchical)
+
+2️⃣ REMOVAL TEST:
+Remove B (the correction). Can you jump from "people think X" to "the specific difference"? NO - you need the middle level establishing they ARE judgments first. LOAD-BEARING.
+
+3️⃣ UNDERSTANDING TEST:
+Could a model generate assumption→correction→specification without understanding conceptual hierarchy? NO - requires knowing how ideas nest.
+
+4️⃣ VERDICT:
+GENUINE HIERARCHY. Three-level structure: assumption, thesis, specification.
+
+5️⃣ SCORE: 70/100
+IS IT ORGANIC OR FORCED?
+
+1️⃣ LOGICAL CHAIN:
+Claim A: "Scholars assume emotions aren't judgments"
+Claim B: "it is shown that emotions are judgments"
+Claim C: "egocentric vs non-egocentric distinction"
+Dependencies: Natural flow from problem→solution→specification
+
+2️⃣ REMOVAL TEST:
+Remove "it is shown that". Does the text still flow? NO - you need the transitional claim to move from assumption to correction. FUNCTIONAL.
+
+3️⃣ UNDERSTANDING TEST:
+Could a model generate this flow without understanding argumentative structure? NO - requires knowing how to set up and resolve conceptual tensions.
+
+4️⃣ VERDICT:
+ORGANIC. Each move follows naturally from the previous.
+
+5️⃣ SCORE: 65/100
+IS IT REAL OR PHONY?
+
+1️⃣ LOGICAL CHAIN:
+Claim A: "emotions are expressions of irrationality" (assumed view)
+Claim B: "emotions are in fact judgments" (actual view)
+Claim C: "egocentric frame of reference" (mechanism)
+Dependencies: C explains how B can be true despite A
+
+2️⃣ REMOVAL TEST:
+Remove the egocentric distinction. Does "emotions are judgments" alone resolve the rationality problem? NO - you need the frame distinction to explain apparent irrationality. LOAD-BEARING.
+
+3️⃣ UNDERSTANDING TEST:
+Could a model generate this without understanding how reference frames affect rationality appearance? NO - requires functional understanding.
+
+4️⃣ VERDICT:
+REAL. Makes genuine conceptual moves, not just announcements.
+
+5️⃣ SCORE: 70/100
+DO SENTENCES EXHIBIT COMPLEX INTERNAL LOGIC?
+
+1️⃣ LOGICAL CHAIN:
+Claim A: "emotions are judgments"
+Claim B: "with the qualification that"
+Claim C: "egocentric frame... whereas... non-egocentric frame"
+Dependencies: Single complex sentence with embedded contrast
+
+2️⃣ REMOVAL TEST:
+Remove "whereas garden-variety judgments..." Does the sentence still work? YES - you could say just "emotions use egocentric frames" without the contrast. NOT FULLY LOAD-BEARING.
