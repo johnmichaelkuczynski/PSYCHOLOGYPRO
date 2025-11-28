@@ -388,89 +388,101 @@ ANTI-HEDGING RULE: Do not say "could be more developed" if work passes ALL tests
     return prompt;
   }
 
-  // Create MICRO cognitive prompt - FORMAL LOGIC STRUCTURE (no hiding possible)
+  // Create MICRO cognitive prompt - SEMANTIC INTELLIGENCE (not syntax grading)
   createMicrocognitivePrompt(textContent: string, questions: string[], additionalContext?: string): string {
-    let prompt = `🚨 MICRO COGNITIVE ANALYSIS - FORMAL LOGIC VERIFICATION 🚨
+    let prompt = `🚨 MICRO COGNITIVE ANALYSIS - SEMANTIC INTELLIGENCE ASSESSMENT 🚨
 
-Your task: Map the text's reasoning as FORMAL LOGIC. This exposes bullshit immediately.
+Your task: Assess whether the text demonstrates REAL THINKING or just competent presentation.
 
-FOR EACH QUESTION, ANSWER WITH THIS EXACT FORMAT. NOTHING ELSE:
+Real thinking has four hallmarks that bullshit lacks:
+1. PREDICTIVE POWER: Framework generates NEW claims beyond what's stated
+2. DISSOLUTION: It dissolves contradictions rather than renaming them
+3. VULNERABILITY: Can articulate what would break the logic
+4. TRANSFER: Framework applies to novel cases outside the original domain
 
----FORMAL STRUCTURE---
-CLAIM_1: [exact quote from text]
-CLAIM_2: [exact quote from text]  
-CLAIM_3: [exact quote from text]
+FOR EACH QUESTION, ANSWER IN THIS EXACT FORMAT:
 
-LOGIC_MAP:
-Claim1 AND/OR/IMPLIES Claim2 AND/OR/IMPLIES Claim3
+Q: [question number and text]
 
-LOAD_BEARING_TEST:
-Remove Claim2. Is the reasoning still valid?
-[YES = independent, announcement / NO = dependent, execution]
+CORE_CLAIM: [What is the text actually claiming? 1-2 sentences max]
 
-TEMPLATE_TEST:
-Is this reasoning structure known to every educated person?
-[YES = bullshit, you've seen this template / NO = requires actual knowledge]
+PREDICTIVE_POWER:
+What new predictions does this framework make that aren't explicitly stated?
+[If none: "Framework is descriptive only" → ≤50. If has predictions: list them]
 
-SCORE_RULE:
-If Load_Bearing = YES: score ≤ 50
-If Template = YES: score ≤ 50
-If both NO: score 50-100
+DISSOLVES_OR_RENAMES:
+Does this dissolve a real contradiction or just call it different?
+[Example of dissolution: "Emotions appear irrational but ARE judgments because they're egocentric (indexed to self not world)—this EXPLAINS apparent irrationality" = DISSOLUTION]
+[Example of renaming: "Emotions are complex patterns of neural activity" = just renamed, didn't explain why they seemed irrational]
 
-FINAL_SCORE: [number only]
+VULNERABLE_POINTS:
+What assumptions would break this framework? Where is it vulnerable?
+[If text provides none: "Author doesn't acknowledge vulnerabilities" → ≤50]
 
----END FORMAL STRUCTURE---
+TRANSFER:
+Does the logic work outside original context?
+[Can you apply this framework to different domains? YES/NO. Show example.]
 
-EXAMPLES (FOLLOW EXACTLY):
+INTELLIGENCE_VERDICT:
+Based on four criteria above:
+- All four strong = 80-95 (genuine thinking with depth)
+- Three strong = 65-80 (solid reasoning, some limits)
+- Two strong = 40-65 (mixed—some insight but incomplete)
+- One or fewer = ≤40 (mostly surface)
 
-FRAUDULENT:
-CLAIM_1: "First I examine the philosophy."
-CLAIM_2: "Then I critique the position."
-CLAIM_3: "Finally I argue for synthesis."
+FINAL_SCORE: [number 1-100]
 
-LOGIC_MAP:
-Claim1 . Claim2 . Claim3 (dots = no connection)
+---
 
-LOAD_BEARING_TEST:
-Remove Claim2. Does Claim1 still lead to Claim3? YES. They're independent.
+EXAMPLE OF LOW SCORE (TEMPLATE THINKING):
 
-TEMPLATE_TEST:
-Is "first...then...finally" a universal template? YES.
+Q: IS IT INSIGHTFUL?
 
-FINAL_SCORE: 22
+CORE_CLAIM: "Emotions are complex psychological phenomena shaped by multiple factors."
 
----END---
+PREDICTIVE_POWER: None. Generic statement doesn't predict anything.
 
-GENUINE:
-CLAIM_1: "Worship requires supernatural belief (non-empirical)"
-CLAIM_2: "Admiration requires only excellence (empirical)"
-CLAIM_3: "Cults survive narrative shifts but collapse on resource shifts"
+DISSOLVES_OR_RENAMES: Just renames. Says emotions are "complex" but doesn't explain why they seem irrational.
 
-LOGIC_MAP:
-Claim1 ≠ Claim2 IMPLIES Claim3 (the difference generates the result)
+VULNERABLE_POINTS: None acknowledged.
 
-LOAD_BEARING_TEST:
-Remove Claim2. Does Claim1 alone explain why cults behave this way? NO. The distinction is essential.
+TRANSFER: Generic enough to apply anywhere (useless).
 
-TEMPLATE_TEST:
-Would a random person generate this specific contrast? NO. Requires understanding what makes supernatural belief functionally different from factual excellence.
+INTELLIGENCE_VERDICT: Template thinking. Sounds intelligent but generates no insight.
 
-FINAL_SCORE: 78
+FINAL_SCORE: 18
 
----END---
+---
 
-DO NOT ADD ANALYSIS, COMMENTARY, OR EXPLANATION. ONLY THE FORMAL STRUCTURE ABOVE.
-DO NOT EXPLAIN YOUR REASONING. THE LOGIC_MAP SPEAKS FOR ITSELF.
+EXAMPLE OF HIGH SCORE (REAL THINKING):
+
+Q: IS IT INSIGHTFUL?
+
+CORE_CLAIM: "Emotions are judgments indexed to an egocentric (self-centered) frame, while standard judgments are indexed to a non-egocentric frame."
+
+PREDICTIVE_POWER: YES. Predicts that emotions should be revisable through reframing (which they are—cognitive therapy exists). Predicts emotions should track self-relevant salience (which they do). Predicts emotions incompatible with universal truths (which they are).
+
+DISSOLVES_OR_RENAMES: DISSOLVES. Solves emotion/judgment binary by showing emotions ARE judgments but with different reference frame. This explains apparent irrationality (egocentric judgments appear irrational from objective stance). Dissolution, not renaming.
+
+VULNERABLE_POINTS: Yes. What defines "egocentric"? Are all self-relevant judgments emotions? (Some self-relevant truths feel cold.) Framework admits complexity here.
+
+TRANSFER: YES. Applies to other self-indexed phenomena (desire, preference, aesthetic judgment). Generalizable.
+
+INTELLIGENCE_VERDICT: Real thinking. Framework dissolves contradiction, generates predictions, admits limits, transfers to new domains.
+
+FINAL_SCORE: 82
+
+---
 
 ${additionalContext ? `CONTEXT: ${additionalContext}\n\n` : ''}
 
 TEXT TO ANALYZE:
 ${textContent}
 
-QUESTIONS TO ANSWER:
+QUESTIONS:
 ${questions.map((q, i) => `${i + 1}. ${q}`).join('\n')}
 
-FOR EACH QUESTION, OUTPUT ONLY THE FORMAL STRUCTURE. NOTHING ELSE. START NOW:`;
+RESPOND WITH STRUCTURE ABOVE FOR EACH QUESTION. ASSESS SEMANTICS, NOT SYNTAX.`;
 
     return prompt;
   }
