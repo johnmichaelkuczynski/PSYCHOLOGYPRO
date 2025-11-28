@@ -61,7 +61,7 @@ export default function ResultsPanel({ analysisId, onDiscussionToggle, onNewAnal
   const [isPaused, setIsPaused] = useState(false);
   const [batches, setBatches] = useState<BatchData[]>([]);
   const [currentBatch, setCurrentBatch] = useState(1);
-  const [totalBatches] = useState(4); // 18 questions / 5 per batch = 4 batches (rounded)
+  const [totalBatches, setTotalBatches] = useState(0); // Track dynamically
   const [summary, setSummary] = useState("");
   const [delayProgress, setDelayProgress] = useState(0);
   const [streamingContent, setStreamingContent] = useState<{[key: number]: string}>({});
@@ -104,10 +104,18 @@ export default function ResultsPanel({ analysisId, onDiscussionToggle, onNewAnal
             [streamData.batchNumber!]: stripMarkdown(streamData.rawContent!)
           }));
           setCurrentBatch(streamData.batchNumber);
+          // Update total batches if we see a higher batch number
+          if (streamData.batchNumber > totalBatches) {
+            setTotalBatches(streamData.batchNumber);
+          }
         }
       } else if (streamData.type === "batch_complete") {
         // When batch completes, keep the final raw response visible
         if (streamData.batchNumber && streamData.finalRawResponse) {
+          // Update total batches if needed
+          if (streamData.batchNumber > totalBatches) {
+            setTotalBatches(streamData.batchNumber);
+          }
           setBatches(prev => {
             const batchData: BatchData = {
               batchNumber: streamData.batchNumber!,
