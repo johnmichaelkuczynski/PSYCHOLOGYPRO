@@ -388,80 +388,77 @@ ANTI-HEDGING RULE: Do not say "could be more developed" if work passes ALL tests
     return prompt;
   }
 
-  // Create MICRO cognitive prompt - same questions but much shorter responses
+  // Create MICRO cognitive prompt - SHOW ALL WORK, NO HIDING
   createMicrocognitivePrompt(textContent: string, questions: string[], additionalContext?: string): string {
-    let prompt = `🚨 MICRO COGNITIVE ANALYSIS - EXECUTION VERIFICATION MODE 🚨
+    let prompt = `🚨 MICRO COGNITIVE ANALYSIS - EXECUTION VERIFICATION WITH PROOF 🚨
 
-CRITICAL: Detect whether text EXECUTES reasoning or merely ANNOUNCES it.
+Your job: Determine if the text EXECUTES (genuine reasoning) or ANNOUNCES (fake reasoning).
 
-🚨 MANDATORY SCORING RULE 🚨
-Score is DETERMINED by test results, not intuition:
-- IF BULLSHIT TEST = YES (could write without understanding) → SCORE MUST BE ≤ 50, PERIOD
-- IF PSEUDO-INTELLECTUAL RED FLAGS FOUND → SCORE MUST BE ≤ 50, PERIOD  
-- IF EXECUTION TEST FAILS (announces instead of executes) → SCORE MUST BE ≤ 50, PERIOD
-- IF ALL TESTS PASS → THEN score based on quality (50-100)
+YOU MUST SHOW YOUR WORK FOR EVERY ANSWER. Hide nothing. Show the logical chain. Show the test results. Show WHY you scored it that way.
 
-YOU CANNOT GIVE HIGH SCORES TO FLAGGED TEXT. The tests override intuition.
+FOR EACH QUESTION, PROVIDE EXACTLY THIS STRUCTURE (NO DEVIATIONS):
 
-🚨 BULLSHIT TEST (MANDATORY) 🚨
-"Could someone write this without understanding the subject?"
-- YES = MUST score ≤ 50 (no exceptions, no hedging)
-- NO = continue analysis
+1️⃣ LOGICAL CHAIN (mandatory):
+   Write out the sequential claims in the text for this question:
+   Claim A: [EXACT QUOTE]
+   Claim B: [EXACT QUOTE]  
+   Claim C: [EXACT QUOTE]
+   Show dependencies: A→B (B requires A to work) or A. B. (B is independent)
 
-🚨 PSEUDO-INTELLECTUAL RED FLAGS (AUTOMATIC CEILING: 50) 🚨
-- Empty sequencing: "First... Then... Finally..." WITHOUT logical dependencies between steps
-- Announced claims without execution: "I develop a novel framework" but framework never appears in text
-- Free variables: Points that connect to nothing else
-- Independent sentences: Remove any sentence, does nothing break? = no logical chain exists
-- Pattern without substance: Same structure repeated with different topics
+2️⃣ REMOVAL TEST (mandatory):
+   Pick the middle claim. Remove it mentally.
+   Question: "If I remove [Claim B], does [Claim A] still lead to [Claim C]?"
+   Answer: YES (chain works without it = ANNOUNCING) or NO (chain breaks = EXECUTING)
 
-🚨 EXECUTION TEST 🚨
-Does EACH SENTENCE/CLAIM generate the NEXT one?
-- EXECUTES: "X means Y; therefore Z" - clear dependency
-- ANNOUNCES: "First X. Second Y. Third Z." - no logical dependency, just listing
+3️⃣ UNDERSTANDING TEST (mandatory):
+   "Could a language model generate this exact reasoning chain without understanding the subject?"
+   YES (it's template logic anyone knows) or NO (requires actual subject knowledge)
 
-🚨 LOGICAL CHAIN TEST 🚨
-Map claims in order: Claim1 → Claim2 → Claim3
-Remove Claim2: Does chain still work?
-- NO (chain breaks) = load-bearing = EXECUTING = can score higher
-- YES (chain still works) = independent = ANNOUNCING = must score ≤ 50
+4️⃣ VERDICT (mandatory):
+   If Removal Test = YES (chain independent): PSEUDO-INTELLECTUAL, SCORE ≤ 50
+   If Understanding Test = YES (template logic): BULLSHIT, SCORE ≤ 50
+   If both NO: GENUINE EXECUTION, SCORE 50-100 based on depth
 
-`;
+5️⃣ SCORE (mandatory):
+   Show exact number. Never hedge with 65-70. Either ≤50 or 50-100+.
 
-    if (additionalContext) {
-      prompt += `Additional Context: ${additionalContext}\n\n`;
-    }
-    
-    prompt += `TEXT TO ANALYZE:
+---
+
+CRITICAL EXAMPLES:
+
+FRAUDULENT EXAMPLE:
+Text: "First I analyze the concept. Then I critique the position. Finally I synthesize the view."
+LOGICAL CHAIN: 
+  - Claim A: "I analyze the concept" 
+  - Claim B: "I critique the position"
+  - Claim C: "I synthesize the view"
+  - Dependencies: A. B. C. (independent - just listing)
+REMOVAL TEST: Remove B. Does "I analyze" lead to "I synthesize"? YES - still works. INDEPENDENT.
+UNDERSTANDING TEST: Could a model generate "first...then...finally" structure? YES - it's a universal template.
+VERDICT: PSEUDO-INTELLECTUAL. Score ≤ 50.
+
+GENUINE EXAMPLE:
+Text: "Worship requires supernatural authority (not answerable to facts). Admiration requires only excellence (answerable to facts). This explains why cults need narrative changes (factual shifts break them) while remaining stable through resource changes."
+LOGICAL CHAIN:
+  - Claim A: "Worship = supernatural authority (immune to facts)"
+  - Claim B: "Admiration = excellence (vulnerable to facts)"  
+  - Claim C: "Cults need narrative changes; resources don't matter"
+  - Dependencies: C requires both A and B (A≠B distinction GENERATES C)
+REMOVAL TEST: Remove B (admiration definition). Does A still lead to C? NO - you need the distinction to explain why cults behave this way. LOAD-BEARING.
+UNDERSTANDING TEST: Could a model generate this without understanding why supernatural authority ≠ factual excellence? NO - requires functional reasoning.
+VERDICT: GENUINE EXECUTION. Score 80/100.
+
+---
+
+${additionalContext ? `ADDITIONAL CONTEXT: ${additionalContext}\n\n` : ''}
+
+TEXT TO ANALYZE:
 ${textContent}
 
-QUESTIONS TO ANSWER:
+QUESTIONS:
 ${questions.map((q, i) => `${i + 1}. ${q}`).join('\n')}
 
-FOR EACH QUESTION:
-1. BULLSHIT TEST: YES or NO? (Can someone write this without understanding?)
-2. PSEUDO-INTELLECTUAL FLAGS: Present? YES or NO?
-3. EXECUTION TEST: EXECUTES or ANNOUNCES?
-4. LOGICAL CHAIN: Map 2-3 claims. Show dependencies.
-5. SCORE: Apply mandatory rule above
-   - If ANY test failed: SCORE ≤ 50 (no exceptions)
-   - If ALL tests passed: SCORE 50-100 based on depth/originality
-
-EXAMPLE OF FORCED CEILING:
-Text: "First, philosophy examines foundations. Second, logic applies rules. Third, conclusions emerge."
-BULLSHIT TEST: YES - anyone can write this template
-PSEUDO-FLAGS: YES - "First...Second...Third" with no logical generation
-EXECUTION: ANNOUNCES (just listing steps, not executing logic)
-MANDATORY SCORE: ≤ 50 (PERIOD - cannot be higher)
-
-EXAMPLE OF LEGITIMATE SCORING:
-Text: "Worship requires supernatural belief (not answerable to empirical facts). High regard requires only admiration (answerable to fact). This explains why cults survive via narrative shift but fall via resource shift."
-BULLSHIT TEST: NO - requires understanding functional difference between faith-based and fact-based authority
-PSEUDO-FLAGS: NO - each claim generates next; chain is necessary
-EXECUTION: EXECUTES (each claim depends on prior ones; remove any, chain breaks)
-SCORE: 75+ (all tests pass; quality shows genuine reasoning)
-
-CRITICAL: Do not hedging by scoring 65-70 "just to be safe". The tests are the safety. If tests pass → score properly. If tests fail → stay ≤50.`;
+RESPOND WITH STRUCTURE ABOVE. SHOW ALL WORK. NO SHORTCUTS. NO HIDING.`;
 
     return prompt;
   }
