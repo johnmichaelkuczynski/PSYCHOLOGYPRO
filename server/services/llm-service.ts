@@ -439,70 +439,32 @@ CONFIRMATION: ALL TESTS PASSED. Chain airtight, all distinctions load-bearing, a
     return prompt;
   }
 
-  // Create MICRO psychological prompt - same questions but much shorter responses  
+  // Create MICRO psychological prompt - ULTRA CONCISE
   createMicropsychologicalPrompt(textContent: string, questions: string[], additionalContext?: string): string {
-    let prompt = `🚨 MICRO PSYCHOLOGICAL ANALYSIS - ULTRA-CONCISE MODE 🚨
+    return `MICRO PSYCHOLOGICAL - ONE SENTENCE PER QUESTION THEN VERDICT
 
-CRITICAL: PROVIDE ONLY 1-2 SENTENCE RESPONSES PER QUESTION FOR SPEED.
+TEXT: ${textContent}
+${additionalContext ? `\nCONTEXT: ${additionalContext}` : ''}
 
-KEY INSTRUCTION: Your responses must be extremely brief - maximum 1-2 sentences per question. Focus on the core psychological assessment without lengthy explanations.
+For each question: 1 sentence assessment, then VERDICT: [Assessment type]
 
-`;
+${questions.map((q, i) => `${i + 1}. ${q}\nAnswer: [1 sentence] VERDICT: [Healthy/Defended/Fragmented/Integrated/Other]`).join('\n\n')}
 
-    if (additionalContext) {
-      prompt += `Additional Context: ${additionalContext}\n\n`;
-    }
-    
-    prompt += `TEXT TO ANALYZE:
-${textContent}
-
-QUESTIONS TO ANSWER:
-${questions.map((q, i) => `${i + 1}. ${q}`).join('\n')}
-
-INSTRUCTIONS:
-First, provide a 1-sentence summary and categorization.
-
-For each question:
-1. Give a direct 1-2 sentence psychological assessment
-2. Score from 1-100 (high scores = good performance)  
-3. One sentence justification
-
-KEEP ALL RESPONSES EXTREMELY BRIEF FOR SPEED.`;
-
-    return prompt;
+NO elaboration. NO scoring. Sentence + verdict for each.`;
   }
 
-  // Create MICRO psychopathological prompt - same questions but much shorter responses
+  // Create MICRO psychopathological prompt - ULTRA CONCISE
   createMicropsychopathologicalPrompt(textContent: string, questions: string[], additionalContext?: string): string {
-    let prompt = `🚨 MICRO PSYCHOPATHOLOGICAL ANALYSIS - ULTRA-CONCISE MODE 🚨
+    return `MICRO PSYCHOPATHOLOGICAL - ONE SENTENCE PER QUESTION THEN VERDICT
 
-CRITICAL: PROVIDE ONLY 1-2 SENTENCE RESPONSES PER QUESTION FOR SPEED.
+TEXT: ${textContent}
+${additionalContext ? `\nCONTEXT: ${additionalContext}` : ''}
 
-KEY INSTRUCTION: Your responses must be extremely brief - maximum 1-2 sentences per question. Focus on the core pathological assessment without lengthy explanations.
+For each question: 1 sentence assessment, then VERDICT: [Category]
 
-`;
+${questions.map((q, i) => `${i + 1}. ${q}\nAnswer: [1 sentence] VERDICT: [Clear/Distorted/Delusional/Organized/Fragmented]`).join('\n\n')}
 
-    if (additionalContext) {
-      prompt += `Additional Context: ${additionalContext}\n\n`;
-    }
-    
-    prompt += `TEXT TO ANALYZE:
-${textContent}
-
-QUESTIONS TO ANSWER:
-${questions.map((q, i) => `${i + 1}. ${q}`).join('\n')}
-
-INSTRUCTIONS:
-First, provide a 1-sentence summary and categorization.
-
-For each question:
-1. Give a direct 1-2 sentence psychopathological assessment
-2. Score from 1-100 (high scores = good performance)  
-3. One sentence justification
-
-KEEP ALL RESPONSES EXTREMELY BRIEF FOR SPEED.`;
-
-    return prompt;
+NO elaboration. NO scoring. Sentence + verdict for each.`;
   }
 
   // Comprehensive Cognitive Questions (more extensive set)

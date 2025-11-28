@@ -83,6 +83,8 @@ export class StreamingService {
       throw new Error("Analysis not found");
     }
 
+    console.log(`🔍 ANALYSIS ROUTING: ID=${analysisId}, TYPE=${analysis.type}, PROVIDER=${analysis.llmProvider}`);
+
     // Check if user has sufficient credits (only for authenticated users)
     if (analysis.userId) {
       const requiredCredits = this.getRequiredCredits(analysis.type);
@@ -101,6 +103,7 @@ export class StreamingService {
 
     try {
       // Process the analysis and ensure results are saved
+      console.log(`📋 EXECUTING SWITCH: analysis.type = '${analysis.type}'`);
       switch (analysis.type) {
         case "cognitive":
           await this.processCognitiveAnalysis(analysis);
@@ -599,11 +602,13 @@ export class StreamingService {
 
   // Process Micro Cognitive Analysis (ultra-fast, concise responses)
   private async processMicrocognitiveAnalysis(analysis: Analysis): Promise<void> {
+    console.log(`✅ MICRO COGNITIVE ANALYSIS STARTED - ID: ${analysis.id}`);
     // Step 1: Generate and stream summary
     const summary = await this.streamSummary(analysis);
 
     // Step 2: Process questions in 1 batch with micro prompts
     const questions = this.llmService.getMicrocognitiveQuestions();
+    console.log(`📝 MICRO COGNITIVE QUESTIONS: ${questions.length} questions, first: "${questions[0]}"`);
     const batches = this.createBatches(questions, 100);
     const batchResults = await this.processMicroBatchesWithResults(analysis, batches, 'microcognitive');
 
@@ -621,11 +626,13 @@ export class StreamingService {
 
   // Process Micro Psychological Analysis (ultra-fast, concise responses - 1 batch)
   private async processMicropsychologicalAnalysis(analysis: Analysis): Promise<void> {
+    console.log(`✅ MICRO PSYCHOLOGICAL ANALYSIS STARTED - ID: ${analysis.id}`);
     // Step 1: Generate and stream summary
     const summary = await this.streamSummary(analysis);
 
     // Step 2: Process questions in 1 batch with micro prompts
     const questions = this.llmService.getMicropsychologicalQuestions();
+    console.log(`📝 MICRO PSYCHOLOGICAL QUESTIONS: ${questions.length} questions, first: "${questions[0]}"`);
     const batches = this.createBatches(questions, 100);
     const batchResults = await this.processMicroBatchesWithResults(analysis, batches, 'micropsychological');
 
@@ -643,11 +650,13 @@ export class StreamingService {
 
   // Process Micro Psychopathological Analysis (ultra-fast, concise responses - 1 batch)
   private async processMicropsychopathologicalAnalysis(analysis: Analysis): Promise<void> {
+    console.log(`✅ MICRO PSYCHOPATHOLOGICAL ANALYSIS STARTED - ID: ${analysis.id}`);
     // Step 1: Generate and stream summary
     const summary = await this.streamSummary(analysis);
 
     // Step 2: Process questions in 1 batch with micro prompts
     const questions = this.llmService.getMicropsychopathologicalQuestions();
+    console.log(`📝 MICRO PSYCHOPATHOLOGICAL QUESTIONS: ${questions.length} questions, first: "${questions[0]}"`);
     const batches = this.createBatches(questions, 100);
     const batchResults = await this.processMicroBatchesWithResults(analysis, batches, 'micropsychopathological');
 
