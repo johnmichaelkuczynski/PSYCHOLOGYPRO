@@ -644,67 +644,39 @@ KEEP ALL RESPONSES EXTREMELY BRIEF FOR SPEED.`;
     ];
   }
 
-  // MBTI Questions (Normal)
+  // MBTI Questions (Normal) - DISTINCT, NOT REPETITIVE
   getMBTIQuestions(): string[] {
     return [
-      "I. INTROVERSION VS EXTRAVERSION: Does the text emphasize inner thoughts and reflection, or external events and social interaction?",
-      "I. INTROVERSION VS EXTRAVERSION: Is the author more focused on subjective experience (\"I think/feel\") or shared/group dynamics (\"we,\" \"people\")?",
-      "I. INTROVERSION VS EXTRAVERSION: Does the work explore solitude, retreat, and internal processing—or engagement, action, or outward expression?",
-      "I. INTROVERSION VS EXTRAVERSION: Are ideas developed internally and abstractly—or through dialogue, examples, and external interactions?",
-      "I. INTROVERSION VS EXTRAVERSION: Is emotional expression restrained and implied—or direct, open, and outwardly engaged?",
-      
-      "II. SENSING VS INTUITION: Does the writing focus on concrete details, sensory description, and observable facts (S) or possibilities, patterns, and abstractions (N)?",
-      "II. SENSING VS INTUITION: Are examples literal and rooted in physical experience—or metaphoric, symbolic, or hypothetical?",
-      "II. SENSING VS INTUITION: Does the author favor step-by-step description—or leaps to conceptual insight and synthesis?",
-      "II. SENSING VS INTUITION: Are time, sequence, and practical procedures emphasized—or timeless principles and overarching meaning?",
-      "II. SENSING VS INTUITION: Does the author show trust in past experience and tradition—or interest in innovation, speculation, and potential futures?",
-      
-      "III. THINKING VS FEELING: Is the reasoning structured around logic, consistency, and objective principles—or values, ethics, and human impact?",
-      "III. THINKING VS FEELING: Does the author handle disagreement through argument and critique—or through empathy, harmony, and relational tone?",
-      "III. THINKING VS FEELING: Are judgments justified by cause-and-effect reasoning—or by moral relevance and personal meaning?",
-      "III. THINKING VS FEELING: Does the text prioritize truth over tone—or tone over blunt accuracy?",
-      "III. THINKING VS FEELING: Are emotions analyzed as data—or used as persuasive elements tied to human wellbeing?",
-      
-      "IV. JUDGING VS PERCEIVING: Is the structure of the writing tight, organized, and conclusive—or open-ended, exploratory, and flexible?",
-      "IV. JUDGING VS PERCEIVING: Does the author express certainty and closure—or ambiguity and willingness to leave questions unresolved?",
-      "IV. JUDGING VS PERCEIVING: Is time handled with plans, deadlines, and deliberate pacing—or spontaneity and fluid transitions?",
-      "IV. JUDGING VS PERCEIVING: Are definitions fixed and categories stable—or shifting, provisional, and context-dependent?",
-      "IV. JUDGING VS PERCEIVING: Does the argument move linearly toward conclusions—or circle, revise, and adapt as it unfolds?",
-      
-      "V. DEEPER INDIRECT MBTI SIGNALS: Does the text show preference for systemic analysis—or narrative, emotional resonance?",
-      "V. DEEPER INDIRECT MBTI SIGNALS: Are values universalized and principled—or personal and relational?",
-      "V. DEEPER INDIRECT MBTI SIGNALS: Does the author rely on internal intuition (private insight) or external data and observation?",
-      "V. DEEPER INDIRECT MBTI SIGNALS: Is conflict treated as a problem to solve logically—or to reconcile interpersonally?",
-      "V. DEEPER INDIRECT MBTI SIGNALS: Does the work prioritize control, predictability, and structure—or openness to uncertainty and adaptation?",
-      "V. DEEPER INDIRECT MBTI SIGNALS: Is language precise and utilitarian—or expressive, aesthetic, or symbolic?",
-      "V. DEEPER INDIRECT MBTI SIGNALS: Does the narrative voice depend on established rules—or break conventions playfully or freely?",
-      "V. DEEPER INDIRECT MBTI SIGNALS: Are future possibilities extrapolated logically—or imagined freely and creatively?",
-      "V. DEEPER INDIRECT MBTI SIGNALS: Do characters (or the narrator) suppress personal feelings to maintain objectivity—or elevate emotional truth?",
-      "V. DEEPER INDIRECT MBTI SIGNALS: Is the tone disciplined and purposeful—or improvisational and fluid?"
+      "ENERGY SOURCE - Does the author draw energy from internal analysis and independent thinking, or from interaction and external feedback?",
+      "INFORMATION GATHERING - What type of information dominates? Specific facts/details/experience, or broader patterns/connections/possibilities?",
+      "DECISION CRITERIA - When evaluating ideas, does the author prioritize logical consistency and objective principles, or human impact and alignment with values?",
+      "LIFESTYLE PREFERENCE - Is the approach structured, planned, and conclusive, or exploratory, adaptive, and open to multiple outcomes?",
+      "FOCUS OF ATTENTION - Does the author dwell on inner meanings and implications, or external realities and immediate contexts?",
+      "HOW IDEAS DEVELOP - Do ideas emerge from synthesis of many angles and possibilities (breadth), or from deep analysis of core principles (depth)?",
+      "CONFLICT RESOLUTION - Are conflicts resolved through logical argument/winning the point, or through seeking understanding and harmony?",
+      "CERTAINTY COMFORT - Does the author seek definitive answers and closure, or accept ambiguity and remain open to revision?",
+      "LANGUAGE STYLE - Is language precise, technical, and efficient, or evocative, rich, and focused on nuance?",
+      "RISK ORIENTATION - Does the author prefer proven methods and established tradition, or experimentation and novel approaches?"
     ];
   }
 
-  // Comprehensive MBTI Questions (Extended with deeper analysis)
+  // Comprehensive MBTI Questions (Extended with deeper analysis) - 20 distinct questions
   getComprehensiveMBTIQuestions(): string[] {
     return [
+      // Core 10 questions
       ...this.getMBTIQuestions(),
       
-      // Additional deep cognitive function analysis
-      "COGNITIVE FUNCTIONS - NI/NE: Does the text reveal patterns of introverted intuition (Ni: convergent vision, singular insight) or extraverted intuition (Ne: divergent possibilities, multiple connections)?",
-      "COGNITIVE FUNCTIONS - SI/SE: Does sensory engagement show introverted sensing (Si: internal sensory memory, comfort with familiar) or extraverted sensing (Se: external sensory present, engagement with immediate)?",
-      "COGNITIVE FUNCTIONS - TI/TE: Does logical structure demonstrate introverted thinking (Ti: internal logical consistency, precision) or extraverted thinking (Te: external efficiency, objective organization)?",
-      "COGNITIVE FUNCTIONS - FI/FE: Does value judgment reflect introverted feeling (Fi: internal value alignment, authenticity) or extraverted feeling (Fe: external harmony, social rapport)?",
-      
-      // Communication style depth
-      "COMMUNICATION DEPTH: Does the author's communication prioritize depth over breadth, or breadth over depth?",
-      "ABSTRACTION PREFERENCE: How does the author balance abstract concepts versus concrete applications?",
-      "INTERPERSONAL STANCE: Does the writing reveal comfort with interpersonal tension or preference for interpersonal harmony?",
-      "DECISION-MAKING EVIDENCE: What evidence exists for how the author weighs logical analysis versus human considerations in complex decisions?",
-      "INFORMATION PROCESSING: Does the text suggest preference for gathering more information or reaching conclusions?",
-      
-      // Additional contextual signals
-      "STRESS RESPONSES: Are there any indicators of how the author responds under stress or pressure based on their writing?",
-      "MOTIVATION PATTERNS: What underlying motivations can be inferred about what drives the author's intellectual or creative work?"
+      // Extended 10 - addressing different analysis angles
+      "COMPLEXITY TOLERANCE - Does the author embrace intricate, multi-layered problems or prefer clear-cut, straightforward issues?",
+      "PROBLEM-SOLVING APPROACH - When faced with a problem, does the author brainstorm multiple solutions first or narrow down to the best one immediately?",
+      "SOCIAL ENERGY DISPLAY - Is the author's writing collaborative and inviting readers in, or independent and self-contained?",
+      "FUTURE ORIENTATION - Does the text emphasize what could be (possibilities, potential) or what is (current reality, facts)?",
+      "CONSISTENCY IMPORTANCE - How important is maintaining logical consistency versus adapting positions based on new information?",
+      "CRITICISM RESPONSE - When encountering opposing views, does the author seek to refute them or understand them?",
+      "DETAIL LEVEL - Does the author get lost in specifics or gloss over them to see the bigger picture?",
+      "SPONTANEITY COMFORT - Is the writing planned and deliberate or improvisational and reactive?",
+      "VALUE EXPRESSION - Are personal values explicitly stated and central, or implicit and secondary to facts?",
+      "WORLD VIEW - Is the world fundamentally chaotic (requiring constant adaptation) or orderly (requiring clear systems)?"
     ];
   }
 
