@@ -82,7 +82,7 @@ export type Discussion = typeof discussions.$inferSelect;
 export type InsertTransaction = z.infer<typeof insertTransactionSchema>;
 export type Transaction = typeof transactions.$inferSelect;
 
-export const LLMProvider = z.enum(["zhi1", "zhi2", "zhi3", "zhi4"]);
+export const LLMProvider = z.enum(["zhi1", "zhi2", "zhi3", "zhi4", "zhi5"]);
 export const AnalysisType = z.enum([
   "cognitive",
   "comprehensive-cognitive", 

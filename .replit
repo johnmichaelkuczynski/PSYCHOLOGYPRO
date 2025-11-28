@@ -15,6 +15,10 @@ localPort = 5000
 externalPort = 80
 
 [[ports]]
+localPort = 39403
+externalPort = 3001
+
+[[ports]]
 localPort = 41557
 externalPort = 3002
 
@@ -48,3 +52,8 @@ waitForPort = 5000
 
 [agent]
 integrations = ["perplexity_v0:1.0.0", "javascript_anthropic:1.0.0", "javascript_object_storage:1.0.0", "javascript_database:1.0.0", "javascript_stripe:1.0.0"]
+
+[userenv]
+
+[userenv.shared]
+VITE_STRIPE_PUBLIC_KEY = "pk_test_placeholder"

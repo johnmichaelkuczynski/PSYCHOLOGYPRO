@@ -28,6 +28,11 @@ export class LLMService {
       baseUrl: "https://api.perplexity.ai",
       model: "sonar-pro",
     },
+    zhi5: {
+      apiKey: process.env.XAI_API_KEY || process.env.API_KEY || "",
+      baseUrl: "https://api.x.ai/v1",
+      model: "grok-2",
+    },
   };
 
   async *streamResponse(
@@ -90,6 +95,19 @@ export class LLMService {
           break;
 
         case "zhi4": // Perplexity
+          headers = {
+            "Authorization": `Bearer ${config.apiKey}`,
+            "Content-Type": "application/json",
+          };
+          requestBody = {
+            model: config.model,
+            messages,
+            stream: true,
+          };
+          endpoint = `${config.baseUrl}/chat/completions`;
+          break;
+
+        case "zhi5": // Grok (xAI)
           headers = {
             "Authorization": `Bearer ${config.apiKey}`,
             "Content-Type": "application/json",
