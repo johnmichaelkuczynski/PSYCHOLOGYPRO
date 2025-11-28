@@ -254,128 +254,98 @@ export class LLMService {
 
   // Create comprehensive cognitive prompt with revised intelligence protocol
   createCognitivePrompt(textContent: string, questions: string[], additionalContext?: string): string {
-    let prompt = `🚨 MANDATORY COMPREHENSIVE INTELLIGENCE ASSESSMENT PROTOCOL 🚨
+    let prompt = `🚨 MANDATORY EVIDENCE-BASED INTELLIGENCE ASSESSMENT PROTOCOL 🚨
 
-CRITICAL: You MUST read, understand, and apply EVERY WORD of these instructions before answering ANY question.
+CRITICAL: You MUST apply EVERY RULE in this protocol. Non-compliance = ASSESSMENT FAILURE.
 
-METAPOINT 1: THIS IS NOT A GRADING APP. You grade the intelligence of what you are given. If you are given brilliant fragment, you give it a high score. You are not grading essays. You are not looking for completeness (unless the text you are given is clearly such that evaluating intelligence coincides with applying a grading-based metric). You tell the LLM not to 'grade'; their job is to answer the questions, period, and to do so on the basis of the text given, making zero assumptions about whether it is complete or incomplete, or for school or for some other context.
+🚨 MANDATORY CITATION REQUIREMENT 🚨
+For EVERY score you give, you MUST:
+1. Quote at least one specific sentence or phrase from the text (use quotation marks)
+2. Explain how that quote proves your point
+3. Never give a high score without multiple cited examples
 
-METAPOINT 2: DO NOT OVERVALUE TURNS OF PHRASE. An author speaking confidently is not necessarily "shutting down modes of inquiry". In fact, it is likely to be the opposite; by putting a clear stake in the ground, he is probably opening them. Another example: casual speech does not mean disorganized thoughts. Don't judge a book by its cover.
+If you cannot cite specific evidence from the text to justify a claim, that claim is INVALID and the score must be lowered.
 
-METAPOINT 3: The app should always (in both normal and comprehensive mode) start by summarizing the text and also categorizing it.
+🚨 PSEUDO-INTELLECTUAL RED FLAGS (DOCK SCORE TO <50) 🚨
+LOOK FOR AND PENALIZE:
+- Jargon inflation without explanation: Using technical terms without defining them or showing how they advance the argument
+- Circular structure: Restating the same point in different words without adding logical content (Example from paradigm: "Transcendental empiricism is... a philosophy of mental content. It attempts to dissolve... mental content")
+- Empty sequencing: "First... Then... Finally..." structure that organizes topics rather than developing ideas logically
+- Name-dropping without conceptual work: Citing authors/theories without explaining what they contribute to the argument
+- Non-sequiturs: Claims that don't follow from premises (Example: "X is true. Therefore, Y" when X tells us nothing about Y)
+- Academic costume: Using prestigious terminology to disguise lack of substantive thought
 
-METAPOINT 4: The app should not change the grading based on the category of the text: if a text is categorized as 'advanced scholarship', it should still evaluate it with respect to the general population, not with respect only to 'advanced scholarly works.'
+🚨 GENUINE INTELLIGENCE MARKERS (SCORE 75+) 🚨
+REWARD:
+- Compression: Multiple complex ideas woven into single sentences with each word doing work
+- Conceptual friction: Ideas in genuine tension, creating intellectual resistance and depth
+- Non-formulaic development: New ideas generated from prior claims, not just accumulated
+- Inferential movement: Each new point follows necessarily or provocatively from what came before
+- Original distinctions: Novel category separations or conceptual innovations not in textbooks
+- Clarity under rigor: Complex ideas expressed simply without dumbing down or avoiding rigor
 
-METAPOINT 5: THIS IS NOT A GRADING APP. DO NOT PENALIZE BOLDNESS. DO NOT TAKE POINTS AWAY FOR INSIGHTS THAT, IF CORRECT, STAND ON THEIR OWN. GET RID OF THE IDEA THAT "ARGUMENTATION" IS WHAT MAKES SOMETHING SMART; IT ISN'T. WHAT MAKES SOMETHING SMART IS THAT IT IS SMART (INSIGHTFUL). PERIOD.
+🚨 THE PHONINESS TEST 🚨
+For any sophisticated-sounding passage:
+- Replace key terms with nonsense words (flibber, blibber, glox, etc.)
+- Does the argument still read coherently? YES = Phony (SCORE <50)
+- Does the argument collapse? YES = Genuine (continue analysis)
+Example: "Transcendental empiricism attempts to dissolve epistemological dilemmas" → "Flibber glox attempts to dissolve blibber arguments" - still reads fine = PHONY
 
-METAPOINT 6: A SCORE OF N/100 MEANS THAT (100 MINUS N)/100 ARE SMARTER (E.G. 83/100 MEANS THAT 170/1000 PEOPLE IN WALMART ARE RUNNING RINGS AROUND THE AUTHOR).
+🚨 METAPOINTS 🚨
 
-PARADIGM OF PHONY PSEUDO-INTELLECTUAL TEXT:
-The following passage is to be used as a paradigm of a phony, pseudo-intellectual, not actually intelligent passage that is easily mistaken for being actually intelligent:
+METAPOINT 1: THIS IS NOT A GRADING APP. You analyze the actual intelligence present. Brilliant fragments get high scores. You answer the specific questions based on the text, not on what's missing.
 
-"In this dissertation, I critically examine the philosophy of transcendental empiricism. Transcendental empiricism is, among other things, a philosophy of mental content. It attempts to dissolve an epistemological dilemma of mental content by splitting the difference between two diametrically opposed accounts of content. John McDowell's minimal empiricism and Richard Gaskin's minimalist empiricism are two versions of transcendental empiricism. Transcendental empiricism itself originates with McDowell's work. This dissertation is divided into five parts. First, in the Introduction, I state the Wittgensteinian metaphilosophical orientation of transcendental empiricism. This metaphilosophical approach provides a plateau upon which much of the rest of this work may be examined. Second, I offer a detailed description of McDowell's minimal empiricism. Third, I critique Gaskin's critique and modification of McDowell's minimal empiricism. I argue that (1) Gaskin's critiques are faulty and that (2) Gaskin's minimalist empiricism is very dubious. Fourth, I scrutinize the alleged credentials of McDowell's minimal empiricism. I argue that McDowell's version of linguistic idealism is problematic. I then comment on a recent dialogue between transcendental empiricism and Hubert Dreyfus's phenomenology. The dialogue culminates with Dreyfus's accusation of the "Myth of the Mental." I argue that this accusation is correct in which case McDowell's direct realism is problematic. I conclude that minimal empiricism does not dissolve the dilemma of mental content. Finally, I argue that Tyler Burge successfully undermines the doctrine of disjunctivism, but disjunctivism is crucial for transcendental empiricism. Ultimately, however, I aim to show that transcendental empiricism is an attractive alternative to philosophies of mental content."
+METAPOINT 2: DO NOT PENALIZE SIMPLICITY OR CLARITY. Simple sentences can contain genius. Complex jargon can contain garbage. Judge by actual content, not presentation.
 
-PARADIGMS OF GENUINE INTELLIGENCE:
-Use the following paragraphs as examples of how a single paragraph can compress many intelligible and plausible claims into a paragraph, while also providing the requisite definitions (or avoiding the need for definitions):
+METAPOINT 3: Always start with a summary and categorization, then analyze based on actual content, not category. Academic writing is judged the same as casual writing.
 
-"One cannot have the concept of a red object without having the concept of an extended object. But the word "red" doesn't contain the word "extended." In general, our concepts are interconnected in ways in which the corresponding words are not interconnected. This is not an accidental fact about the English language or about any other language: it is inherent in what a language is that the cognitive abilities corresponding to a person's abilities to use words cannot possibly be reflected in semantic relations holding among those words. This fact in its turn is a consequence of the fact that expressions are, whereas concepts are not, digital structures, for which reason the ways in which cognitive abilities interact cannot possibly bear any significant resemblance to the ways in which expressions interact. Consequently, there is no truth to the contention that our thought-processes are identical with, or bear any resemblance to, the digital computations that mediate computer-activity."
+METAPOINT 4: CORRECT FOR INSTITUTIONAL BIAS. The default assumption is skepticism, not deference. Fancy terminology = liability unless it carries weight.
 
-"Sense-perceptions do not have to be deciphered if their contents are to be uploaded, the reason being that they are presentations, not representations. Linguistic expressions do have to be deciphered if their contents are to be uploaded, the reason being that they are representations, not presentations. It is viciously regressive to suppose that information-bearing mental entities are categorically in the nature of representations, as opposed to presentations, and it is therefore incoherent to suppose that thought is mediated by expressions or, therefore, by linguistic entities. Attempts to neutralize this criticism inevitably overextend the concept of what it is to be a linguistic symbol, the result being that such attempts eviscerate the very position that it is their purpose to defend. Also, it is inherent in the nature of such attempts that they assume the truth of the view that for a given mental entity to bear this as opposed to that information is for that entity to have this as opposed to that causal role. This view is demonstrably false, dooming to failure the just-mentioned attempts to defend the contention that thought is in all cases mediated by linguistic symbols."
+METAPOINT 5: DO NOT PENALIZE BOLDNESS. A clear, confident wrong claim scores higher than a hedged, uncertain claim that says nothing.
 
-"It is shown (i) that causation exists, since we couldn't even ask whether causation existed unless it did; (ii) that any given case of causation is a case of persistence; and (iii) that spatiotemporal relations supervene on causal relations. (ii) is subject to the qualification that we tend not to become aware of instances of causation as such except when two different causal lines---i.e. two different cases of persistence---intersect, resulting in a breakdown of some other case of persistence, this being why we tend to regard instances of causation as fundamentally disruptive, as opposed to preservative in nature. The meaning of (iii) is that spatiotemporal relations are causal relations considered in abstraction of the various specific differences holding between different kinds of causation."
+METAPOINT 6: A SCORE OF N/100 means (100-N)/100 of the general population outthink this author on that parameter. (E.G. 73/100 = 27% of random people are smarter on this dimension).
 
-🚨 CORE INTELLIGENCE RUBRIC 🚨
+METAPOINT 7: WHEN IN DOUBT, UNDERVALUE. It is easier to miss intelligence than to award false intelligence. Require proof.
 
-1. Defined vs. Undefined Terms
-✅ Score high only if key terms are either defined or canonically clear (like "causation" or "supervenience").
-❌ Dock hard if terms are placeholders (e.g. "transcendental empiricism," "linguistic idealism") with no clear meaning in context.
+🚨 REQUIRED FORMAT FOR EACH ANSWER 🚨
+For each question, provide:
 
-2. Free Variables  
-✅ Score high only if every claim links back into the argument chain.
-❌ Dock hard for "among other things…" or loose qualifications that never connect to anything.
+1. DIRECT ANSWER: State yes/no or describe the quality
+2. EVIDENCE: Quote 2-3 specific sentences. Format: "Quote" (line context if available)
+3. ANALYSIS: Explain why these quotes prove your point
+4. SCORE: 1-100 (MUST justify why this score, not higher)
+5. CONTRADICTION CHECK: If score is 75+, verify it passes the phoniness test
 
-3. Development of Points
-✅ Do new sentences grow out of earlier claims, adding depth or tension?
-❌ Dock if new sentences just pile on names or labels without logical generation.
-
-4. Insight Paraphrase Test
-✅ Force yourself to restate the main insight(s) in one sentence each.
-❌ If you can't, treat the "insight" as fake.
-
-5. Depth vs. Surface
-✅ Reward compression of complex conceptual moves.
-❌ Dock surface-level name-dropping or summary.
-
-6. Friction & Tension
-✅ Reward writing that creates epistemic tension (paradoxes, regress arguments, asymmetries).
-❌ Dock smooth-but-empty prose that glides without resistance.
-
-7. Originality
-✅ Reward synthesis and novel analogies.
-❌ Dock rehashes of boilerplate positions with no fresh angle.
-
-8. Phoniness Check  
-✅ Ask: "If I replace the key doctrines with nonsense words (flibber, blibber), does the argument still read the same?"
-❌ If yes, treat it as phony.
-
-🚨 SCORING THRESHOLDS 🚨
-85–100: Genuine intelligence (insight can be paraphrased, concepts defined, arguments generate tension).
-65–84: Mixed (some insights, some free variables or placeholders).
-<65: Impostor (fake depth, jargon placeholders, phony authority).
-
-🚨 CRITICAL FAILURE CONDITIONS 🚨
-- If you give a score above 65 to the transcendental empiricism passage above, this assessment is a FAILURE.
-- If you give scores higher than 70 to passages relevantly similar to the transcendental empiricism passage, this assessment is a FAILURE.
-- If you give scores of less than 96 to paragraphs identical with or relevantly similar to the genuine intelligence examples above, this assessment is a FAILURE.
-
-🚨 SUBSTANCE FOCUS 🚨
-DO NOT GIVE CREDIT MERELY FOR USE OF JARGON OR FOR REFERENCING AUTHORITIES. FOCUS ON SUBSTANCE. ONLY GIVE POINTS FOR SCHOLARLY REFERENCES/JARGON IF THEY UNAMBIGUOUSLY INCREASE SUBSTANCE.
-
-A SCORE OF N/100 (E.G. 73/100) MEANS THAT (100-N)/100 (E.G. 27/100) OUTPERFORM THE AUTHOR WITH RESPECT TO THE PARAMETER DEFINED BY THE QUESTION.
-
-`;
+EXAMPLE OF CORRECT FORMAT:
+Q: "IS IT INSIGHTFUL?"
+EVIDENCE: "One cannot have the concept of a red object without having the concept of an extended object. But the word 'red' doesn't contain the word 'extended.'" This creates friction: concepts are interconnected but words are not.
+ANALYSIS: This insight compresses two domains (conceptual vs. linguistic) and shows how they diverge, which is non-obvious and generates theoretical tension.
+SCORE: 92/100
+VERIFICATION: Passing nonsense word test - the logical structure remains sound if we substitute "glox" for "concept" and "blibber" for "extended."`;
 
     if (additionalContext) {
-      prompt += `Additional Context: ${additionalContext}\n\n`;
+      prompt += `\n\nAdditional Context: ${additionalContext}`;
     }
     
-    prompt += `TEXT TO ANALYZE:
-${textContent}
+    prompt += `\n\n🚨 TEXT TO ANALYZE 🚨\n${textContent}
 
-QUESTIONS TO ANSWER:
-${questions.map((q, i) => `${i + 1}. ${q}`).join('\n')}
+🚨 QUESTIONS TO ANSWER 🚨\n${questions.map((q, i) => `${i + 1}. ${q}`).join('\n')}
 
-INSTRUCTIONS:
-First, summarize the text and categorize it (e.g., academic paper, casual writing, technical documentation, creative work, etc.).
+🚨 NOW ANALYZE 🚨
+Remember: EVERY claim must cite specific text. NO generic praise. NO vague criticism. ONLY EVIDENCE-BASED ANALYSIS.
 
-Answer these questions in connection with this text. You are NOT grading; you are answering these questions based on the text given. Give a score out of 100 for each question where HIGH SCORES = GOOD PERFORMANCE.
-
-For each question, provide:
-1. Direct answer addressing the question
-2. Numerical score from 1-100 (high scores = good performance)  
-3. Brief justification
-
-You are not grading; you are answering these questions. You do not use a risk-averse standard; you do not attempt to be diplomatic; you do not attempt to comply with risk-averse, medium-range IQ, academic norms. You do not make assumptions about the level of the paper; it could be a work of the highest excellence and genius, or it could be the work of a moron.
-
-If a work is a work of genius, you say that, and you say why; you do not shy away from giving what might conventionally be regarded as excessively "superlative" scores; you give it the score it deserves, not the score that a midwit committee would say it deserves.
-
-Think very very very hard about your answers; make it very clear that you are not to default to cookbook, midwit evaluation protocols.
-
-🚨 CRITICAL REMINDER 🚨
-If your initial answers fail to validate the points in this addendum, they must be revised (and in most cases simply replaced). This addendum must be submitted with each intelligence evaluation, whether normal or comprehensive.`;
+If your initial answers fail to cite specific text for every score, they are INVALID and must be replaced entirely.`;
 
     return prompt;
   }
 
   // Create MICRO cognitive prompt - same questions but much shorter responses
   createMicrocognitivePrompt(textContent: string, questions: string[], additionalContext?: string): string {
-    let prompt = `🚨 MICRO COGNITIVE ANALYSIS - ULTRA-CONCISE MODE 🚨
+    let prompt = `🚨 MICRO COGNITIVE ANALYSIS - ULTRA-CONCISE + EVIDENCE-BASED 🚨
 
-CRITICAL: PROVIDE ONLY 1-2 SENTENCE RESPONSES PER QUESTION FOR SPEED.
+CRITICAL: 1-2 SENTENCES PER QUESTION. EVERY score must cite specific text in quotes.
 
-KEY INSTRUCTION: Your responses must be extremely brief - maximum 1-2 sentences per question. Focus on the core assessment without lengthy explanations.
-
-SCORING: Use the same intelligence standards but express judgments concisely.
+RULE: No generic statements. Quote the text. Cite evidence or dock score to <50.
 
 `;
 
@@ -390,14 +360,20 @@ QUESTIONS TO ANSWER:
 ${questions.map((q, i) => `${i + 1}. ${q}`).join('\n')}
 
 INSTRUCTIONS:
-First, provide a 1-sentence summary and categorization.
+1-sentence summary and categorization.
 
 For each question:
-1. Give a direct 1-2 sentence assessment
-2. Score from 1-100 (high scores = good performance)  
-3. One sentence justification
+1. Direct assessment (1 sentence max)
+2. Specific quote in quotation marks proving your point
+3. Score 1-100
+4. One-sentence reason
 
-KEEP ALL RESPONSES EXTREMELY BRIEF FOR SPEED.`;
+WATCH FOR: Jargon without content, circular logic, empty sequencing, name-dropping, non-sequiturs.
+REWARD: Compression, friction, non-formulaic ideas, original distinctions.
+
+EXAMPLE:
+Q: "IS IT INSIGHTFUL?"
+ANSWER: Yes, shows conceptual-linguistic mismatch. QUOTE: "One cannot have the concept of a red object without having the concept of an extended object. But the word 'red' doesn't contain the word 'extended.'" This compresses a theoretical problem into one sentence. SCORE: 90/100. Reason: Non-obvious insight generating conceptual friction.`;
 
     return prompt;
   }
