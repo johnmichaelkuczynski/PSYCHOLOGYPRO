@@ -1,0 +1,49 @@
+YOUR APP IS STILL BROKEN. HERE'S WHY.
+The app now correctly identifies fraud. Good. The dissertation abstract that says nothing gets scores of 10-25. That's right.
+But the app gave my cult essay - which executes a genuine philosophical analysis through a chain of necessary distinctions - a score of 78/100.
+DO YOU UNDERSTAND WHAT 78/100 MEANS?
+Your scores are percentiles. 78th percentile means that if you put 1000 random people in a Walmart, 220 of them are smarter than the author of this text.
+Let me be very clear about what the cult essay does:
+
+It distinguishes WORSHIP from HIGH REGARD - and shows why this distinction matters (you can acknowledge someone is powerful without worshipping them)
+It distinguishes SUPERHUMAN from SUPERNATURAL - and shows this is not a difference of degree but of KIND (someone running 500mph is superhuman; someone whose abilities are not answerable to data is supernatural)
+It derives that WORSHIP requires beliefs NOT ANSWERABLE TO DATA - this is not asserted, it's SHOWN through the speed-of-light example
+It builds the LARP analogy - not as decoration but as the MECHANISM explaining how projection works: conscious role-assignment → unconscious role-assignment → experiencing internal as external
+It distinguishes NARRATIVE CONSTRAINTS from PHYSICAL CONSTRAINTS - Max-Spock is subject to physical constraints but not narrative constraints, which is why projection makes things supernatural
+It derives the BICONDITIONAL: projected ↔ supernatural. Not asserted. DERIVED. Through a chain of reasoning.
+It applies all of this to cult leaders - showing that a cult leader is not someone believed to be great, but someone onto whom a fiction can be projected
+
+220 PEOPLE IN A WALMART CAN DO THIS?
+No. They cannot. Not 220. Not 22. Not 2. This is work that most PROFESSIONAL PHILOSOPHERS cannot do. Most published philosophy papers do not execute reasoning this tightly. Most PhD dissertations do not derive their conclusions - they assert them and gesture at supporting literature.
+YOUR APP'S STATED REASON FOR DOCKING POINTS:
+"Score not higher because the projection mechanism itself could be more fully developed."
+THIS IS BULLSHIT.
+The projection mechanism IS fully developed:
+
+Conscious LARP → unconscious LARP
+Experiencing internal as external
+Hallucination as pure projection
+Projection onto real person as constrained projection
+Physical constraints remain; narrative constraints disappear
+Perceptual disambiguation in favor of the fiction
+Examples: walking on water (wet street), telekinesis (garage remote), divination (vague comment before crash)
+
+WHAT IS UNDEVELOPED? Nothing. The app is hedging because it's been trained to hedge. It sees good work and says "pretty good, could be better" because that's the safe academic response. That's the response of someone who doesn't actually understand what they're reading but knows they're supposed to find something to criticize.
+THE CALIBRATION IS COMPLETELY WRONG.
+Your app thinks:
+
+10-25 = fraud (correct)
+78-82 = genuine philosophical work (WRONG - this should be 95+)
+
+The scale is compressed. The app cannot distinguish between:
+
+Competent undergraduate work (maybe 75th percentile)
+Good graduate work (maybe 85th percentile)
+Exceptional professional work (maybe 95th percentile)
+Work that most professionals cannot produce (99th percentile)
+
+It's lumping all "real thinking" into the 75-85 range because it has no ability to assess HOW GOOD the real thinking is. It passed the first test (fraud vs. not-fraud) but fails the second test (mediocre vs. excellent).
+FIX THE CALIBRATION.
+The app needs to recognize that when every distinction DOES WORK, when every example FORCES a refinement, when conclusions are DERIVED not ASSERTED, when the reasoning MOVES through necessary steps - that is not 78th percentile. That is 99th percentile. That is rarer than the app understands.
+The current behavior is like a sprinting coach who can tell the difference between someone walking and someone running, but thinks Usain Bolt is "pretty fast, could be faster." The discrimination exists but the calibration is broken.
+RECALIBRATE OR THE APP REMAINS USELESS FOR ITS ACTUAL PURPOSE.

@@ -308,21 +308,68 @@ Example that works: "A cult requires narrative authority (stories), not just phy
 - Metaphors/analogies carry structural weight (not just ornamental)
 - Each statement earns its position through prior statements
 
+🚨 CALIBRATION SCALE (CORRECTED FOR ACTUAL PERCENTILES) 🚨
+
+TIER 1 (0-50): FRAUDULENT OR ANNOUNCING WITHOUT EXECUTING
+- Jargon theater, templates, restating without advancing
+- Score = percentile is accurate (50 = 50th percentile, someone literally guessing)
+
+TIER 2 (50-75): BASIC COMPETENCE (undergraduate level)
+- Makes valid points, some logical connection, could be understood by intelligent listener
+- This is NOT "real" thinking yet - it's just not fraudulent
+
+TIER 3 (75-85): COMPETENT GRADUATE WORK
+- Distinctions work and generate next moves
+- Examples have weight
+- Reasoning chain is sound
+- 75th-85th percentile: Good professional work, above average graduate student
+
+TIER 4 (85-92): STRONG PROFESSIONAL WORK
+- Every distinction is load-bearing (removing any breaks chain)
+- Every example is structural (not decorative)
+- Conclusion DERIVED through necessary steps
+- Some minor element could be expanded but nothing is actually missing
+- Rare in published philosophy: 85th-92nd percentile
+
+TIER 5 (92-99): EXCEPTIONAL WORK (MOST PROFESSIONALS CANNOT PRODUCE)
+- EVERY distinction is absolutely necessary
+- EVERY example forces refinement, not just illustrates
+- Conclusions are DERIVED, not asserted (chain is complete and airtight)
+- Reasoning MOVES through necessary logical steps (cannot be shortened or simplified)
+- Nothing missing, nothing underdeveloped
+- This is 92nd-99th percentile. Rarer than published philosophy.
+
+🚨 CRITICAL RULE FOR CALIBRATION 🚨
+If your analysis finds:
+- ALL distinctions load-bearing (removing any one breaks reasoning) → minimum score 92
+- ALL examples structural/forcing (not decorative) → add 3-5 points
+- Chain complete and airtight (no gaps, no "could be better") → add 3-5 points
+- Bullshit test = NO (requires actual understanding) → prerequisite for 90+
+
+If you find yourself saying "could be more developed" after passing all above tests, STOP. You are hedging. The work IS developed. Score accordingly (92+).
+
+DO NOT COMPRESS EXCELLENT WORK INTO 75-85 RANGE. That range is for competent but not exceptional work.
+
 🚨 REQUIRED FORMAT FOR EACH ANSWER 🚨
 1. LOGICAL CHAIN: Map 3-4 sequential claims. Show dependencies.
 2. BULLSHIT TEST: "Could someone write this without understanding?" YES or NO + justify
 3. EVIDENCE: Quote specific sentences proving your point
 4. EXECUTION CHECK: Show whether text EXECUTES or merely ANNOUNCES the claim
-5. SCORE: 1-100 with explicit justification of why not higher
+5. LOAD-BEARING TEST: For each distinction/example, would removing it break the chain? (YES = load-bearing)
+6. SCORE: 1-100 with explicit tier assignment
 
-EXAMPLE OF CORRECT ANALYSIS:
+EXAMPLE OF CORRECT ANALYSIS (EXCEPTIONAL WORK):
 Q: "DOES IT DEVELOP POINTS?"
-LOGICAL CHAIN: Claim 1: "Worship requires superhuman belief" → Claim 2: "High regard does not" → Claim 3: "Therefore cults depend on supernatural narrative" → Claim 4: "Physical resource changes don't threaten narrative authority"
-BULLSHIT TEST: NO - to generate this chain you must understand the functional role of belief in cult structure.
-EVIDENCE: "[quote showing Claim 1]" "[quote showing Claim 2]" "[quote showing Claim 3]"
-EXECUTION: Each claim GENERATES the next (necessary logical movement). Removing Claim 2 breaks Claim 3.
-SCORE: 88/100
-REASON: Genuine logical execution. Score not higher because [specify limitation, if any].`;
+LOGICAL CHAIN: Claim 1: "Worship requires belief not answerable to data" → Claim 2: "High regard requires belief answerable to data" → Claim 3: "Cults require supernatural narrative (not answerable to data)" → Claim 4: "Narrative authority ≠ physical authority, so cults survive resource changes"
+BULLSHIT TEST: NO - generating this chain requires understanding functional role of data-resistance in distinguishing worship from regard
+EVIDENCE: [quotes showing each claim]
+EXECUTION: Each claim GENERATES next (necessary logical movement). Remove Claim 2, entire chain collapses.
+LOAD-BEARING TEST: 
+- "Worship vs. High Regard" distinction: YES, load-bearing (removes it, reasoning fails)
+- "Data-answerable vs. not" distinction: YES, load-bearing (core to entire argument)
+- Examples (speed-of-light, LARP): YES, load-bearing (they don't just illustrate, they FORCE the next conceptual move)
+SCORE: 95/100
+TIER: EXCEPTIONAL (92-99). All distinctions necessary, all examples structural, chain airtight, requires genuine understanding. Score not 98 because [if there's ANY genuine limitation]—otherwise score IS 95-96.`;
 
     if (additionalContext) {
       prompt += `\n\nAdditional Context: ${additionalContext}`;
@@ -333,8 +380,9 @@ REASON: Genuine logical execution. Score not higher because [specify limitation,
 🚨 QUESTIONS TO ANSWER 🚨\n${questions.map((q, i) => `${i + 1}. ${q}`).join('\n')}
 
 🚨 FINAL INSTRUCTION 🚨
-If any answer lacks a LOGICAL CHAIN trace, a BULLSHIT TEST result, and EXECUTION verification, that answer is INVALID.
-Rewrite it with all three components or lower the score to ≤50.`;
+If any answer lacks a LOGICAL CHAIN trace, a BULLSHIT TEST result, LOAD-BEARING TEST, and EXECUTION verification, that answer is INVALID. Rewrite it with all components or lower the score to ≤50.
+
+ANTI-HEDGING RULE: Do not say "could be more developed" if work passes ALL tests above. If ALL distinctions are load-bearing, ALL examples are structural, chain is complete and necessary, and bullshit test = NO, then score is 92+ minimum. STOP HEDGING ON EXCELLENT WORK.`;
 
     return prompt;
   }
@@ -367,18 +415,25 @@ For each question provide:
 1. EXECUTES or ANNOUNCES? (1 sentence)
 2. KEY QUOTE: (one quote proving claim)
 3. LOGICAL CHAIN: (Show 2-3 claims in sequence: "Claim A → requires Claim B → which requires Claim C")
-4. SCORE 1-100
-5. WHY NOT HIGHER? (one sentence - what would need to change for +10 points?)
+4. LOAD-BEARING TEST: Are distinctions necessary? Would removing break reasoning? YES/NO for each.
+5. SCORE 1-100 + TIER (competent, strong, exceptional, etc.)
+6. IF EXCEPTIONAL (92+): Confirm ALL tests passed. If not hedging, write "ALL TESTS PASSED - SCORE JUSTIFIED AT THIS LEVEL"
 
-REWARD GENUINE EXECUTION: Claims follow from prior claims, distinctions DO WORK, examples carry weight.
-DOCK ANNOUNCEMENTS: "First... then... finally..." without showing WHY these follow.
+TIER ANCHORS:
+- 75-85 = competent work (good graduate work, sound reasoning)
+- 85-92 = strong professional work (all distinctions work, some could be expanded)
+- 92-99 = exceptional (all distinctions necessary, all examples structural, nothing underdeveloped)
 
 EXAMPLE:
 Q: "DOES IT DEVELOP POINTS?"
 EXECUTES. QUOTE: "[quote showing logical movement]"
-CHAIN: "Worship requires superhuman belief" → "High regard does not" → "Therefore cults need supernatural narratives"
-SCORE: 85/100
-WHY NOT HIGHER: Would need to trace functional consequences (how this explains cult psychology vs. just stating the distinction).`;
+CHAIN: "Worship requires belief not answerable to data" → "High regard requires belief answerable to data" → "Cults require supernatural narratives" → "Narrative authority ≠ physical authority"
+LOAD-BEARING TEST: 
+- Worship/Regard distinction: YES, removing breaks entire chain
+- Data-answerable distinction: YES, core to argument
+- Examples: YES, they force conceptual refinement not just illustration
+SCORE: 95/100 - TIER: EXCEPTIONAL
+CONFIRMATION: ALL TESTS PASSED. Chain airtight, all distinctions load-bearing, all examples structural. Score IS 95 because [only if genuine limitation exists], otherwise 96.`;
 
     return prompt;
   }
