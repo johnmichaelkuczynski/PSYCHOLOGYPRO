@@ -10,7 +10,7 @@ export interface LLMInfo {
   demerits: string[];
 }
 
-export type LLMProviderType = "zhi1" | "zhi2" | "zhi3" | "zhi4";
+export type LLMProviderType = "zhi1" | "zhi2" | "zhi3" | "zhi4" | "zhi5";
 
 export const PRICING_TIERS: PricingTier[] = [
   {
@@ -20,6 +20,7 @@ export const PRICING_TIERS: PricingTier[] = [
       zhi2: 106840,  // Anthropic
       zhi3: 702000,  // DeepSeek
       zhi4: 6410255, // Perplexity
+      zhi5: 3500000, // Grok
     },
   },
   {
@@ -29,6 +30,7 @@ export const PRICING_TIERS: PricingTier[] = [
       zhi2: 224360,
       zhi3: 1474200,
       zhi4: 13461530,
+      zhi5: 7350000,
     },
   },
   {
@@ -38,6 +40,7 @@ export const PRICING_TIERS: PricingTier[] = [
       zhi2: 587625,
       zhi3: 3861000,
       zhi4: 35256400,
+      zhi5: 19375000,
     },
   },
   {
@@ -47,6 +50,7 @@ export const PRICING_TIERS: PricingTier[] = [
       zhi2: 1282100,
       zhi3: 8424000,
       zhi4: 76923050,
+      zhi5: 42350000,
     },
   },
   {
@@ -56,6 +60,7 @@ export const PRICING_TIERS: PricingTier[] = [
       zhi2: 2883400,
       zhi3: 18954000,
       zhi4: 173176900,
+      zhi5: 95850000,
     },
   },
 ];
@@ -110,6 +115,18 @@ export const LLM_INFO: Record<LLMProviderType, LLMInfo> = {
     demerits: [
       "Quality varies — can be shallow compared to Anthropic/OpenAI",
       "Weak on sustained long-form consistency",
+    ],
+  },
+  zhi5: {
+    name: "ZHI 5 (Grok)",
+    merits: [
+      "Fast, capable reasoning and analysis",
+      "Competitive pricing, good value for extended analysis",
+      "Strong performance on complex text assessment",
+    ],
+    demerits: [
+      "Newer model, less track record than established providers",
+      "API occasionally experiences capacity constraints",
     ],
   },
 };
