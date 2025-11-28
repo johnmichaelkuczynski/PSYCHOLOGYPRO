@@ -1181,6 +1181,62 @@ export class StreamingService {
     return batchResults;
   }
 
+  // For MICRO COGNITIVE: Extract test results and filter fraudulent analysis
+  private filterMicroCognitiveResponse(response: string): string {
+    const lines = response.split('\n');
+    const results: string[] = [];
+    let currentQuestion = '';
+    let fraudDetected = false;
+    let scoreExtracted = false;
+    
+    for (const line of lines) {
+      // Track question numbers
+      if (/^\d+\.\s/.test(line)) {
+        currentQuestion = line;
+        fraudDetected = false;
+        scoreExtracted = false;
+      }
+      
+      // Extract ONLY test results, not analysis comments
+      if (line.includes('BULLSHIT TEST:')) {
+        results.push(line);
+        if (line.includes('BULLSHIT TEST: YES')) {
+          fraudDetected = true;
+        }
+      } else if (line.includes('PSEUDO-INTELLECTUAL FLAGS:')) {
+        results.push(line);
+        if (line.includes('YES')) {
+          fraudDetected = true;
+        }
+      } else if (line.includes('EXECUTION TEST:') || line.includes('EXECUTION:')) {
+        results.push(line);
+        if (line.includes('ANNOUNCES')) {
+          fraudDetected = true;
+        }
+      } else if (line.includes('LOGICAL CHAIN:')) {
+        results.push(line);
+      } else if (line.includes('SCORE:') || line.includes('MANDATORY SCORE:')) {
+        // Extract score but force cap if fraud detected
+        if (fraudDetected) {
+          results.push('ENFORCED SCORE: ≤50 (fraud detected - test results override analysis)');
+        } else {
+          results.push(line);
+        }
+        scoreExtracted = true;
+      } else if (!scoreExtracted && !fraudDetected && (line.includes('TIER:') || line.match(/\d+\/100/))) {
+        // Include tier info only if no fraud
+        results.push(line);
+      }
+    }
+    
+    // If fraud was detected in ANY question, add explicit warning
+    if (response.includes('BULLSHIT TEST: YES') || response.includes('PSEUDO-INTELLECTUAL FLAGS: YES')) {
+      return `⚠️ FRAUD DETECTION ACTIVATED ⚠️\nThe following test results indicate pseudo-intellectual or announced-without-executing text. Scores capped at ≤50.\n\n${results.join('\n')}`;
+    }
+    
+    return results.join('\n') || response;
+  }
+
   // Process micro batch using appropriate micro prompt
   private async processMicroBatch(analysis: Analysis, questions: string[], batchNumber: number, microType: 'microcognitive' | 'micropsychological' | 'micropsychopathological'): Promise<string> {
     let prompt: string;
@@ -1223,7 +1279,7 @@ export class StreamingService {
           fullResponse += chunk;
           hasContent = true;
           
-          // Stream the raw response immediately as it comes in - PURE PASSTHROUGH
+          // Stream the raw response immediately as it comes in
           this.broadcastToStream(analysis.id, {
             type: "raw_stream",
             batchNumber,
@@ -1250,11 +1306,17 @@ export class StreamingService {
       throw new Error(`Micro batch ${batchNumber} processing failed: ${errorMessage}`);
     }
 
-    // Mark batch as complete - NO PARSING, JUST RAW FINAL RESPONSE
+    // For MICRO COGNITIVE: Filter fraudulent comments and force score caps
+    let finalResponse = fullResponse;
+    if (microType === 'microcognitive') {
+      finalResponse = this.filterMicroCognitiveResponse(fullResponse);
+    }
+
+    // Mark batch as complete
     this.broadcastToStream(analysis.id, {
       type: "batch_complete", 
       batchNumber,
-      finalRawResponse: fullResponse,
+      finalRawResponse: finalResponse,
       isComplete: true,
       timestamp: new Date().toLocaleTimeString("en-US", {
         hour: "numeric",
@@ -1264,6 +1326,6 @@ export class StreamingService {
       })
     });
     
-    return fullResponse;
+    return finalResponse;
   }
 }
