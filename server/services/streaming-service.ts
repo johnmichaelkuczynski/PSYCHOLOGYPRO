@@ -436,14 +436,14 @@ export class StreamingService {
     return content;
   }
 
-  // Process Comprehensive Cognitive Analysis
+  // Process Comprehensive Cognitive Analysis (8 batches)
   private async processComprehensiveCognitiveAnalysis(analysis: Analysis): Promise<void> {
     // Step 1: Generate and stream summary
     const summary = await this.streamSummary(analysis);
 
-    // Step 2: Process questions in batches of 5
+    // Step 2: Process questions in 8 batches
     const questions = this.llmService.getComprehensiveCognitiveQuestions();
-    const batches = this.createBatches(questions, 5);
+    const batches = this.createBatches(questions, 3);
     const batchResults = await this.processBatchesWithResults(analysis, batches);
 
     // Step 3: Save the complete analysis results
@@ -458,12 +458,12 @@ export class StreamingService {
     await this.storage.updateAnalysisResults(analysis.id, finalResults);
   }
 
-  // Process Psychological Analysis  
+  // Process Psychological Analysis (NORMAL - 4 batches)
   private async processPsychologicalAnalysis(analysis: Analysis): Promise<void> {
     // Step 1: Generate and stream summary
     const summary = await this.streamSummary(analysis);
 
-    // Step 2: Process questions in batches of 5
+    // Step 2: Process questions in 4 batches
     const questions = this.llmService.getPsychologicalQuestions();
     const batches = this.createBatches(questions, 5);
     const batchResults = await this.processBatchesWithResults(analysis, batches);
@@ -480,14 +480,14 @@ export class StreamingService {
     await this.storage.updateAnalysisResults(analysis.id, finalResults);
   }
 
-  // Process Comprehensive Psychological Analysis
+  // Process Comprehensive Psychological Analysis (8 batches)
   private async processComprehensivePsychologicalAnalysis(analysis: Analysis): Promise<void> {
     // Step 1: Generate and stream summary
     const summary = await this.streamSummary(analysis);
 
-    // Step 2: Process questions in batches of 5
+    // Step 2: Process questions in 8 batches
     const questions = this.llmService.getComprehensivePsychologicalQuestions();
-    const batches = this.createBatches(questions, 5);
+    const batches = this.createBatches(questions, 3);
     const batchResults = await this.processBatchesWithResults(analysis, batches);
 
     // Step 3: Save the complete analysis results
@@ -524,14 +524,14 @@ export class StreamingService {
     await this.storage.updateAnalysisResults(analysis.id, finalResults);
   }
 
-  // Process Comprehensive Psychopathological Analysis
+  // Process Comprehensive Psychopathological Analysis (8 batches)
   private async processComprehensivePsychopathologicalAnalysis(analysis: Analysis): Promise<void> {
     // Step 1: Generate and stream summary
     const summary = await this.streamSummary(analysis);
 
-    // Step 2: Process questions in batches of 5
+    // Step 2: Process questions in 8 batches
     const questions = this.llmService.getComprehensivePsychopathologicalQuestions();
-    const batches = this.createBatches(questions, 5);
+    const batches = this.createBatches(questions, 3);
     const batchResults = await this.processBatchesWithResults(analysis, batches);
 
     // Step 3: Save the complete analysis results
@@ -602,9 +602,9 @@ export class StreamingService {
     // Step 1: Generate and stream summary
     const summary = await this.streamSummary(analysis);
 
-    // Step 2: Process questions in batches of 5 with micro prompts
+    // Step 2: Process questions in 1 batch with micro prompts
     const questions = this.llmService.getMicrocognitiveQuestions();
-    const batches = this.createBatches(questions, 5);
+    const batches = this.createBatches(questions, 100);
     const batchResults = await this.processMicroBatchesWithResults(analysis, batches, 'microcognitive');
 
     // Step 3: Save the complete analysis results
@@ -619,14 +619,14 @@ export class StreamingService {
     await this.storage.updateAnalysisResults(analysis.id, finalResults);
   }
 
-  // Process Micro Psychological Analysis (ultra-fast, concise responses)
+  // Process Micro Psychological Analysis (ultra-fast, concise responses - 1 batch)
   private async processMicropsychologicalAnalysis(analysis: Analysis): Promise<void> {
     // Step 1: Generate and stream summary
     const summary = await this.streamSummary(analysis);
 
-    // Step 2: Process questions in batches of 5 with micro prompts
+    // Step 2: Process questions in 1 batch with micro prompts
     const questions = this.llmService.getMicropsychologicalQuestions();
-    const batches = this.createBatches(questions, 5);
+    const batches = this.createBatches(questions, 100);
     const batchResults = await this.processMicroBatchesWithResults(analysis, batches, 'micropsychological');
 
     // Step 3: Save the complete analysis results
@@ -641,14 +641,14 @@ export class StreamingService {
     await this.storage.updateAnalysisResults(analysis.id, finalResults);
   }
 
-  // Process Micro Psychopathological Analysis (ultra-fast, concise responses)
+  // Process Micro Psychopathological Analysis (ultra-fast, concise responses - 1 batch)
   private async processMicropsychopathologicalAnalysis(analysis: Analysis): Promise<void> {
     // Step 1: Generate and stream summary
     const summary = await this.streamSummary(analysis);
 
-    // Step 2: Process questions in batches of 5 with micro prompts
+    // Step 2: Process questions in 1 batch with micro prompts
     const questions = this.llmService.getMicropsychopathologicalQuestions();
-    const batches = this.createBatches(questions, 5);
+    const batches = this.createBatches(questions, 100);
     const batchResults = await this.processMicroBatchesWithResults(analysis, batches, 'micropsychopathological');
 
     // Step 3: Save the complete analysis results
