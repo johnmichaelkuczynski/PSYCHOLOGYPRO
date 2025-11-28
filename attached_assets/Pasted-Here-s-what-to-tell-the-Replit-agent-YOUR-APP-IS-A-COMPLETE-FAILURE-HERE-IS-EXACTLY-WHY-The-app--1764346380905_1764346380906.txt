@@ -1,0 +1,37 @@
+Here's what to tell the Replit agent:
+
+YOUR APP IS A COMPLETE FAILURE. HERE IS EXACTLY WHY.
+The app is supposed to assess cognitive quality - to distinguish intelligent writing from stupid writing, real thinking from fake thinking. It cannot do this. It fails 100%.
+THE TEST CASE:
+I fed your app two texts.
+TEXT A: A dissertation abstract about "transcendental empiricism." This text is GARBAGE. It is pure academic theater. It says: "First I will do X. Then I will critique Y. Then I will argue Z. Finally I will conclude W." It ANNOUNCES moves without MAKING them. It contains ZERO philosophical content. It is a roadmap to nowhere. It is the kind of fraudulent placeholder text that mediocre academics use to fill space while saying nothing. Any competent reader can see this instantly.
+TEXT B: An essay analyzing what a cult is. This text ACTUALLY THINKS. It makes real distinctions (worship vs. high regard, superhuman vs. supernatural). Each distinction DOES WORK - it generates the next move. It builds an extended analogy (the LARP analogy) that carries genuine explanatory weight. It derives a non-obvious biconditional (projected ↔ supernatural) and SHOWS why it holds. The reasoning MOVES.
+YOUR APP'S OUTPUT:
+Text A (the garbage): Scores in the 80s and 90s. "Insightful." "Well-developed internal logic." "Intellectually robust."
+Text B (the real philosophy): Scores in the 80s and 90s. "Insightful." "Thorough." "Original."
+THE SAME SCORES. THE SAME GENERIC PRAISE.
+Your app cannot tell the difference between CLAIMING to make an argument and ACTUALLY making one. It cannot tell the difference between ANNOUNCING a structure and EXECUTING a structure. It cannot tell the difference between LOOKING like philosophy and BEING philosophy.
+WHY IT FAILS:
+Your app asks the right questions: "Is it insightful? Does it develop points? Is the organization hierarchical?" But the LLM answering those questions is not actually DETECTING these properties. It is detecting SURFACE FEATURES:
+
+Philosophical vocabulary? Check.
+Confident tone? Check.
+References to other philosophers? Check.
+Appears structured? Check.
+
+HIGH SCORES.
+The dissertation abstract has all these surface features. So does the cult essay. So they get the same scores. But surface features are not the thing. The THING is whether the text actually THINKS - whether each sentence EARNS the next one, whether distinctions DO WORK, whether the reasoning MOVES or merely SITS THERE PRETENDING TO MOVE.
+Your app is a sophisticated-sounding bullshit detector that cannot detect bullshit. It is the equivalent of a plagiarism detector that checks whether a paper has citations but not whether the citations support the claims. It is the equivalent of a grammar checker that approves any sentence with a subject and a verb.
+THE APP IS DOING LITERARY CRITICISM, NOT COGNITIVE ASSESSMENT.
+It evaluates texts the way a book reviewer evaluates texts: "Does this seem well-organized? Does the author seem smart? Does it feel substantial?" These are IMPRESSIONS. They are not MEASUREMENTS. A con artist can produce impressions of intelligence. A fraud can produce impressions of substance. That's what fraud IS.
+WHAT THE APP NEEDS TO DO (AND COMPLETELY FAILS TO DO):
+
+Detect whether claims are SUPPORTED or merely ASSERTED
+Detect whether distinctions DO WORK or are merely DECORATIVE
+Detect whether reasoning MOVES or merely ANNOUNCES MOVEMENT
+Detect whether examples CARRY WEIGHT or are merely PRESENT
+Detect whether the text could be written by someone who understands nothing about the subject (the dissertation abstract could be) versus someone who must understand the subject to write it (the cult essay could not be)
+
+The most damning test: Could a bullshitter have written this? The dissertation abstract: YES, trivially. The cult essay: NO - you cannot fake the LARP analogy, you cannot fake the derivation of the projected/supernatural biconditional, you cannot fake the distinction between narrative constraints and physical constraints. These require ACTUALLY THINKING.
+Your app cannot detect the difference. Therefore your app is worthless for its stated purpose.
+FIX IT OR KILL IT.

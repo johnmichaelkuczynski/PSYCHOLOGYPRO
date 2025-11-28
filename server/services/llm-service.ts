@@ -254,74 +254,75 @@ export class LLMService {
 
   // Create comprehensive cognitive prompt with revised intelligence protocol
   createCognitivePrompt(textContent: string, questions: string[], additionalContext?: string): string {
-    let prompt = `🚨 MANDATORY EVIDENCE-BASED INTELLIGENCE ASSESSMENT PROTOCOL 🚨
+    let prompt = `🚨 MANDATORY EXECUTION-BASED INTELLIGENCE ASSESSMENT PROTOCOL 🚨
 
-CRITICAL: You MUST apply EVERY RULE in this protocol. Non-compliance = ASSESSMENT FAILURE.
+CRITICAL: You must detect whether the text EXECUTES reasoning or merely ANNOUNCES it.
 
-🚨 MANDATORY CITATION REQUIREMENT 🚨
-For EVERY score you give, you MUST:
-1. Quote at least one specific sentence or phrase from the text (use quotation marks)
-2. Explain how that quote proves your point
-3. Never give a high score without multiple cited examples
+🚨 THE CORE PRINCIPLE 🚨
+Distinguish between:
+- ANNOUNCING: "First I will do X. Then I will argue Y. Finally I will conclude Z." (Says what will happen, doesn't do it)
+- EXECUTING: Claims flow from prior claims; distinctions generate next moves; examples carry weight; reasoning MOVES
 
-If you cannot cite specific evidence from the text to justify a claim, that claim is INVALID and the score must be lowered.
+🚨 LOGICAL CHAIN VERIFICATION (REQUIRED FOR ALL SCORES ABOVE 70) 🚨
+For EVERY claimed insight or argument, you MUST:
+1. IDENTIFY the logical chain: "Claim A depends on Claim B which depends on Claim C"
+2. VERIFY derivability: Does Claim A actually follow from B? Or is it just asserted?
+3. TEST the chain: Remove one link - does the entire argument collapse? (YES = real thinking)
+4. EXAMPLES TEST: Do examples illustrate the point or just exist? Can the argument work without them?
 
-🚨 PSEUDO-INTELLECTUAL RED FLAGS (DOCK SCORE TO <50) 🚨
-LOOK FOR AND PENALIZE:
-- Jargon inflation without explanation: Using technical terms without defining them or showing how they advance the argument
-- Circular structure: Restating the same point in different words without adding logical content (Example from paradigm: "Transcendental empiricism is... a philosophy of mental content. It attempts to dissolve... mental content")
-- Empty sequencing: "First... Then... Finally..." structure that organizes topics rather than developing ideas logically
-- Name-dropping without conceptual work: Citing authors/theories without explaining what they contribute to the argument
-- Non-sequiturs: Claims that don't follow from premises (Example: "X is true. Therefore, Y" when X tells us nothing about Y)
-- Academic costume: Using prestigious terminology to disguise lack of substantive thought
+Format: "Claim A: '[quote]' → This requires Claim B: '[quote]' → Which requires Claim C: '[quote]' → Without C, A fails."
 
-🚨 GENUINE INTELLIGENCE MARKERS (SCORE 75+) 🚨
-REWARD:
-- Compression: Multiple complex ideas woven into single sentences with each word doing work
-- Conceptual friction: Ideas in genuine tension, creating intellectual resistance and depth
-- Non-formulaic development: New ideas generated from prior claims, not just accumulated
-- Inferential movement: Each new point follows necessarily or provocatively from what came before
-- Original distinctions: Novel category separations or conceptual innovations not in textbooks
-- Clarity under rigor: Complex ideas expressed simply without dumbing down or avoiding rigor
+🚨 THE BULLSHIT TEST (MANDATORY FOR ALL SCORES) 🚨
+Ask yourself: "Could someone write this without actually understanding the subject?"
+- YES = Score drops to maximum 50 (announcing without executing)
+- NO = Continue analysis (author had to understand to write it)
 
-🚨 THE PHONINESS TEST 🚨
-For any sophisticated-sounding passage:
-- Replace key terms with nonsense words (flibber, blibber, glox, etc.)
-- Does the argument still read coherently? YES = Phony (SCORE <50)
-- Does the argument collapse? YES = Genuine (continue analysis)
-Example: "Transcendental empiricism attempts to dissolve epistemological dilemmas" → "Flibber glox attempts to dissolve blibber arguments" - still reads fine = PHONY
+EXAMPLE OF BULLSHIT:
+"First I examine the philosophy. Then I critique the account. Finally I argue the position is attractive." 
+Could someone write this without understanding philosophy? YES - it's a template. SCORE ≤ 50.
 
-🚨 METAPOINTS 🚨
+EXAMPLE OF GENUINE:
+"Worship requires belief in superhuman powers; high regard does not. Distinguishing these explains why cults function through supernatural claims, not merely charismatic authority."
+Could someone write this without understanding what distinguishes worship from regard, what makes supernatural claims functionally distinct? NO - you must understand to generate this. SCORE potential: 75+.
 
-METAPOINT 1: THIS IS NOT A GRADING APP. You analyze the actual intelligence present. Brilliant fragments get high scores. You answer the specific questions based on the text, not on what's missing.
+🚨 DISTINCTION WORK TEST 🚨
+When text makes a distinction, verify it WORKS:
+- Quote the distinction: "X vs. Y"
+- Show how this distinction GENERATES the next reasoning move
+- If the distinction is merely decorative (doesn't change subsequent reasoning), dock 20+ points
+- If the distinction is load-bearing (removes it and reasoning collapses), reward 15+ points
 
-METAPOINT 2: DO NOT PENALIZE SIMPLICITY OR CLARITY. Simple sentences can contain genius. Complex jargon can contain garbage. Judge by actual content, not presentation.
+Example that works: "A cult requires narrative authority (stories), not just physical authority (rules). This explains why cults collapse when narratives are questioned but remain stable when resources change." Remove "narrative vs. physical" and reasoning fails.
 
-METAPOINT 3: Always start with a summary and categorization, then analyze based on actual content, not category. Academic writing is judged the same as casual writing.
+🚨 PSEUDO-INTELLECTUAL RED FLAGS (AUTOMATIC SCORE CEILING: 50) 🚨
+- Empty sequencing: "First... Then... Finally..." without logical generation
+- Announced structure, not executed: "I will argue X, Y, Z" without showing WHY these follow
+- Definitions without use: Terms defined but not deployed in reasoning
+- Name-dropping: "Author X says... Author Y says..." without showing what they contribute
+- Restating without advancing: Same point rephrased multiple times
 
-METAPOINT 4: CORRECT FOR INSTITUTIONAL BIAS. The default assumption is skepticism, not deference. Fancy terminology = liability unless it carries weight.
-
-METAPOINT 5: DO NOT PENALIZE BOLDNESS. A clear, confident wrong claim scores higher than a hedged, uncertain claim that says nothing.
-
-METAPOINT 6: A SCORE OF N/100 means (100-N)/100 of the general population outthink this author on that parameter. (E.G. 73/100 = 27% of random people are smarter on this dimension).
-
-METAPOINT 7: WHEN IN DOUBT, UNDERVALUE. It is easier to miss intelligence than to award false intelligence. Require proof.
+🚨 GENUINE EXECUTION MARKERS (SCORE 80+) 🚨
+- Claims can be restated as: "If [prior claim], then [new claim]" not "and also [new claim]"
+- Distinctions generate moves (remove distinction, reasoning breaks)
+- Examples illustrate causal necessity, not just possibilities
+- Metaphors/analogies carry structural weight (not just ornamental)
+- Each statement earns its position through prior statements
 
 🚨 REQUIRED FORMAT FOR EACH ANSWER 🚨
-For each question, provide:
+1. LOGICAL CHAIN: Map 3-4 sequential claims. Show dependencies.
+2. BULLSHIT TEST: "Could someone write this without understanding?" YES or NO + justify
+3. EVIDENCE: Quote specific sentences proving your point
+4. EXECUTION CHECK: Show whether text EXECUTES or merely ANNOUNCES the claim
+5. SCORE: 1-100 with explicit justification of why not higher
 
-1. DIRECT ANSWER: State yes/no or describe the quality
-2. EVIDENCE: Quote 2-3 specific sentences. Format: "Quote" (line context if available)
-3. ANALYSIS: Explain why these quotes prove your point
-4. SCORE: 1-100 (MUST justify why this score, not higher)
-5. CONTRADICTION CHECK: If score is 75+, verify it passes the phoniness test
-
-EXAMPLE OF CORRECT FORMAT:
-Q: "IS IT INSIGHTFUL?"
-EVIDENCE: "One cannot have the concept of a red object without having the concept of an extended object. But the word 'red' doesn't contain the word 'extended.'" This creates friction: concepts are interconnected but words are not.
-ANALYSIS: This insight compresses two domains (conceptual vs. linguistic) and shows how they diverge, which is non-obvious and generates theoretical tension.
-SCORE: 92/100
-VERIFICATION: Passing nonsense word test - the logical structure remains sound if we substitute "glox" for "concept" and "blibber" for "extended."`;
+EXAMPLE OF CORRECT ANALYSIS:
+Q: "DOES IT DEVELOP POINTS?"
+LOGICAL CHAIN: Claim 1: "Worship requires superhuman belief" → Claim 2: "High regard does not" → Claim 3: "Therefore cults depend on supernatural narrative" → Claim 4: "Physical resource changes don't threaten narrative authority"
+BULLSHIT TEST: NO - to generate this chain you must understand the functional role of belief in cult structure.
+EVIDENCE: "[quote showing Claim 1]" "[quote showing Claim 2]" "[quote showing Claim 3]"
+EXECUTION: Each claim GENERATES the next (necessary logical movement). Removing Claim 2 breaks Claim 3.
+SCORE: 88/100
+REASON: Genuine logical execution. Score not higher because [specify limitation, if any].`;
 
     if (additionalContext) {
       prompt += `\n\nAdditional Context: ${additionalContext}`;
@@ -331,21 +332,21 @@ VERIFICATION: Passing nonsense word test - the logical structure remains sound i
 
 🚨 QUESTIONS TO ANSWER 🚨\n${questions.map((q, i) => `${i + 1}. ${q}`).join('\n')}
 
-🚨 NOW ANALYZE 🚨
-Remember: EVERY claim must cite specific text. NO generic praise. NO vague criticism. ONLY EVIDENCE-BASED ANALYSIS.
-
-If your initial answers fail to cite specific text for every score, they are INVALID and must be replaced entirely.`;
+🚨 FINAL INSTRUCTION 🚨
+If any answer lacks a LOGICAL CHAIN trace, a BULLSHIT TEST result, and EXECUTION verification, that answer is INVALID.
+Rewrite it with all three components or lower the score to ≤50.`;
 
     return prompt;
   }
 
   // Create MICRO cognitive prompt - same questions but much shorter responses
   createMicrocognitivePrompt(textContent: string, questions: string[], additionalContext?: string): string {
-    let prompt = `🚨 MICRO COGNITIVE ANALYSIS - ULTRA-CONCISE + EVIDENCE-BASED 🚨
+    let prompt = `🚨 MICRO COGNITIVE ANALYSIS - EXECUTION VERIFICATION MODE 🚨
 
-CRITICAL: 1-2 SENTENCES PER QUESTION. EVERY score must cite specific text in quotes.
+CRITICAL: For each question, answer: EXECUTES or ANNOUNCES? Then score.
 
-RULE: No generic statements. Quote the text. Cite evidence or dock score to <50.
+KEY TEST: "Could someone write this without understanding?" 
+YES = max score 50. NO = continue analysis.
 
 `;
 
@@ -360,20 +361,24 @@ QUESTIONS TO ANSWER:
 ${questions.map((q, i) => `${i + 1}. ${q}`).join('\n')}
 
 INSTRUCTIONS:
-1-sentence summary and categorization.
+Summary + categorization (1 sentence).
 
-For each question:
-1. Direct assessment (1 sentence max)
-2. Specific quote in quotation marks proving your point
-3. Score 1-100
-4. One-sentence reason
+For each question provide:
+1. EXECUTES or ANNOUNCES? (1 sentence)
+2. KEY QUOTE: (one quote proving claim)
+3. LOGICAL CHAIN: (Show 2-3 claims in sequence: "Claim A → requires Claim B → which requires Claim C")
+4. SCORE 1-100
+5. WHY NOT HIGHER? (one sentence - what would need to change for +10 points?)
 
-WATCH FOR: Jargon without content, circular logic, empty sequencing, name-dropping, non-sequiturs.
-REWARD: Compression, friction, non-formulaic ideas, original distinctions.
+REWARD GENUINE EXECUTION: Claims follow from prior claims, distinctions DO WORK, examples carry weight.
+DOCK ANNOUNCEMENTS: "First... then... finally..." without showing WHY these follow.
 
 EXAMPLE:
-Q: "IS IT INSIGHTFUL?"
-ANSWER: Yes, shows conceptual-linguistic mismatch. QUOTE: "One cannot have the concept of a red object without having the concept of an extended object. But the word 'red' doesn't contain the word 'extended.'" This compresses a theoretical problem into one sentence. SCORE: 90/100. Reason: Non-obvious insight generating conceptual friction.`;
+Q: "DOES IT DEVELOP POINTS?"
+EXECUTES. QUOTE: "[quote showing logical movement]"
+CHAIN: "Worship requires superhuman belief" → "High regard does not" → "Therefore cults need supernatural narratives"
+SCORE: 85/100
+WHY NOT HIGHER: Would need to trace functional consequences (how this explains cult psychology vs. just stating the distinction).`;
 
     return prompt;
   }
