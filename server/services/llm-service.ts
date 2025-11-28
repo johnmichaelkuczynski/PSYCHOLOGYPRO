@@ -392,10 +392,23 @@ ANTI-HEDGING RULE: Do not say "could be more developed" if work passes ALL tests
   createMicrocognitivePrompt(textContent: string, questions: string[], additionalContext?: string): string {
     let prompt = `🚨 MICRO COGNITIVE ANALYSIS - EXECUTION VERIFICATION MODE 🚨
 
-CRITICAL: For each question, answer: EXECUTES or ANNOUNCES? Then score.
+CRITICAL: Detect whether text EXECUTES reasoning or merely ANNOUNCES it.
 
-KEY TEST: "Could someone write this without understanding?" 
-YES = max score 50. NO = continue analysis.
+🚨 BULLSHIT TEST (MANDATORY) 🚨
+"Could someone write this without understanding the subject?"
+- YES = max score 50 (announcing without executing)
+- NO = continue analysis
+
+🚨 PSEUDO-INTELLECTUAL RED FLAGS (AUTOMATIC CEILING: 50) 🚨
+- Empty sequencing: "First... Then... Finally..." WITHOUT logical dependencies between steps
+- Announced claims without execution: "I develop a novel framework" but framework never appears in text
+- Free variables: Points that connect to nothing else
+- Independent sentences: Remove any sentence, does nothing break? = no logical chain exists
+
+🚨 EXECUTION MARKERS (80+) 🚨
+- Each claim generates the next (not just "and also")
+- Remove one claim = entire reasoning collapses
+- Distinctions actually CAUSE subsequent reasoning moves
 
 `;
 
@@ -409,32 +422,14 @@ ${textContent}
 QUESTIONS TO ANSWER:
 ${questions.map((q, i) => `${i + 1}. ${q}`).join('\n')}
 
-INSTRUCTIONS:
-Summary + categorization (1 sentence).
-
-For each question provide:
+FOR EACH QUESTION:
 1. EXECUTES or ANNOUNCES? (1 sentence)
-2. KEY QUOTE: (one quote proving claim)
-3. LOGICAL CHAIN: (Show 2-3 claims in sequence: "Claim A → requires Claim B → which requires Claim C")
-4. LOAD-BEARING TEST: Are distinctions necessary? Would removing break reasoning? YES/NO for each.
-5. SCORE 1-100 + TIER (competent, strong, exceptional, etc.)
-6. IF EXCEPTIONAL (92+): Confirm ALL tests passed. If not hedging, write "ALL TESTS PASSED - SCORE JUSTIFIED AT THIS LEVEL"
+2. QUOTE: One sentence/phrase proving your answer
+3. CHAIN: Show 2-3 sequential claims and their dependencies
+4. LOGICAL TEST: Remove one claim - does chain collapse? YES=real thinking, NO=announcement
+5. SCORE 1-100 with tier
 
-TIER ANCHORS:
-- 75-85 = competent work (good graduate work, sound reasoning)
-- 85-92 = strong professional work (all distinctions work, some could be expanded)
-- 92-99 = exceptional (all distinctions necessary, all examples structural, nothing underdeveloped)
-
-EXAMPLE:
-Q: "DOES IT DEVELOP POINTS?"
-EXECUTES. QUOTE: "[quote showing logical movement]"
-CHAIN: "Worship requires belief not answerable to data" → "High regard requires belief answerable to data" → "Cults require supernatural narratives" → "Narrative authority ≠ physical authority"
-LOAD-BEARING TEST: 
-- Worship/Regard distinction: YES, removing breaks entire chain
-- Data-answerable distinction: YES, core to argument
-- Examples: YES, they force conceptual refinement not just illustration
-SCORE: 95/100 - TIER: EXCEPTIONAL
-CONFIRMATION: ALL TESTS PASSED. Chain airtight, all distinctions load-bearing, all examples structural. Score IS 95 because [only if genuine limitation exists], otherwise 96.`;
+CRITICAL: If you find empty sequencing ("First... Then...") without logical generation between steps, that's PSEUDO-INTELLECTUAL. Score ≤ 50.`;
 
     return prompt;
   }

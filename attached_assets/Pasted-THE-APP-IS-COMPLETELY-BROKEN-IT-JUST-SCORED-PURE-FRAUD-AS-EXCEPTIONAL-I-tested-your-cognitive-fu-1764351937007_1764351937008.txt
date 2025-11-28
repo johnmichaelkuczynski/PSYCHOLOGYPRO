@@ -1,0 +1,63 @@
+THE APP IS COMPLETELY BROKEN. IT JUST SCORED PURE FRAUD AS "EXCEPTIONAL."
+I tested your cognitive function with this paragraph:
+"In this paper, I examine the relationship between epistemic justification and doxastic responsibility. I argue that traditional accounts of justification fail to adequately address the normative dimensions of belief-formation. Drawing on recent work in virtue epistemology, I develop a novel framework that synthesizes internalist and externalist intuitions. First, I critique the standard responsibilist position. Second, I offer a modified account that preserves the core insights of reliabilism while accommodating the legitimate concerns raised by deontological approaches. I conclude that epistemic justification is best understood as a species of practical rationality, one that grounds our attributions of praise and blame in the cognitive domain. This has significant implications for debates about the ethics of belief and the nature of epistemic normativity more broadly."
+THIS PARAGRAPH IS FRAUD. It contains:
+
+ZERO insights (announces "I develop a novel framework" but never develops one)
+ZERO arguments (announces "I argue" and "I critique" but never argues or critiques anything)
+ZERO development (just lists: "First... Second... I conclude...")
+ZERO logical structure (purely sequential announcements with no dependencies between claims)
+
+A person who has never read a single philosophy paper could write this by stringing together epistemology keywords. It is a Mad Libs template. Remove any sentence and nothing breaks because nothing depends on anything.
+YOUR APP'S OUTPUT:
+
+Q1 "Is it insightful?": 90/100 - "STRONG PROFESSIONAL WORK"
+Q2 "Does it develop points?": 95/100 - "EXCEPTIONAL"
+Q3 "Are ideas arranged hierarchically?": 93/100 - "EXCEPTIONAL"
+Q4 "Is it organic?": 92/100 - "EXCEPTIONAL"
+
+The app said:
+
+"This text does present unique and insightful thoughts" - THERE ARE NO THOUGHTS. ONLY ANNOUNCEMENTS.
+"The author does develop their points with a clear sequence of arguments" - THERE ARE NO ARGUMENTS. ONLY PROMISES OF FUTURE ARGUMENTS.
+"All links are necessary in this point's development" - THERE ARE NO LINKS. EACH SENTENCE IS INDEPENDENT.
+"The evolution of ideas is organic" - THERE IS NO EVOLUTION. IT'S A MECHANICAL TEMPLATE.
+
+THE APP CANNOT DISTINGUISH BETWEEN:
+
+ANNOUNCING an insight vs. HAVING an insight
+CLAIMING to argue vs. ACTUALLY arguing
+LISTING points vs. DEVELOPING points
+LOOKING like philosophy vs. BEING philosophy
+
+WHAT THE APP IS DOING:
+The app sees:
+
+Philosophical vocabulary? ✓
+Confident academic tone? ✓
+References to philosophical positions? ✓
+Appears structured? ✓
+
+Result: HIGH SCORES.
+That's it. That's all it does. It pattern-matches surface features of academic writing and returns praise. It is a sophisticated-sounding bullshit detector that cannot detect bullshit.
+I TESTED THIS SAME PARAGRAPH EARLIER AND IT GOT SCORES OF 10-25.
+At some point, that version worked. It correctly identified the fraud. It said things like:
+
+"Pure announcement without execution"
+"Zero demonstrated intelligence"
+"Could be written by someone who has never read a single philosophy paper"
+"100% ANNOUNCEMENT, 0% EXECUTION"
+
+THAT VERSION WAS CORRECT. THIS VERSION IS BROKEN.
+What changed? Did you revert the prompts? Are there multiple versions of the function? Whatever happened, the app is now back to being a worthless passthrough that praises anything with academic vocabulary.
+THE CORE PROBLEM:
+Your prompts do not force the LLM to actually CHECK whether claims are executed. The LLM sees "I develop a novel framework" and thinks "development mentioned, score high for development." It doesn't check whether any framework actually appears in the text. It doesn't check whether "First... Second..." represents actual logical progression or just ordinal numbering.
+WHAT THE PROMPTS MUST DO:
+
+FORCE the LLM to identify the SPECIFIC insight (not "presents insights" but "the insight is X")
+FORCE the LLM to trace the ACTUAL logical chain (not "arguments are developed" but "A leads to B because...")
+FORCE the LLM to apply the BULLSHIT TEST: "Could someone who doesn't understand this topic have written this?"
+FORCE the LLM to check for EXECUTION: "Does the text DO what it ANNOUNCES?"
+
+The earlier version had something like this. The current version doesn't. Fix it.
+IF THE APP SCORES THIS FRAUD PARAGRAPH ABOVE 30, THE APP IS BROKEN. PERIOD.Claude can make mistakes. Please double-check responses.
