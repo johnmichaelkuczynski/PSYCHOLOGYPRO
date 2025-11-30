@@ -223,14 +223,6 @@ export class LLMService {
     }
   }
 
-  // Generate questions for each analysis type
-
-  // Create comprehensive cognitive prompt with revised intelligence protocol
-  }
-
-  // Create MICRO cognitive prompt - SEMANTIC INTELLIGENCE (not syntax grading)
-  }
-
   // Create MICRO psychological prompt - ULTRA CONCISE
   createMicropsychologicalPrompt(textContent: string, questions: string[], additionalContext?: string): string {
     return `MICRO PSYCHOLOGICAL - ONE SENTENCE PER QUESTION THEN VERDICT
@@ -258,8 +250,6 @@ ${questions.map((q, i) => `${i + 1}. ${q}\nAnswer: [1 sentence] VERDICT: [Clear/
 
 NO elaboration. NO scoring. Sentence + verdict for each.`;
   }
-
-  // Comprehensive Cognitive Questions (more extensive set)
 
   // Comprehensive Psychological Questions
   getComprehensivePsychologicalQuestions(): string[] {

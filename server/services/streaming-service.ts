@@ -200,67 +200,6 @@ export class StreamingService {
     return summary;
   }
 
-  private async processBatch(analysis: Analysis, questions: string[], batchNumber: number): Promise<string> {
-    const prompt = this.llmService.createCognitivePrompt(
-      analysis.textContent,
-      questions,
-      analysis.additionalContext || undefined
-    );
-
-    let fullResponse = "";
-    let hasContent = false;
-    
-    try {
-      for await (const chunk of this.llmService.streamResponse(
-        analysis.llmProvider as any,
-        [{ role: "user", content: prompt }],
-        (chunk) => {
-          fullResponse += chunk;
-          hasContent = true;
-          
-          // Stream the raw response immediately as it comes in - PURE PASSTHROUGH
-          this.broadcastToStream(analysis.id, {
-            type: "raw_stream",
-            batchNumber,
-            rawContent: fullResponse,
-            timestamp: new Date().toLocaleTimeString("en-US", {
-              hour: "numeric",
-              minute: "2-digit", 
-              second: "2-digit",
-              hour12: true,
-            })
-          });
-        }
-      )) {
-        // Stream is handled by the onChunk callback
-      }
-      
-      if (!hasContent) {
-        throw new Error(`No content received from LLM for batch ${batchNumber}`);
-      }
-      
-    } catch (error) {
-      const errorMessage = error instanceof Error ? error.message : String(error);
-      console.error(`Batch ${batchNumber} processing failed for analysis ${analysis.id}:`, errorMessage);
-      throw new Error(`Batch ${batchNumber} processing failed: ${errorMessage}`);
-    }
-
-    // Mark batch as complete - NO PARSING, JUST RAW FINAL RESPONSE
-    this.broadcastToStream(analysis.id, {
-      type: "batch_complete", 
-      batchNumber,
-      finalRawResponse: fullResponse,
-      isComplete: true,
-      timestamp: new Date().toLocaleTimeString("en-US", {
-        hour: "numeric",
-        minute: "2-digit",
-        second: "2-digit", 
-        hour12: true,
-      })
-    });
-    
-    return fullResponse;
-  }
 
   private parseQuestionResponses(response: string, questions: string[]): Array<{
     question: string;

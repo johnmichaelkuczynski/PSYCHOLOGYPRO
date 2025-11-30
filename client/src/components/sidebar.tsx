@@ -1,4 +1,4 @@
-import { Lightbulb, Brain, Users, UserCheck, Stethoscope, ClipboardCheck, FileText, Zap, User } from "lucide-react";
+import { Users, UserCheck, Stethoscope, ClipboardCheck, FileText, Zap, User } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import type { AnalysisTypeType } from "@shared/schema";
 
@@ -87,6 +87,7 @@ export default function Sidebar({ selectedFunction, onFunctionChange }: SidebarP
                 className="w-full justify-start text-sm font-medium h-auto py-3 px-3"
                 onClick={() => onFunctionChange(func.key)}
                 data-testid={`function-${func.key}`}
+                disabled={!isAvailable}
               >
                 <Icon className="mr-3 h-4 w-4 flex-shrink-0" />
                 <span className="text-left leading-tight">{func.label}</span>
