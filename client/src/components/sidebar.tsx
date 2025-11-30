@@ -9,24 +9,6 @@ interface SidebarProps {
 
 const FUNCTIONS = [
   {
-    key: "microcognitive" as AnalysisTypeType,
-    label: "Micro Cognitive (Fast)",
-    icon: Zap,
-    available: true,
-  },
-  {
-    key: "cognitive" as AnalysisTypeType,
-    label: "Cognitive",
-    icon: Lightbulb,
-    available: true,
-  },
-  {
-    key: "comprehensive-cognitive" as AnalysisTypeType,
-    label: "Comprehensive Cognitive", 
-    icon: Brain,
-    available: true,
-  },
-  {
     key: "micropsychological" as AnalysisTypeType,
     label: "Micro Psychological (Fast)",
     icon: Zap,

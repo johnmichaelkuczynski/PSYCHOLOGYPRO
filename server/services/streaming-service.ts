@@ -105,15 +105,6 @@ export class StreamingService {
       // Process the analysis and ensure results are saved
       console.log(`📋 EXECUTING SWITCH: analysis.type = '${analysis.type}'`);
       switch (analysis.type) {
-        case "cognitive":
-          await this.processCognitiveAnalysis(analysis);
-          break;
-        case "comprehensive-cognitive":
-          await this.processComprehensiveCognitiveAnalysis(analysis);
-          break;
-        case "microcognitive":
-          await this.processMicrocognitiveAnalysis(analysis);
-          break;
         case "psychological":
           await this.processPsychologicalAnalysis(analysis);
           break;
@@ -173,52 +164,6 @@ export class StreamingService {
     }
   }
 
-  private async processCognitiveAnalysis(analysis: Analysis): Promise<void> {
-    // Step 1: Generate and stream summary
-    const summary = await this.streamSummary(analysis);
-
-    // Step 2: Process questions in batches of 5
-    const questions = this.llmService.getCognitiveQuestions();
-    const batches = this.createBatches(questions, 5);
-    const batchResults: string[] = [];
-
-    for (let i = 0; i < batches.length; i++) {
-      // Check if analysis was stopped
-      const currentStream = this.activeStreams.get(analysis.id);
-      if (!currentStream || !currentStream.isActive) {
-        return;
-      }
-
-      const batch = batches[i];
-      const batchNumber = i + 1;
-
-      // Process each question in the batch
-      const batchResponse = await this.processBatch(analysis, batch, batchNumber);
-      batchResults.push(batchResponse);
-
-      // Check if analysis was stopped before delay
-      const delayStream = this.activeStreams.get(analysis.id);
-      if (!delayStream || !delayStream.isActive) {
-        return;
-      }
-
-      // Wait 10 seconds before next batch (except for last batch)
-      if (i < batches.length - 1) {
-        await this.streamDelay(analysis.id, 10000);
-      }
-    }
-
-    // Step 3: Save the complete analysis results
-    const finalResults = {
-      summary,
-      batches: batchResults,
-      questions,
-      type: analysis.type,
-      completedAt: new Date().toISOString()
-    };
-
-    await this.storage.updateAnalysisResults(analysis.id, finalResults);
-  }
 
   private async streamSummary(analysis: Analysis): Promise<string> {
     const summaryPrompt = `First, summarize this text and categorize it:\n\n${analysis.textContent}`;
@@ -400,9 +345,7 @@ export class StreamingService {
 
   private getRequiredCredits(analysisType: string): number {
     const ANALYSIS_CREDIT_COST = {
-      cognitive: 2000,
       "comprehensive-cognitive": 5000,
-      microcognitive: 500,
       psychological: 1500,
       "comprehensive-psychological": 4000,
       micropsychological: 400,
@@ -440,26 +383,6 @@ export class StreamingService {
   }
 
   // Process Comprehensive Cognitive Analysis (8 batches)
-  private async processComprehensiveCognitiveAnalysis(analysis: Analysis): Promise<void> {
-    // Step 1: Generate and stream summary
-    const summary = await this.streamSummary(analysis);
-
-    // Step 2: Process questions in 8 batches
-    const questions = this.llmService.getComprehensiveCognitiveQuestions();
-    const batches = this.createBatches(questions, 3);
-    const batchResults = await this.processBatchesWithResults(analysis, batches);
-
-    // Step 3: Save the complete analysis results
-    const finalResults = {
-      summary,
-      batches: batchResults,
-      questions,
-      type: analysis.type,
-      completedAt: new Date().toISOString()
-    };
-
-    await this.storage.updateAnalysisResults(analysis.id, finalResults);
-  }
 
   // Process Psychological Analysis (NORMAL - 4 batches)
   private async processPsychologicalAnalysis(analysis: Analysis): Promise<void> {
@@ -601,28 +524,6 @@ export class StreamingService {
   }
 
   // Process Micro Cognitive Analysis (ultra-fast, concise responses)
-  private async processMicrocognitiveAnalysis(analysis: Analysis): Promise<void> {
-    console.log(`✅ MICRO COGNITIVE ANALYSIS STARTED - ID: ${analysis.id}`);
-    // Step 1: Generate and stream summary
-    const summary = await this.streamSummary(analysis);
-
-    // Step 2: Process questions in 1 batch with micro prompts
-    const questions = this.llmService.getMicrocognitiveQuestions();
-    console.log(`📝 MICRO COGNITIVE QUESTIONS: ${questions.length} questions, first: "${questions[0]}"`);
-    const batches = this.createBatches(questions, 100);
-    const batchResults = await this.processMicroBatchesWithResults(analysis, batches, 'microcognitive');
-
-    // Step 3: Save the complete analysis results
-    const finalResults = {
-      summary,
-      batches: batchResults,
-      questions,
-      type: analysis.type,
-      completedAt: new Date().toISOString()
-    };
-
-    await this.storage.updateAnalysisResults(analysis.id, finalResults);
-  }
 
   // Process Micro Psychological Analysis (ultra-fast, concise responses - 1 batch)
   private async processMicropsychologicalAnalysis(analysis: Analysis): Promise<void> {
