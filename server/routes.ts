@@ -36,10 +36,11 @@ const fileService = new FileService();
 const streamingService = new StreamingService(llmService, storage);
 
 // Initialize Stripe
-if (!process.env.STRIPE_SECRET_KEY) {
-  throw new Error('Missing required Stripe secret: STRIPE_SECRET_KEY');
+const stripeSecretKey = process.env.STRIPE_SECRET_KEY || process.env.TESTING_STRIPE_SECRET_KEY;
+if (!stripeSecretKey) {
+  console.warn('Warning: Missing Stripe secret key. Payment features will be disabled.');
 }
-const stripe = new Stripe(process.env.STRIPE_SECRET_KEY);
+const stripe = stripeSecretKey ? new Stripe(stripeSecretKey) : null;
 
 // Set up session store
 const PgSession = connectPgSimple(session);
@@ -419,6 +420,9 @@ export async function registerRoutes(app: Express): Promise<Server> {
       }
 
       console.log("Creating Stripe PaymentIntent...");
+      if (!stripe) {
+        return res.status(500).json({ error: "Stripe is not configured" });
+      }
       const paymentIntent = await stripe.paymentIntents.create({
         amount: Math.round(amount * 100), // Convert to cents
         currency: "usd",
@@ -451,6 +455,9 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
       let event;
       try {
+        if (!stripe) {
+          throw new Error("Stripe is not configured");
+        }
         event = stripe.webhooks.constructEvent(req.body, sig as string, webhookSecret);
       } catch (err: any) {
         console.error('Webhook signature verification failed:', err.message);
