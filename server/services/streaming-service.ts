@@ -307,7 +307,7 @@ export class StreamingService {
     const summary = await this.streamSummary(analysis);
 
     // Step 2: Process questions in 4 batches
-    const questions = this.llmService.getPsychologicalQuestions();
+    const questions = this.llmService.getMicropsychologicalQuestions();
     const batches = this.createBatches(questions, 5);
     const batchResults = await this.processBatchesWithResults(analysis, batches);
 
