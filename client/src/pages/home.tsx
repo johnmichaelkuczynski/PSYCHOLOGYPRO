@@ -26,6 +26,10 @@ export default function Home() {
     // Always fetch saved analyses for the count, but refetch when showing the panel
     staleTime: showSavedAnalyses ? 0 : 5 * 60 * 1000, // 5 minutes when not showing panel
   });
+  const { data: historyRows = [] } = useQuery<any[]>({
+    queryKey: ["/api/analysis-settings/tractatus_mode"],
+    staleTime: 0,
+  });
 
   const handleNewAnalysis = () => {
     setCurrentAnalysisId(null);
@@ -253,6 +257,12 @@ export default function Home() {
                       ))}
                     </div>
                   )}
+                  <div className="mt-4 border-t pt-3">
+                    <h4 className="text-xs font-semibold uppercase text-gray-500 mb-2">DB scaffold setting</h4>
+                    <pre className="text-xs bg-gray-50 p-2 rounded overflow-x-auto">
+                      {JSON.stringify(historyRows, null, 2)}
+                    </pre>
+                  </div>
                 </div>
               )}
               

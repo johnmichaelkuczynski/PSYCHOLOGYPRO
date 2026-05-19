@@ -152,6 +152,10 @@ export class StreamingService {
 
 
   private async streamSummary(analysis: Analysis): Promise<string> {
+    const scaffoldMode = await this.storage.getAnalysisSetting("tractatus_mode");
+    if (scaffoldMode?.value) {
+      console.log("DB tractatus mode:", scaffoldMode.value);
+    }
     const summaryPrompt = this.llmService.createScaffoldedAnalysisPrompt(
       "summary",
       analysis.textContent,
@@ -298,6 +302,7 @@ export class StreamingService {
 
   // Process Psychological Analysis (NORMAL - 4 batches)
   private async processPsychologicalAnalysis(analysis: Analysis): Promise<void> {
+    await this.ensureHistoryAnchor(analysis);
     // Step 1: Generate and stream summary
     const summary = await this.streamSummary(analysis);
 
@@ -320,6 +325,7 @@ export class StreamingService {
 
   // Process Comprehensive Psychological Analysis (8 batches)
   private async processComprehensivePsychologicalAnalysis(analysis: Analysis): Promise<void> {
+    await this.ensureHistoryAnchor(analysis);
     // Step 1: Generate and stream summary
     const summary = await this.streamSummary(analysis);
 
@@ -342,6 +348,7 @@ export class StreamingService {
 
   // Process Psychopathological Analysis
   private async processPsychopathologicalAnalysis(analysis: Analysis): Promise<void> {
+    await this.ensureHistoryAnchor(analysis);
     // Step 1: Generate and stream summary
     const summary = await this.streamSummary(analysis);
 
@@ -364,6 +371,7 @@ export class StreamingService {
 
   // Process Comprehensive Psychopathological Analysis (8 batches)
   private async processComprehensivePsychopathologicalAnalysis(analysis: Analysis): Promise<void> {
+    await this.ensureHistoryAnchor(analysis);
     // Step 1: Generate and stream summary
     const summary = await this.streamSummary(analysis);
 
@@ -439,6 +447,7 @@ export class StreamingService {
 
   // Process Micro Psychological Analysis (ultra-fast, concise responses - 1 batch)
   private async processMicropsychologicalAnalysis(analysis: Analysis): Promise<void> {
+    await this.ensureHistoryAnchor(analysis);
     console.log(`✅ MICRO PSYCHOLOGICAL ANALYSIS STARTED - ID: ${analysis.id}`);
     // Step 1: Generate and stream summary
     const summary = await this.streamSummary(analysis);
@@ -463,6 +472,7 @@ export class StreamingService {
 
   // Process Micro Psychopathological Analysis (ultra-fast, concise responses - 1 batch)
   private async processMicropsychopathologicalAnalysis(analysis: Analysis): Promise<void> {
+    await this.ensureHistoryAnchor(analysis);
     console.log(`✅ MICRO PSYCHOPATHOLOGICAL ANALYSIS STARTED - ID: ${analysis.id}`);
     // Step 1: Generate and stream summary
     const summary = await this.streamSummary(analysis);
@@ -487,6 +497,7 @@ export class StreamingService {
 
   // Process MBTI Analysis
   private async processMBTIAnalysis(analysis: Analysis): Promise<void> {
+    await this.ensureHistoryAnchor(analysis);
     // Step 1: Generate and stream summary
     const summary = await this.streamSummary(analysis);
 
@@ -648,6 +659,7 @@ export class StreamingService {
 
   // Process Comprehensive MBTI Analysis (Extended with cognitive functions)
   private async processComprehensiveMBTIAnalysis(analysis: Analysis): Promise<void> {
+    await this.ensureHistoryAnchor(analysis);
     // Step 1: Generate and stream summary
     const summary = await this.streamSummary(analysis);
 
@@ -808,6 +820,7 @@ export class StreamingService {
 
   // Process Micro MBTI Analysis (Fast, concise responses)
   private async processMicroMBTIAnalysis(analysis: Analysis): Promise<void> {
+    await this.ensureHistoryAnchor(analysis);
     // Step 1: Generate and stream summary
     const summary = await this.streamSummary(analysis);
 
@@ -1078,5 +1091,24 @@ export class StreamingService {
     });
     
     return fullResponse;
+  }
+
+  private async ensureHistoryAnchor(analysis: Analysis): Promise<void> {
+    const key = `history:${analysis.id}`;
+    const existing = await this.storage.getAnalysisSetting(key);
+    if (existing) {
+      return;
+    }
+
+    await this.storage.upsertAnalysisSetting({
+      key,
+      value: {
+        analysisId: analysis.id,
+        type: analysis.type,
+        provider: analysis.llmProvider,
+        textLength: analysis.textContent.length,
+        createdAt: analysis.createdAt?.toISOString?.() ?? new Date().toISOString(),
+      },
+    });
   }
 }
