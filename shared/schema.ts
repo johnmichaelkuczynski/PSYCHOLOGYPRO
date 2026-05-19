@@ -34,6 +34,14 @@ export const discussions = pgTable("discussions", {
   createdAt: timestamp("created_at").defaultNow(),
 });
 
+export const analysisSettings = pgTable("analysis_settings", {
+  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+  key: varchar("key").notNull().unique(),
+  value: jsonb("value").notNull(),
+  createdAt: timestamp("created_at").defaultNow(),
+  updatedAt: timestamp("updated_at").defaultNow(),
+});
+
 export const transactions = pgTable("transactions", {
   id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
   userId: integer("user_id").notNull().references(() => users.id, { onDelete: "cascade" }),
@@ -66,6 +74,11 @@ export const insertDiscussionSchema = createInsertSchema(discussions).pick({
   sender: true,
 });
 
+export const insertAnalysisSettingsSchema = createInsertSchema(analysisSettings).pick({
+  key: true,
+  value: true,
+});
+
 export const insertTransactionSchema = createInsertSchema(transactions).pick({
   userId: true,
   amount: true,
@@ -79,6 +92,8 @@ export type InsertAnalysis = z.infer<typeof insertAnalysisSchema>;
 export type Analysis = typeof analyses.$inferSelect;
 export type InsertDiscussion = z.infer<typeof insertDiscussionSchema>;
 export type Discussion = typeof discussions.$inferSelect;
+export type InsertAnalysisSettings = z.infer<typeof insertAnalysisSettingsSchema>;
+export type AnalysisSettings = typeof analysisSettings.$inferSelect;
 export type InsertTransaction = z.infer<typeof insertTransactionSchema>;
 export type Transaction = typeof transactions.$inferSelect;
 

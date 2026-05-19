@@ -7,6 +7,16 @@ interface LLMConfig {
 }
 
 export class LLMService {
+  private getDefaultTreeMode() {
+    return {
+      enabled: true,
+      style: "tractatus",
+      shortParagraphs: 2,
+      mediumParagraphs: 8,
+      comprehensiveParagraphs: 32,
+    };
+  }
+
   private configs: Record<LLMProviderType, LLMConfig> = {
     zhi1: {
       apiKey: process.env.OPENAI_API_KEY || process.env.API_KEY || "",
@@ -204,6 +214,7 @@ export class LLMService {
   }
 
   private buildScaffoldPrompt(title: string, textContent: string, additionalContext?: string): string {
+    const treeMode = this.getDefaultTreeMode();
     return `${title}
 
 Use this scaffold before writing the answer.
@@ -211,6 +222,10 @@ If the answer would be longer than 2 paragraphs, you must first produce a compac
 Do not repeat the same point in different words.
 Do not ramble.
 Do not produce more than one sentence per bullet in the scaffold.
+Use Tractatus tree style.
+Short answers must be exactly ${treeMode.shortParagraphs} paragraphs.
+Medium answers must be exactly ${treeMode.mediumParagraphs} paragraphs.
+Comprehensive answers must be exactly ${treeMode.comprehensiveParagraphs} paragraphs.
 
 STRUCTURE:
 1. Thesis

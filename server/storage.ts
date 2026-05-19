@@ -1,4 +1,4 @@
-import { type Analysis, type Discussion, type InsertAnalysis, type InsertDiscussion, analyses, discussions } from "../shared/schema";
+import { type Analysis, type AnalysisSettings, type Discussion, type InsertAnalysis, type InsertAnalysisSettings, type InsertDiscussion, analyses, analysisSettings, discussions } from "../shared/schema";
 import { db } from "./db";
 import { eq, desc } from "drizzle-orm";
 
@@ -18,6 +18,10 @@ export interface IStorage {
   
   // Saved analyses
   getSavedAnalyses(userId?: number): Promise<Analysis[]>;
+
+  // Analysis settings
+  getAnalysisSetting(key: string): Promise<AnalysisSettings | undefined>;
+  upsertAnalysisSetting(setting: InsertAnalysisSettings): Promise<AnalysisSettings>;
 }
 
 // Referenced from javascript_database integration
@@ -90,6 +94,32 @@ export class DatabaseStorage implements IStorage {
       .from(analyses)
       .where(eq(analyses.saved, true))
       .orderBy(desc(analyses.createdAt));
+  }
+
+  async getAnalysisSetting(key: string): Promise<AnalysisSettings | undefined> {
+    const [setting] = await db
+      .select()
+      .from(analysisSettings)
+      .where(eq(analysisSettings.key, key));
+    return setting || undefined;
+  }
+
+  async upsertAnalysisSetting(setting: InsertAnalysisSettings): Promise<AnalysisSettings> {
+    const existing = await this.getAnalysisSetting(setting.key);
+    if (existing) {
+      const [updated] = await db
+        .update(analysisSettings)
+        .set({ value: setting.value, updatedAt: new Date() })
+        .where(eq(analysisSettings.key, setting.key))
+        .returning();
+      return updated;
+    }
+
+    const [created] = await db
+      .insert(analysisSettings)
+      .values(setting)
+      .returning();
+    return created;
   }
 }
 

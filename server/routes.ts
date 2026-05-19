@@ -6,7 +6,7 @@ import { storage } from "./storage";
 import { LLMService } from "./services/llm-service";
 import { FileService } from "./services/file-service";
 import { StreamingService } from "./services/streaming-service";
-import { insertAnalysisSchema, insertDiscussionSchema } from "../shared/schema";
+import { insertAnalysisSchema, insertDiscussionSchema, insertAnalysisSettingsSchema } from "../shared/schema";
 
 // Configure multer for file uploads
 const upload = multer({
@@ -229,6 +229,33 @@ export async function registerRoutes(app: Express): Promise<Server> {
     } catch (error) {
       console.error("Save analysis error:", error);
       res.status(500).json({ error: "Failed to save analysis" });
+    }
+  });
+
+  app.get("/api/analysis-settings/:key", async (req, res) => {
+    try {
+      const setting = await storage.getAnalysisSetting(req.params.key);
+      if (!setting) {
+        return res.status(404).json({ error: "Setting not found" });
+      }
+      res.json(setting);
+    } catch (error) {
+      console.error("Get analysis setting error:", error);
+      res.status(500).json({ error: "Failed to get analysis setting" });
+    }
+  });
+
+  app.put("/api/analysis-settings/:key", async (req, res) => {
+    try {
+      const settingData = insertAnalysisSettingsSchema.parse({ ...req.body, key: req.params.key });
+      const setting = await storage.upsertAnalysisSetting(settingData);
+      res.json(setting);
+    } catch (error) {
+      console.error("Update analysis setting error:", error);
+      if (error instanceof z.ZodError) {
+        return res.status(400).json({ error: "Invalid setting data", details: error.errors });
+      }
+      res.status(500).json({ error: "Failed to update analysis setting" });
     }
   });
 
