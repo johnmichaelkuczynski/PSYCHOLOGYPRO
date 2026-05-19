@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { Brain, Settings, HelpCircle, Bookmark, Loader2, Video } from "lucide-react";
+import { Brain, Settings, HelpCircle, Bookmark, Loader2, Video, Sparkles, Download } from "lucide-react";
 import Sidebar from "@/components/sidebar";
 import LLMSelector from "@/components/llm-selector";
 import TextInput from "@/components/text-input";
@@ -161,6 +161,12 @@ export default function Home() {
               <Button variant="ghost" size="sm" data-testid="help-button">
                 <HelpCircle className="h-4 w-4" />
               </Button>
+              <Button variant="outline" size="sm" asChild data-testid="diagnostics-button">
+                <a href="/diagnostic">
+                  <Sparkles className="h-4 w-4 mr-2" />
+                  Diagnostic
+                </a>
+              </Button>
               <Button variant="ghost" size="sm" data-testid="settings-button">
                 <Settings className="h-4 w-4" />
               </Button>
@@ -210,6 +216,7 @@ export default function Home() {
                     onClick={handleDownloadAnalysis}
                     disabled={!currentAnalysisId}
                   >
+                    <Download className="h-4 w-4 mr-2" />
                     Download TXT
                   </Button>
                 </div>
