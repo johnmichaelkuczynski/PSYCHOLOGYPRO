@@ -1,0 +1,426 @@
+Build a synthetic user agent ("R1") that beta-tests Psychology Pro end-to-end. R1 must produce raw, reviewable evidence of every interaction — not pass/fail summaries.
+NON-NEGOTIABLE REQUIREMENTS (read first)
+These are the parts a previous synthetic-user build for a different app failed on. If any are missing, the deliverable is rejected.
+
+No green-checkmark theater. R1 produces raw evidence, not "PASS." Exact text typed, exact text returned, exact network responses, exact screenshots. Judge produces prose critique, not booleans. PASS/FAIL exists only as a filter for failures.md — never as a substitute for evidence.
+The HTML report must be reviewable in under 30 minutes. Every interaction shows step + R1's input verbatim + app's response body + screenshots + judge critique. No collapsed sections.
+The live view must show R1's actual inputs and the app's actual outputs as they happen — not "Step 4 of N in progress." Spec below.
+Network traffic captured raw. Every /api/* request and response body in network.log as JSONL. SSE streams captured event-by-event.
+Three screenshots per interactive step (before / after typing / after app responds). Navigation-only steps get one. The sanity check distinguishes the two cases.
+If R1 cannot complete a step, the failure is logged with the actual error, page HTML at moment of failure, and a screenshot. No skipping and marking green.
+Per-step API-call expectations are route-specific. "Submit analysis" expects POST /api/analyses specifically, followed by GET /api/analyses/:id/stream. Boolean checks forbidden.
+Critical button clicks wrapped in Promise.all([page.waitForResponse(predicate), click]).
+
+What's different about this app — Psychology Pro's defining features
+Psychology Pro is a streaming multi-provider analysis platform with session auth, credit-gated paid features, and 12 analysis types. Five things make it different from previous R1 targets:
+It uses SSE for live streaming. Per blueprint, analysis status flows pending → streaming → completed/error. R1 must consume the SSE stream from GET /api/analyses/:id/stream and verify the lifecycle. This is the same SSE pattern as FreudGPT and several others, but here it's the dominant interaction model.
+It has a credit-gated paid flow. R1 should test both the credit balance check AND the analysis submission path. R1 does NOT attempt real Stripe payments but verifies the checkout page loads and creates a payment intent without errors.
+The provider naming is ZHI 1–5 with the same hidden-provider rule as other apps. R1 enforces this as an invariant.
+There are 12 distinct analysis types (4 base × 3 depths). R1 should exercise all 12 to verify each works, but with SKIP_FUNCTIONS for cost control. The discussion follow-up system is a separate flow attached to each analysis.
+The download endpoint produces a text report. R1 verifies the download is non-empty and contains the analysis output, not just an error stub.
+The seven invariants that elevate to CRITICAL VIOLATION status:
+Invariant A — ZHI labels never reveal provider identity. Same as several other apps. R1 scans UI for ZHI \d \( patterns and raw provider names (OpenAI, Anthropic, DeepSeek, Perplexity, xAI, Grok, Claude, GPT). Any leak = CRITICAL VIOLATION.
+Invariant B — SSE lifecycle is well-formed. For every analysis R1 submits, the stream must emit a sequence including some indication of streaming state and a terminal completed or error state. R1 captures all SSE events and verifies:
+
+The stream opens within 5 seconds of GET /api/analyses/:id/stream
+At least one mid-stream event arrives (status update or content chunk)
+A terminal event arrives (final results or explicit error)
+The corresponding GET /api/analyses/:id after stream end shows status as completed or error, NOT stuck at streaming or pending
+
+If the stream never terminates, or DB status disagrees with stream terminus, CRITICAL VIOLATION.
+Invariant C — Provider routing is real. R1 submits the same input through all 5 providers (zhi1, zhi2, zhi3, zhi4, zhi5 — skipping any whose API keys are missing). All responses captured. No two byte-identical (would indicate silent fallback to a default provider). The llmProvider field stored on the analysis row must match the provider R1 selected. If silent fallback occurs, CRITICAL VIOLATION.
+Invariant D — Saved analyses persist across sessions. R1 saves an analysis, logs out, logs back in, retrieves saved analyses via GET /api/analyses/saved, and verifies the saved analysis appears with intact content. If saved data is lost or content corrupts, CRITICAL VIOLATION (the documented persistence contract is broken).
+Invariant E — Download produces faithful output. When R1 downloads an analysis as text via GET /api/analyses/:id/download, the file must:
+
+Be non-empty
+Contain substantial text matching what was displayed in the UI (not just metadata)
+Be in plain text format (no HTML escapes, no JSON wrapping)
+
+If the download is empty, an error stub, or doesn't match the analysis content, CRITICAL VIOLATION.
+Invariant F — Discussions are scoped to analyses. When R1 posts a discussion message via POST /api/discussions with analysisId=X, and then fetches GET /api/discussions/Y (different ID), the message must NOT appear under Y's discussions. Cross-analysis bleed would be a data integrity bug: CRITICAL VIOLATION.
+Invariant G — Auth enforcement on protected routes. R1 logs out, then attempts to call protected endpoints (POST /api/analyses, GET /api/analyses/mine, etc.) without a session. Each must return 401 (or equivalent unauthorized response), NOT silently succeed or expose other users' data. If any protected route works without auth, CRITICAL VIOLATION.
+Architecture
+
+Browser automation: Playwright (Node, single-file tools/r1/run.mjs). Standalone Node project, not in any workspace.
+R1's brain: Anthropic API. Model: claude-opus-4-7. Key in ANTHROPIC_API_KEY.
+Judge: Separate Claude API call per interaction. Prose critique. For psychological/cognitive analysis quality, judge evaluates whether the analysis is substantive, on-topic, and avoids generic boilerplate.
+Live view: node:http server on port 7777. Zero extra deps.
+Target app: Psychology Pro running locally. Default APP_URL=http://localhost:5000 (typical Replit dev port). R1 registers a fresh user at startup.
+
+Authentication
+R1 creates a fresh user at startup:
+
+POST /api/auth/register with username r1-<timestamp>, random password, save credentials in memory.
+POST /api/auth/login with same credentials.
+GET /api/me to verify session.
+If registration fails (e.g., duplicate username on retry), R1 retries with a new timestamp.
+If login fails, abort with explicit error.
+
+R1 also tests the logout/re-login flow as part of Invariant D.
+Live view
+Top panel: current step + R1's approach/reasoning + URL + live keystroke mirror + latest screenshot.
+Middle panel: streamed analysis content (this is heavily streaming-driven — show tokens arriving), recent /api/* calls, judge critique, plus a dedicated "Psychology Pro State" panel showing:
+
+Current page (/, /credits, /checkout)
+Authenticated user
+Selected analysis type (cognitive / psychological / etc.)
+Selected provider (zhi1–zhi5)
+Current analysis ID
+Current analysis status (pending / streaming / completed / error)
+Credit balance
+Last UI scan result (clean / violations)
+
+For active SSE streams, sub-panel shows event count, last event type, time since last event.
+Bottom panel: reverse-chronological completed-interaction log.
+After exit: "RUN COMPLETE" with link to report.html. Kept open 60s.
+Fixtures
+R1 needs varied text content. Include in fixtures/:
+
+personal-essay.txt — ~500 words of first-person reflective writing for psychological/cognitive analysis (R1 generates this from the brain at startup if not present)
+narrative-passage.txt — ~800 words of third-person narrative for MBTI inference
+stream-of-consciousness.txt — ~600 words of looser, less structured text for psychopathological angles
+short-snippet.txt — ~100 words for edge case testing
+pdf-fixture.pdf — short PDF for file upload testing
+
+The content should be substantive enough that the judge can evaluate whether the analysis is genuinely engaging with it (not generic).
+What R1 is testing — the functions
+Function 1 — Registration and login
+
+Navigate to the auth page (or trigger the auth dialog).
+Register fresh user: POST /api/auth/register. Verify 200 + user record.
+Login: POST /api/auth/login. Verify session cookie set.
+GET /api/me. Verify response contains the new user.
+Initial UI scan for Invariant A: scan all visible text. No ZHI \d \( patterns. No provider names.
+
+Function 2 — Home workspace initial state
+
+Navigate to /.
+Verify presence of: sidebar (analysis type selection), LLM selector (zhi1–zhi5), text input area, results panel.
+Verify all 12 analysis types appear in the sidebar.
+Verify all 5 providers appear in the LLM selector.
+
+Function 3 — Simple analysis submission (smoke test)
+
+Paste personal-essay.txt content into the text input.
+Select analysis type: cognitive (the simplest).
+Select provider: zhi1.
+Click submit. Expected routes (in sequence):
+
+POST /api/analyses → returns analysis with id and status=pending
+GET /api/analyses/:id/stream (SSE) → streaming begins
+
+
+Capture all SSE events.
+Wait for terminal event (completed or error). Timeout: 3 min.
+Verify Invariant B (SSE lifecycle):
+
+Stream opened within 5s
+At least one mid-stream event
+Terminal event observed
+GET /api/analyses/:id shows status=completed after stream end
+
+
+Capture final analysis content.
+Save to outputs/analyses/cognitive-zhi1.json.
+
+Function 4 — All 12 analysis types
+For each of: cognitive, comprehensive-cognitive, microcognitive, psychological, comprehensive-psychological, micropsychological, psychopathological, comprehensive-psychopathological, micropsychopathological, mbti, comprehensive-mbti, micro-mbti:
+
+Submit using personal-essay.txt, provider zhi1.
+Wait for completion.
+Verify analysis completes successfully (Invariant B for each).
+Capture content.
+Save to outputs/analyses/<type>.json.
+
+If any type fails to complete or returns empty content, log as CRITICAL VIOLATION for that type.
+Function 5 — Provider parity (Invariant C)
+
+Pick one analysis type (cognitive).
+Submit the same input with each of: zhi1, zhi2, zhi3, zhi4, zhi5.
+Skip any provider whose API key is unavailable (verify by checking if Function 4's zhi1 call worked, then trying each in turn — if a provider returns immediate error like "API key not configured," skip and log).
+For each successful submission:
+
+Wait for completion
+Capture full output content
+Verify llmProvider field on the analysis record matches what R1 selected
+
+
+Verify Invariant C: no two outputs byte-identical. If any pair identical, one fell back. CRITICAL VIOLATION.
+Save outputs to outputs/provider-parity/.
+
+Function 6 — Save and reload (Invariant D)
+
+After Function 3's analysis completes, click "Save analysis."
+Expected route: PATCH /api/analyses/:id/save.
+Verify save success.
+Navigate to saved analyses view.
+Expected route: GET /api/analyses/saved.
+Verify the saved analysis appears.
+Capture the analysis ID for cross-session test.
+
+Persistence across sessions:
+
+Log out: POST /api/auth/logout.
+Verify GET /api/me returns null/401.
+Log back in: POST /api/auth/login with same credentials.
+Navigate to saved analyses.
+Verify Invariant D: the previously saved analysis still appears, content intact.
+If lost or content corrupted, CRITICAL VIOLATION.
+
+Function 7 — Download (Invariant E)
+
+On a completed analysis, click download.
+Expected route: GET /api/analyses/:id/download.
+Capture the downloaded file.
+Verify Invariant E:
+
+File is non-empty (≥ 200 bytes)
+File contains plain text (no <html>, no JSON-wrapping characters)
+File contains substantial overlap with the analysis content as displayed in the UI (extract a 50-word sample from UI, search downloaded file for ≥ 80% of that text)
+
+
+If any check fails, CRITICAL VIOLATION.
+Save to outputs/downloads/<analysis_id>.txt.
+
+Function 8 — Discussion follow-up (Invariant F)
+
+On a completed analysis (call it Analysis A), open the discussion modal.
+Post a discussion message: "Can you elaborate on the cognitive patterns you identified?"
+Expected route: POST /api/discussions with analysisId=A.
+Verify response.
+Wait for any AI follow-up response (if the discussion system auto-responds — verify against actual behavior).
+Retrieve discussions: GET /api/discussions/A. Verify R1's message appears.
+
+Cross-analysis bleed test for Invariant F:
+
+Create or pick Analysis B (different from A).
+Retrieve GET /api/discussions/B. Verify R1's message about cognitive patterns does NOT appear in B's discussion thread.
+If it does, CRITICAL VIOLATION (cross-analysis data bleed).
+
+Function 9 — File parsing
+
+Navigate to upload UI (on home page).
+Upload pdf-fixture.pdf.
+Expected route: POST /api/files/parse.
+Verify response contains extracted text.
+Verify extracted text matches the PDF content.
+Use the parsed text as analysis input. Verify full pipeline works.
+
+Function 10 — Credits page
+
+Navigate to /credits.
+Verify presence of:
+
+Current credit balance display
+5 LLM provider cards
+Pricing tier grid
+Purchase buttons
+
+
+Verify credit balance API: GET /api/user/credits.
+Verify transactions API: GET /api/user/transactions (likely empty for fresh user).
+Re-run Invariant A UI scan on this page (provider cards risk exposing names — check for compliance with ZHI-only labeling).
+
+Function 11 — Checkout flow (no real payment)
+
+From credits page, click a purchase button.
+Navigate to /checkout.
+Verify checkout page loads with amount and provider info from URL.
+Verify Stripe payment intent creation: POST /api/create-payment-intent.
+Capture response. Verify a payment intent ID is returned.
+Do NOT enter card details. Do NOT submit payment.
+Close the page.
+Verify no transaction was recorded: GET /api/user/transactions should still be empty (or unchanged).
+
+If Stripe environment variables are missing, expect graceful error message (per blueprint Part 10). Verify the error is friendly, not raw "Error: 500" or stack trace.
+Function 12 — Authentication enforcement (Invariant G)
+
+Log out: POST /api/auth/logout.
+Without a session cookie, attempt protected endpoints:
+
+GET /api/me → should return null user or 401
+POST /api/analyses with valid payload → expect 401
+GET /api/analyses/mine → expect 401
+GET /api/analyses/saved → expect 401
+GET /api/user/credits → expect 401
+
+
+Verify Invariant G: every protected endpoint returns 401 (or equivalent unauthorized). If any succeeds without auth or returns another user's data, CRITICAL VIOLATION.
+Log back in for continued testing.
+
+Function 13 — Edge cases
+
+Submit empty text. Expect graceful error or "input too short" message, NOT crash or 500.
+Submit a very long text (~20,000 words). Verify either successful completion or graceful "too long" message.
+Submit with no analysis type selected. Expect frontend validation block.
+Submit with no provider selected. Expect frontend validation block.
+
+Function 14 — Contest / reanalysis flow
+
+On a completed analysis, attempt to contest the result.
+Expected route: POST /api/analyses/:id/contest.
+Verify response (may trigger a new analysis or feedback request — check actual behavior).
+Capture result.
+
+Function 15 — Delete analysis
+
+Create a throwaway analysis.
+Delete it: DELETE /api/analyses/:id.
+Verify removal: GET /api/analyses/:id should 404 or return null.
+Verify it doesn't appear in GET /api/analyses/mine.
+
+Function 16 — User history toggle
+
+On the home page, toggle the user history view.
+Verify history populates with R1's analyses from earlier in the run.
+Click into a historical analysis. Verify it reloads.
+
+Function 17 — New analysis reset flow
+
+After working on an analysis, click "New analysis."
+Verify the workspace resets (text input cleared, no result, ready for new submission).
+
+Function 18 — Final UI scan (Invariant A real test)
+After all functions have run with various providers and analysis types:
+
+Take full-page screenshots across /, /credits, /checkout.
+Scan all visible text for ZHI \d \( patterns and provider names (OpenAI, Anthropic, DeepSeek, Perplexity, xAI, Grok, GPT, Claude).
+Verify Invariant A: zero violations. If any visible, CRITICAL VIOLATION with exact element location.
+
+R1's behavior
+For each interaction R1 picks one approach and logs the choice:
+
+Happy-path: substantive fixture content, default settings
+Switch providers to test parity (Invariant C)
+Vary analysis types
+Edge cases (empty, oversized, invalid combinations)
+Test session boundaries (log out / log back in, for Invariant D)
+Probe auth enforcement (Invariant G)
+
+Typing constraint: No clipboard paste for short inputs. .type() with TYPE_DELAY_MS=15. EXCEPTION: large fixture pastes use .fill() and log r1_input_method: "fill".
+Per-interaction flow
+
+Navigate / open UI.
+Capture page state.
+R1 brain picks approach + composes input.
+"Before" screenshot.
+Type or fill input. Select parameters (analysis type, provider).
+"After typing" screenshot.
+Wrap submit click in Promise.all([page.waitForResponse(predicate), click]).
+Stream consumption: for analysis submissions, subscribe to SSE stream. Capture all events with timestamps. Detect terminal event (completion or error). Timeout: 3 min per analysis.
+"After" screenshot.
+Capture full response, console errors, all /api/* calls.
+Run invariant-specific verification:
+
+All interactions → Invariant A (UI scan)
+Analysis submissions → Invariant B (SSE lifecycle)
+Provider switches → Invariant C (parity, deferred to final compare)
+Save/load across sessions → Invariant D
+Downloads → Invariant E
+Discussion posts → Invariant F (no cross-bleed)
+Logged-out requests → Invariant G
+
+
+Send full interaction to judge: "Critique functionally and qualitatively. Did the analysis substantively engage with the input text, or was it generic boilerplate? Were the streaming events well-formed? Anything broken or off?"
+Append to transcript, update live view.
+
+Artifacts (written to tools/r1/runs/<ISO-timestamp>/)
+transcript.jsonl
+One JSON per interaction with standard fields plus, where applicable:
+
+ui_scan: Invariant A scan results
+sse_lifecycle: events captured with timestamps + terminal status
+provider_used: detected provider for Invariant C
+persistence_check: pre/post-logout comparison results for Invariant D
+download_validation: file size, content match results for Invariant E
+discussion_scope: bleed-check results for Invariant F
+auth_enforcement: response codes from logged-out attempts for Invariant G
+
+report.html
+Self-contained, grouped by function. Sticky TOC. Standard fields plus invariant-specific blocks. Function 4 (12 analysis types) gets a coverage matrix. Function 5 (provider parity) gets a side-by-side output comparison. Function 6 (Invariant D) gets a pre-logout vs post-login comparison block.
+failures.md
+Opens with CRITICAL INVARIANT VIOLATIONS:
+
+Invariant A: ZHI label or provider name leak
+Invariant B: SSE lifecycle broken (cite event sequence)
+Invariant C: provider parity broken (cite byte-identical pair)
+Invariant D: persistence broken (cite the lost/corrupted analysis)
+Invariant E: download faithless (cite file content vs UI)
+Invariant F: discussion bled across analyses (cite the message + wrong analysisId)
+Invariant G: auth bypass (cite the endpoint + response)
+Any 5xx response
+Any uncaught exception in R1's harness
+
+Below: judge concerns linking to report anchors, screenshots inline.
+network.log
+JSONL of every /api/* call + response body. SSE streams captured as assembled-final-body + chunk timestamps + event types.
+sse-streams/
+Full SSE event sequences per analysis as sse-streams/<analysis_id>.jsonl.
+outputs/
+
+analyses/ — outputs per analysis type
+provider-parity/ — outputs per provider
+downloads/ — downloaded text files from Function 7
+discussions/ — discussion threads
+ui-scans/ — JSON captures of all visible text per page for Invariant A re-verification
+
+console.log
+Full stdout.
+screenshots/
+Numbered PNGs.
+run-summary.txt
+INTERACTIONS: N
+JUDGE CONCERNS RAISED: M
+CRITICAL INVARIANT VIOLATIONS: K
+  Invariant A (ZHI labels clean): A
+  Invariant B (SSE lifecycle): B
+  Invariant C (provider parity): C
+  Invariant D (persistence): D
+  Invariant E (download faithful): E
+  Invariant F (discussion scope): F
+  Invariant G (auth enforcement): G
+ANALYSIS TYPES COVERED: [list]
+HARNESS SANITY FAILURES: J
+Anti-theater sanity checks
+For each interaction:
+
+Every route in expected_routes appears in network_calls. Route-specific.
+r1_input ≥ 10 chars or fill-method with fixture reference for interactive steps.
+Interactive: 3 screenshots, not byte-identical. Navigation-only: 1.
+judge_critique ≥ 30 words.
+For analysis submissions: sse_lifecycle block populated with ≥ 1 event AND a terminal status.
+For Function 4 (12 types): all 12 attempted, each either completed or explicitly failed with logged reason.
+For Function 5 (provider parity): each tested provider has a captured output OR an explicit skip with reason.
+
+If any fail: HARNESS SANITY FAILURES: X, exit code 3.
+Configuration
+jsconst APP_URL = process.env.APP_URL || 'http://localhost:5000';
+const OUTPUT_DIR = `./runs/${new Date().toISOString().replace(/[:.]/g,'-')}`;
+const HEADLESS = process.env.HEADLESS === 'true' || false;
+const TYPE_DELAY_MS = parseInt(process.env.TYPE_DELAY_MS || '15', 10);
+const LIVE_VIEW_PORT = parseInt(process.env.LIVE_VIEW_PORT || '7777', 10);
+const SKIP_FUNCTIONS = (process.env.SKIP_FUNCTIONS || '').split(',').filter(Boolean);
+const ANALYSIS_TIMEOUT_MS = parseInt(process.env.ANALYSIS_TIMEOUT_MS || '180000', 10);
+const ANTHROPIC_MODEL = process.env.ANTHROPIC_MODEL || 'claude-opus-4-7';
+Deliverable
+tools/r1/run.mjs + tools/r1/package.json + tools/r1/README.md + the fixture files listed above. Standalone Node project.
+npm start runs full plan. Smoke test: SKIP_FUNCTIONS=4,5 npm start (skip 12-analysis-type sweep and provider parity loop — the expensive ones).
+Startup banner:
+R1 is running.
+Live view:    http://localhost:7777
+Output dir:   ./runs/<timestamp>/
+Watch the live view — especially the Psychology Pro State panel.
+Do not trust summary output alone.
+Finish banner:
+R1 finished.
+Open the report:        ./runs/<...>/report.html
+Open the failures:      ./runs/<...>/failures.md
+Analysis outputs:       ./runs/<...>/outputs/analyses/
+Provider comparison:    ./runs/<...>/outputs/provider-parity/
+SSE streams:            ./runs/<...>/sse-streams/
+Downloads:              ./runs/<...>/outputs/downloads/
+UI scans:               ./runs/<...>/outputs/ui-scans/
+Raw transcript:         ./runs/<...>/transcript.jsonl
+Raw network log:        ./runs/<...>/network.log
+Exit codes: 0 clean, 1 judge concerns raised, 2 critical invariant violations, 3 harness sanity failed.
+UI selectors identified by inspecting the actual rendered Psychology Pro app. The blueprint references components (sidebar.tsx, llm-selector.tsx, text-input.tsx, results-panel.tsx, discussion-modal.tsx) — find data-testids there or use semantic selectors. Confirm endpoint paths against server/routes.ts; the code is authoritative.

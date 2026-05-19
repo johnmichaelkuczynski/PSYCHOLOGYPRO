@@ -85,20 +85,6 @@ export class StreamingService {
 
     console.log(`🔍 ANALYSIS ROUTING: ID=${analysisId}, TYPE=${analysis.type}, PROVIDER=${analysis.llmProvider}`);
 
-    // Check if user has sufficient credits (only for authenticated users)
-    if (analysis.userId) {
-      const requiredCredits = this.getRequiredCredits(analysis.type);
-      const hasCredits = await this.storage.checkUserCredits(analysis.userId, requiredCredits);
-      
-      if (!hasCredits) {
-        await this.storage.updateAnalysisStatus(analysisId, "error");
-        throw new Error("Insufficient credits for this analysis");
-      }
-      
-      // Consume credits upfront
-      await this.storage.consumeUserCredits(analysis.userId, requiredCredits);
-    }
-
     await this.storage.updateAnalysisStatus(analysisId, "streaming");
 
     try {
@@ -280,23 +266,6 @@ export class StreamingService {
       batches.push(items.slice(i, i + batchSize));
     }
     return batches;
-  }
-
-  private getRequiredCredits(analysisType: string): number {
-    const ANALYSIS_CREDIT_COST = {
-      "comprehensive-cognitive": 5000,
-      psychological: 1500,
-      "comprehensive-psychological": 4000,
-      micropsychological: 400,
-      psychopathological: 1500,
-      "comprehensive-psychopathological": 4000,
-      micropsychopathological: 400,
-      mbti: 1800,
-      "comprehensive-mbti": 4500,
-      "micro-mbti": 600,
-    } as const;
-
-    return ANALYSIS_CREDIT_COST[analysisType as keyof typeof ANALYSIS_CREDIT_COST] || 2000;
   }
 
   formatAnalysisForDownload(analysis: Analysis): string {
