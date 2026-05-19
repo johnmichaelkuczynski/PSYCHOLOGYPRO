@@ -57,6 +57,14 @@ interface BatchData {
   timestamp: string;
 }
 
+function renderScaffold(text: string) {
+  const parts = text.split(/\n{2,}/).filter(Boolean).slice(0, 4);
+  return parts.map((part, index) => ({
+    title: index === 0 ? "Thesis" : index === 1 ? "Evidence / reasoning" : index === 2 ? "Implications / caveats" : "Detail",
+    body: part.trim(),
+  }));
+}
+
 export default function ResultsPanel({ analysisId, onDiscussionToggle, onNewAnalysis }: ResultsPanelProps) {
   const [isPaused, setIsPaused] = useState(false);
   const [batches, setBatches] = useState<BatchData[]>([]);
@@ -251,9 +259,12 @@ export default function ResultsPanel({ analysisId, onDiscussionToggle, onNewAnal
             <div className="bg-blue-50 border-l-4 border-primary p-4 rounded-r-md mb-6" data-testid="text-summary">
               <h4 className="font-medium text-gray-900 mb-2">Text Summary & Categorization</h4>
               <div className="text-sm text-gray-700 leading-relaxed">
-                <div className={`streaming-text ${summary ? 'complete' : ''}`}>
-                  {summary}
-                </div>
+                {renderScaffold(summary).map((section, index) => (
+                  <div key={index} className="mb-4 last:mb-0">
+                    <div className="font-semibold text-gray-900">{section.title}</div>
+                    <div className={`streaming-text ${summary ? 'complete' : ''}`}>{section.body}</div>
+                  </div>
+                ))}
               </div>
             </div>
           )}
@@ -269,9 +280,12 @@ export default function ResultsPanel({ analysisId, onDiscussionToggle, onNewAnal
               
               <div className="question-card">
                 <div className="text-sm text-gray-700 leading-relaxed">
-                  <div className="streaming-text font-mono whitespace-pre-wrap">
-                    {content}
-                  </div>
+                  {renderScaffold(content).map((section, index) => (
+                    <div key={index} className="mb-4 last:mb-0">
+                      <div className="font-semibold text-gray-900">{section.title}</div>
+                      <div className="streaming-text font-mono whitespace-pre-wrap">{section.body}</div>
+                    </div>
+                  ))}
                 </div>
               </div>
             </div>
@@ -299,9 +313,12 @@ export default function ResultsPanel({ analysisId, onDiscussionToggle, onNewAnal
                         <div className="flex-1 min-w-0">
                           <p className="text-sm font-medium text-gray-900 mb-2">{q.question}</p>
                           <div className="text-sm text-gray-700 leading-relaxed">
-                            <div className={`streaming-text ${q.isComplete ? 'complete' : ''}`}>
-                              {q.response}
-                            </div>
+                            {renderScaffold(q.response).map((section, index) => (
+                              <div key={index} className="mb-4 last:mb-0">
+                                <div className="font-semibold text-gray-900">{section.title}</div>
+                                <div className={`streaming-text ${q.isComplete ? 'complete' : ''}`}>{section.body}</div>
+                              </div>
+                            ))}
                           </div>
                           {q.score > 0 && (
                             <div className="mt-3">

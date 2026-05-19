@@ -203,6 +203,26 @@ export class LLMService {
     }
   }
 
+  private buildScaffoldPrompt(title: string, textContent: string, additionalContext?: string): string {
+    return `${title}
+
+Use this scaffold before writing the answer.
+If the answer would be longer than 2 paragraphs, you must first produce a compact outline with numbered sections and then write under those headings.
+Do not repeat the same point in different words.
+Do not ramble.
+Do not produce more than one sentence per bullet in the scaffold.
+
+STRUCTURE:
+1. Thesis
+2. Evidence / reasoning
+3. Implications / caveats
+
+TEXT:
+${textContent}
+${additionalContext ? `\nCONTEXT:\n${additionalContext}` : ""}
+`;
+  }
+
   private extractContentFromResponse(parsed: any, provider: LLMProviderType): string | null {
     switch (provider) {
       case "zhi1": // OpenAI
@@ -399,6 +419,18 @@ QUESTIONS (Format: Evidence sentence. VERDICT: [Letter])
     prompt += `\n\nEVERY answer must have a VERDICT line or it's invalid.`;
 
     return prompt;
+  }
+
+  createScaffoldedAnalysisPrompt(
+    analysisType: string,
+    textContent: string,
+    additionalContext?: string
+  ): string {
+    return this.buildScaffoldPrompt(
+      `SCAFFOLDED ${analysisType.toUpperCase()} ANALYSIS`,
+      textContent,
+      additionalContext
+    );
   }
 
   createMBTIFinalPrompt(textContent: string, analysisResults: string[]): string {

@@ -152,7 +152,11 @@ export class StreamingService {
 
 
   private async streamSummary(analysis: Analysis): Promise<string> {
-    const summaryPrompt = `First, summarize this text and categorize it:\n\n${analysis.textContent}`;
+    const summaryPrompt = this.llmService.createScaffoldedAnalysisPrompt(
+      "summary",
+      analysis.textContent,
+      analysis.additionalContext || undefined
+    );
     
     let summary = "";
     let hasContent = false;
