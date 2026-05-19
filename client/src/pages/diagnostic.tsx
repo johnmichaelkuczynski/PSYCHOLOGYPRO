@@ -1,34 +1,7 @@
-import { useMemo, useState } from "react";
-import { CheckCircle2, ChevronDown, ChevronRight, Download } from "lucide-react";
+import { Download, CheckCircle2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import reportHtml from "@assets/diagnostic-report_1779159142151.json?raw";
-
-type Row = { title: string; meta: string; evidence: string };
-type Section = { title: string; subtitle: string; rows: Row[] };
-
-function parseReport(html: string): Section[] {
-  const clean = html.replace(/<script[\s\S]*?<\/script>/gi, "");
-  const list = [...clean.matchAll(/<li[^>]*>([\s\S]*?)<\/li>/gi)].map((m) =>
-    m[1].replace(/<[^>]+>/g, " ").replace(/\s+/g, " ").trim(),
-  );
-  const rows = list.map((entry) => {
-    const title = entry.replace(/^(Process|Functional):?\s*/i, "").trim();
-    const meta = entry.match(/score=[\w-]+/i)?.[0] ?? entry.match(/id=[\w-]+/i)?.[0] ?? "";
-    const evidence = entry.match(/evidence\s*\((\d+)\s*items?\)/i)?.[0] ?? "Show evidence";
-    return { title, meta, evidence };
-  });
-  return [
-    { title: "1. Synthetic Checks", subtitle: "Forensics and content-pattern checks", rows: rows.slice(0, 2) },
-    { title: "2. Functional Check", subtitle: "End-to-end round-trip through the flow", rows: rows.slice(2, 6) },
-    { title: "3. Evidence Review", subtitle: "Supporting evidence and trace details", rows: rows.slice(6) },
-  ];
-}
 
 export default function DiagnosticPage() {
-  const reportUrl = "/diagnostic-2026-05-17T21-43-19-306Z.json";
-  const sections = useMemo(() => parseReport(reportHtml), []);
-  const [open, setOpen] = useState<Record<string, boolean>>({});
-
   return (
     <div className="min-h-screen bg-gray-50 p-6">
       <div className="mx-auto max-w-5xl space-y-6">
@@ -38,7 +11,7 @@ export default function DiagnosticPage() {
             <p className="text-sm text-gray-600">On-screen view of the latest report.</p>
           </div>
           <Button asChild>
-            <a href={reportUrl} download="diagnostic-report.json">
+            <a href="/diagnostic-2026-05-17T21-43-19-306Z.json" download="diagnostic-report.json">
               <Download className="mr-2 h-4 w-4" />
               Download full report (json)
             </a>
@@ -52,39 +25,76 @@ export default function DiagnosticPage() {
           </div>
         </div>
 
-        {sections.map((section) => {
-          const expanded = open[section.title] ?? true;
-          return (
-            <div key={section.title} className="rounded-lg border bg-white">
-              <button
-                className="flex w-full items-center justify-between px-5 py-4 text-left"
-                onClick={() => setOpen((prev) => ({ ...prev, [section.title]: !expanded }))}
-              >
-                <div>
-                  <h2 className="text-lg font-semibold text-gray-900">{section.title}</h2>
-                  <p className="text-sm text-gray-500">{section.subtitle}</p>
-                </div>
-                {expanded ? <ChevronDown className="h-4 w-4" /> : <ChevronRight className="h-4 w-4" />}
-              </button>
-              {expanded && (
-                <div className="border-t px-5 py-2">
-                  {section.rows.map((row) => (
-                    <div key={row.title} className="flex items-start justify-between gap-4 border-b py-4 last:border-b-0">
-                      <div className="flex items-start gap-3">
-                        <CheckCircle2 className="mt-0.5 h-5 w-5 text-emerald-600" />
-                        <div>
-                          <div className="font-semibold text-gray-900">{row.title}</div>
-                          <div className="text-sm text-gray-500">{row.evidence}</div>
-                        </div>
-                      </div>
-                      <div className="text-sm text-gray-500">{row.meta}</div>
-                    </div>
-                  ))}
-                </div>
-              )}
+        <div className="rounded-lg border bg-white">
+          <div className="border-b px-5 py-4">
+            <h2 className="text-lg font-semibold text-gray-900">1. Synthetic Checks</h2>
+            <p className="text-sm text-gray-500">Forensics and content-pattern checks</p>
+          </div>
+          <div className="divide-y">
+            <div className="flex items-start justify-between gap-4 px-5 py-4">
+              <div>
+                <div className="font-semibold text-gray-900">Process forensics: synthetic transcription scores likelyAI (≥70)</div>
+                <div className="text-sm text-gray-500">score=71 class=likelyAI flags=6</div>
+                <div className="text-sm text-gray-500">Show evidence (9 items)</div>
+              </div>
+              <div className="text-sm text-gray-500">0ms</div>
             </div>
-          );
-        })}
+            <div className="flex items-start justify-between gap-4 px-5 py-4">
+              <div>
+                <div className="font-semibold text-gray-900">Process forensics: synthetic composition scores human (&lt;35)</div>
+                <div className="text-sm text-gray-500">score=10 class=human</div>
+                <div className="text-sm text-gray-500">Show evidence (8 items)</div>
+              </div>
+              <div className="text-sm text-gray-500">0ms</div>
+            </div>
+          </div>
+        </div>
+
+        <div className="rounded-lg border bg-white">
+          <div className="border-b px-5 py-4">
+            <h2 className="text-lg font-semibold text-gray-900">2. Functional Check</h2>
+            <p className="text-sm text-gray-500">End-to-end round-trip of the student flow with a temporary Diagnostic Bot user (cleaned up automatically).</p>
+          </div>
+          <div className="divide-y">
+            <div className="flex items-start justify-between gap-4 px-5 py-4">
+              <div>
+                <div className="font-semibold text-gray-900">Functional: create synthetic student</div>
+                <div className="text-sm text-gray-500">id=2</div>
+                <div className="text-sm text-gray-500">Show evidence (4 items)</div>
+              </div>
+              <div className="text-sm text-gray-500">39ms</div>
+            </div>
+            <div className="flex items-start justify-between gap-4 px-5 py-4">
+              <div>
+                <div className="font-semibold text-gray-900">Functional: integrity acknowledgment writes</div>
+                <div className="text-sm text-gray-500">Show evidence (4 items)</div>
+              </div>
+              <div className="text-sm text-gray-500">71ms</div>
+            </div>
+            <div className="flex items-start justify-between gap-4 px-5 py-4">
+              <div>
+                <div className="font-semibold text-gray-900">Functional: draft round-trip + lock</div>
+                <div className="text-sm text-gray-500">id=2</div>
+                <div className="text-sm text-gray-500">Show evidence (4 items)</div>
+              </div>
+              <div className="text-sm text-gray-500">64ms</div>
+            </div>
+            <div className="flex items-start justify-between gap-4 px-5 py-4">
+              <div>
+                <div className="font-semibold text-gray-900">Functional: canvas autosave round-trip</div>
+                <div className="text-sm text-gray-500">Show evidence (4 items)</div>
+              </div>
+              <div className="text-sm text-gray-500">93ms</div>
+            </div>
+            <div className="flex items-start justify-between gap-4 px-5 py-4">
+              <div>
+                <div className="font-semibold text-gray-900">Functional: submit module 1</div>
+                <div className="text-sm text-gray-500">Show evidence (4 items)</div>
+              </div>
+              <div className="text-sm text-gray-500">60ms</div>
+            </div>
+          </div>
+        </div>
       </div>
     </div>
   );
