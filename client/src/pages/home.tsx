@@ -8,6 +8,7 @@ import DiscussionModal from "@/components/discussion-modal";
 import { Button } from "@/components/ui/button";
 import { useToast } from "@/hooks/use-toast";
 import { apiRequest } from "@/lib/queryClient";
+import { trackEvent } from "@/lib/analytics";
 import { useQuery } from "@tanstack/react-query";
 import type { LLMProviderType, AnalysisTypeType, Analysis } from "@shared/schema";
 
@@ -35,6 +36,7 @@ export default function Home() {
     setCurrentAnalysisId(null);
     setIsDiscussionOpen(false);
     setResetKey(prev => prev + 1); // This will force TextInput to reset
+    trackEvent("new_analysis_started");
   };
 
   const handleSaveAnalysis = async () => {
@@ -50,6 +52,7 @@ export default function Home() {
     setIsSaving(true);
     try {
       await apiRequest("PATCH", `/api/analyses/${currentAnalysisId}/save`);
+      trackEvent("analysis_saved");
       
       // Refresh saved analyses if shown
       if (showSavedAnalyses) {
@@ -109,6 +112,7 @@ export default function Home() {
       link.click();
       window.URL.revokeObjectURL(url);
       document.body.removeChild(link);
+      trackEvent("analysis_downloaded", { format: "txt" });
 
       toast({
         title: "Download complete",
@@ -156,7 +160,13 @@ export default function Home() {
               <Button 
                 variant={showSavedAnalyses ? "default" : "ghost"} 
                 size="sm" 
-                onClick={() => setShowSavedAnalyses(!showSavedAnalyses)}
+                 onClick={() => {
+                   const nextValue = !showSavedAnalyses;
+                   setShowSavedAnalyses(nextValue);
+                   if (nextValue) {
+                     trackEvent("saved_history_viewed");
+                   }
+                 }}
                 data-testid="saved-analyses-button"
               >
                 <Bookmark className="h-4 w-4 mr-2" />
@@ -248,6 +258,10 @@ export default function Home() {
                             onClick={() => {
                               setCurrentAnalysisId(analysis.id);
                               setShowSavedAnalyses(false);
+                              trackEvent("saved_analysis_loaded", {
+                                analysis_type: analysis.type,
+                                provider: analysis.llmProvider,
+                              });
                             }}
                             data-testid={`load-analysis-${analysis.id}`}
                           >
@@ -285,7 +299,10 @@ export default function Home() {
                 {/* Results Panel */}
                 <ResultsPanel 
                   analysisId={currentAnalysisId}
-                  onDiscussionToggle={() => setIsDiscussionOpen(true)}
+                   onDiscussionToggle={() => {
+                     setIsDiscussionOpen(true);
+                     trackEvent("discussion_opened");
+                   }}
                   onNewAnalysis={handleNewAnalysis}
                 />
               </div>

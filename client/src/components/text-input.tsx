@@ -4,6 +4,7 @@ import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
 import { useToast } from "@/hooks/use-toast";
 import { apiRequest } from "@/lib/queryClient";
+import { trackEvent } from "@/lib/analytics";
 import type { LLMProviderType, AnalysisTypeType } from "@shared/schema";
 
 interface TextInputProps {
@@ -128,6 +129,11 @@ export default function TextInput({ selectedFunction, selectedLLM, onAnalysisSta
               const textChunks = chunkText(extractedText);
               setChunks(textChunks);
               setSelectedChunks([0]);
+              trackEvent("document_processed", {
+                file_type: "pdf",
+                word_count: wc,
+                chunk_count: textChunks.length,
+              });
               toast({
                 title: "Text extracted and chunked",
                 description: `${textChunks.length} chunks created from PDF`
@@ -135,6 +141,11 @@ export default function TextInput({ selectedFunction, selectedLLM, onAnalysisSta
             } else {
               setChunks(null);
               setSelectedChunks([0]);
+              trackEvent("document_processed", {
+                file_type: "pdf",
+                word_count: wc,
+                chunk_count: 1,
+              });
             }
             
             toast({
@@ -202,8 +213,16 @@ export default function TextInput({ selectedFunction, selectedLLM, onAnalysisSta
           description: `Parsed ${file.name} (${parseResult.wordCount} words).`,
         });
       }
+      trackEvent("document_processed", {
+        file_type: file.type === "text/plain" ? "txt" : file.type.includes("word") ? "word" : "other",
+        word_count: parseResult.wordCount,
+        chunk_count: parseResult.chunks?.length || 1,
+      });
     } catch (error) {
       console.error("File upload error:", error);
+      trackEvent("document_processing_failed", {
+        file_type: file.type === "text/plain" ? "txt" : file.type.includes("word") ? "word" : "other",
+      });
       toast({
         title: "File upload failed",
         description: error instanceof Error ? error.message : "Could not parse the uploaded file. Please try again.",
@@ -287,12 +306,22 @@ export default function TextInput({ selectedFunction, selectedLLM, onAnalysisSta
 
       const { analysisId } = await response.json();
       onAnalysisStart(analysisId);
+      trackEvent("analysis_started", {
+        analysis_type: selectedFunction,
+        provider: selectedLLM,
+        word_count: countWords(contentToAnalyze),
+        input_mode: chunks ? "chunked" : "full_text",
+      });
       
       toast({
         title: "Analysis started",
         description: "Your text is being analyzed. Results will stream in real-time.",
       });
     } catch (error) {
+      trackEvent("analysis_start_failed", {
+        analysis_type: selectedFunction,
+        provider: selectedLLM,
+      });
       toast({
         title: "Analysis failed to start",
         description: "Could not start the analysis. Please try again.",

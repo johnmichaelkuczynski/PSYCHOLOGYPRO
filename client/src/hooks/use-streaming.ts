@@ -1,4 +1,5 @@
 import { useState, useEffect, useRef } from "react";
+import { trackEvent } from "@/lib/analytics";
 
 interface StreamData {
   type: "summary" | "batch" | "question" | "delay" | "complete" | "error" | "streaming_response" | "stopped" | "raw_stream" | "batch_complete";
@@ -50,7 +51,12 @@ export function useStreaming(analysisId: string | null, isPaused: boolean = fals
           eventSource.close();
         }
 
+        if (data.type === "complete") {
+          trackEvent("analysis_completed");
+        }
+
         if (data.type === "error") {
+          trackEvent("analysis_failed", { failure_stage: "stream" });
           setError(new Error(data.error || "Stream error occurred"));
         }
       } catch (err) {
@@ -61,6 +67,7 @@ export function useStreaming(analysisId: string | null, isPaused: boolean = fals
 
     eventSource.onerror = (event) => {
       console.error("Stream error:", event);
+      trackEvent("analysis_failed", { failure_stage: "connection" });
       setError(new Error("Stream connection error"));
       setIsStreaming(false);
       eventSource.close();
