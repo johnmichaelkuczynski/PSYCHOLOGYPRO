@@ -42,13 +42,35 @@ export async function registerRoutes(app: Express): Promise<Server> {
       }
 
       const parseResult = await fileService.parseFile(req.file);
-      res.json(parseResult);
+      const storedFile = await storage.storeFile({
+        originalName: req.file.originalname,
+        contentType: req.file.mimetype,
+        data: req.file.buffer,
+      });
+      res.json({ ...parseResult, fileId: storedFile.id });
     } catch (error) {
       console.error("File parsing error:", error);
       res.status(500).json({ 
         error: "Failed to parse file",
         details: error instanceof Error ? error.message : String(error)
       });
+    }
+  });
+
+  app.get("/api/files/:id", async (req, res) => {
+    try {
+      const file = await storage.getStoredFile(req.params.id);
+      if (!file) return res.status(404).json({ error: "File not found" });
+      const safeName = file.originalName.replace(/[\r\n"]/g, "_");
+      res.setHeader("Content-Type", file.contentType);
+      res.setHeader("Content-Length", String(file.sizeBytes));
+      res.setHeader("Content-Disposition", `attachment; filename="${safeName}"`);
+      res.setHeader("Cache-Control", "private, no-store");
+      res.setHeader("X-Content-Type-Options", "nosniff");
+      res.send(file.data);
+    } catch (error) {
+      console.error("Get stored file error:", error);
+      res.status(500).json({ error: "Failed to retrieve file" });
     }
   });
 

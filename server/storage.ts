@@ -1,6 +1,22 @@
 import { type Analysis, type AnalysisSettings, type Discussion, type InsertAnalysis, type InsertAnalysisSettings, type InsertDiscussion, analyses, analysisSettings, discussions } from "../shared/schema";
-import { db } from "./db";
+import { db, pool } from "./db";
 import { eq, desc } from "drizzle-orm";
+import { randomUUID } from "node:crypto";
+
+export interface StoredFile {
+  id: string;
+  originalName: string;
+  contentType: string;
+  sizeBytes: number;
+  data: Buffer;
+  createdAt: Date;
+}
+
+export interface NewStoredFile {
+  originalName: string;
+  contentType: string;
+  data: Buffer;
+}
 
 export interface IStorage {
   createAnalysis(analysis: InsertAnalysis): Promise<Analysis>;
@@ -22,10 +38,51 @@ export interface IStorage {
   // Analysis settings
   getAnalysisSetting(key: string): Promise<AnalysisSettings | undefined>;
   upsertAnalysisSetting(setting: InsertAnalysisSettings): Promise<AnalysisSettings>;
+
+  // Files persisted in PostgreSQL
+  storeFile(file: NewStoredFile): Promise<StoredFile>;
+  getStoredFile(id: string): Promise<StoredFile | undefined>;
 }
 
 // Referenced from javascript_database integration
 export class DatabaseStorage implements IStorage {
+  async storeFile(file: NewStoredFile): Promise<StoredFile> {
+    const id = randomUUID();
+    const result = await pool.query(
+      `INSERT INTO stored_files (id, original_name, content_type, size_bytes, data)
+       VALUES ($1, $2, $3, $4, $5)
+       RETURNING id, original_name, content_type, size_bytes, data, created_at`,
+      [id, file.originalName, file.contentType, file.data.length, file.data],
+    );
+    const row = result.rows[0];
+    return {
+      id: row.id,
+      originalName: row.original_name,
+      contentType: row.content_type,
+      sizeBytes: Number(row.size_bytes),
+      data: row.data,
+      createdAt: row.created_at,
+    };
+  }
+
+  async getStoredFile(id: string): Promise<StoredFile | undefined> {
+    const result = await pool.query(
+      `SELECT id, original_name, content_type, size_bytes, data, created_at
+       FROM stored_files WHERE id = $1`,
+      [id],
+    );
+    const row = result.rows[0];
+    if (!row) return undefined;
+    return {
+      id: row.id,
+      originalName: row.original_name,
+      contentType: row.content_type,
+      sizeBytes: Number(row.size_bytes),
+      data: row.data,
+      createdAt: row.created_at,
+    };
+  }
+
   async createAnalysis(insertAnalysis: InsertAnalysis): Promise<Analysis> {
     const [analysis] = await db
       .insert(analyses)
