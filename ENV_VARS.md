@@ -16,6 +16,7 @@ The production container listens on `0.0.0.0` and uses port `5000` unless
 | `DEEPSEEK_API_KEY` | No | API key for the `zhi3` (DeepSeek) analysis provider. |
 | `PERPLEXITY_API_KEY` | No | API key for the `zhi4` (Perplexity) analysis provider. |
 | `XAI_API_KEY` | No | API key for the `zhi5` (xAI) analysis provider. |
+| `XAI_MODEL` | No | xAI model for `zhi5`; defaults to `grok-4.20-non-reasoning-latest`, verified against the connected account's model list. |
 
 The application currently has no login/session middleware or OAuth callback, so
 `SESSION_SECRET` and `PUBLIC_BASE_URL` are not read or required. Stripe SDK
@@ -23,5 +24,7 @@ packages are not initialized by the server, and no Stripe key is required to
 start.
 
 LLM keys are optional at startup. A key is required only when a request uses its
-corresponding provider; `API_KEY` is used as a fallback when a provider-specific
-key is absent.
+corresponding provider; `API_KEY` remains a compatibility fallback for `zhi1`
+through `zhi4`. In Replit, `zhi5` can use the attached xAI connection when
+`XAI_API_KEY` is absent. A self-hosted Coolify deployment must set `XAI_API_KEY`
+in Coolify's secrets; the Replit connection does not transfer its credentials.

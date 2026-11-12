@@ -1,7 +1,7 @@
 import { useState, useEffect, useRef } from "react";
 import { trackEvent } from "@/lib/analytics";
 
-interface StreamData {
+export interface StreamData {
   type: "summary" | "batch" | "question" | "delay" | "complete" | "error" | "streaming_response" | "stopped" | "raw_stream" | "batch_complete";
   content?: string;
   batchNumber?: number;
@@ -15,11 +15,19 @@ interface StreamData {
   [key: string]: any;
 }
 
-export function useStreaming(analysisId: string | null, isPaused: boolean = false) {
+export function useStreaming(
+  analysisId: string | null,
+  isPaused: boolean = false,
+  onData?: (data: StreamData) => void
+) {
   const [isStreaming, setIsStreaming] = useState(false);
   const [streamData, setStreamData] = useState<StreamData | null>(null);
   const [error, setError] = useState<Error | null>(null);
+  const [connectionState, setConnectionState] = useState<"connecting" | "open" | "reconnecting" | "closed">("closed");
+  const [connectionVersion, setConnectionVersion] = useState(0);
   const eventSourceRef = useRef<EventSource | null>(null);
+  const onDataRef = useRef(onData);
+  onDataRef.current = onData;
 
   useEffect(() => {
     if (!analysisId || isPaused) {
@@ -28,6 +36,7 @@ export function useStreaming(analysisId: string | null, isPaused: boolean = fals
         eventSourceRef.current = null;
         setIsStreaming(false);
       }
+      setConnectionState("closed");
       return;
     }
 
@@ -35,20 +44,28 @@ export function useStreaming(analysisId: string | null, isPaused: boolean = fals
     const eventSource = new EventSource(`/api/analyses/${analysisId}/stream`);
     eventSourceRef.current = eventSource;
     setIsStreaming(true);
+    setStreamData(null);
     setError(null);
+    setConnectionState("connecting");
 
     eventSource.onopen = () => {
-      console.log("Stream opened");
+      setConnectionState("open");
     };
 
     eventSource.onmessage = (event) => {
       try {
         const data = JSON.parse(event.data) as StreamData;
-        setStreamData(data);
+        const message = { ...data, analysisId };
+        // Deliver every event directly. A single "latest event" state can lose
+        // text when React batches a burst of chunks with the completion event.
+        onDataRef.current?.(message);
+        setStreamData(message);
 
-        if (data.type === "complete" || data.type === "error") {
+        if (data.type === "complete" || data.type === "error" || data.type === "stopped") {
           setIsStreaming(false);
+          setConnectionState("closed");
           eventSource.close();
+          eventSourceRef.current = null;
         }
 
         if (data.type === "complete") {
@@ -65,33 +82,38 @@ export function useStreaming(analysisId: string | null, isPaused: boolean = fals
       }
     };
 
-    eventSource.onerror = (event) => {
-      console.error("Stream error:", event);
-      trackEvent("analysis_failed", { failure_stage: "connection" });
-      setError(new Error("Stream connection error"));
-      setIsStreaming(false);
-      eventSource.close();
+    eventSource.onerror = () => {
+      // EventSource reconnects automatically after temporary network/proxy
+      // interruptions. Closing it here used to leave an endless blank result.
+      if (eventSource.readyState === EventSource.CLOSED) {
+        setError(new Error("The live connection closed before the analysis finished."));
+        setIsStreaming(false);
+        setConnectionState("closed");
+      } else {
+        setConnectionState("reconnecting");
+      }
     };
 
     return () => {
       if (eventSource) {
         eventSource.close();
       }
+      if (eventSourceRef.current === eventSource) eventSourceRef.current = null;
     };
-  }, [analysisId, isPaused]);
+  }, [analysisId, isPaused, connectionVersion]);
 
   const pauseStream = () => {
     if (eventSourceRef.current) {
       eventSourceRef.current.close();
       eventSourceRef.current = null;
       setIsStreaming(false);
+      setConnectionState("closed");
     }
   };
 
   const resumeStream = () => {
     if (analysisId && !eventSourceRef.current) {
-      // Reinitialize streaming
-      useStreaming(analysisId, false);
+      setConnectionVersion(version => version + 1);
     }
   };
 
@@ -99,6 +121,7 @@ export function useStreaming(analysisId: string | null, isPaused: boolean = fals
     isStreaming,
     streamData,
     error,
+    connectionState,
     pauseStream,
     resumeStream,
   };

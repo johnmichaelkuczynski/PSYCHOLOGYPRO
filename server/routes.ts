@@ -79,7 +79,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
     try {
       const analysisData = insertAnalysisSchema.parse(req.body);
       const analysis = await storage.createAnalysis(analysisData);
-      streamingService.startAnalysis(analysis.id);
+      void streamingService.startAnalysis(analysis.id);
       res.json({ analysisId: analysis.id });
     } catch (error) {
       console.error("Create analysis error:", error);
@@ -148,21 +148,35 @@ export async function registerRoutes(app: Express): Promise<Server> {
     // Set up SSE headers
     res.writeHead(200, {
       'Content-Type': 'text/event-stream',
-      'Cache-Control': 'no-cache',
+      'Cache-Control': 'no-cache, no-transform',
       'Connection': 'keep-alive',
+      'X-Accel-Buffering': 'no',
       'Access-Control-Allow-Origin': '*',
       'Access-Control-Allow-Headers': 'Cache-Control',
     });
+    res.flushHeaders();
 
-    // Start streaming
-    streamingService.streamAnalysis(analysisId, (data) => {
+    const heartbeat = setInterval(() => {
+      if (!res.writableEnded) res.write(": keep-alive\n\n");
+    }, 15000);
+
+    let unsubscribe = () => {};
+    res.on('close', () => {
+      clearInterval(heartbeat);
+      unsubscribe();
+    });
+
+    // Cached cumulative output is replayed if generation started before the
+    // browser connected, so no early words are lost.
+    unsubscribe = streamingService.streamAnalysis(analysisId, (data) => {
+      if (res.writableEnded) return;
       res.write(`data: ${JSON.stringify(data)}\n\n`);
+      if (["complete", "error", "stopped"].includes(data.type)) {
+        res.end();
+      }
     });
 
-    // Handle client disconnect
-    req.on('close', () => {
-      streamingService.stopStreaming(analysisId);
-    });
+    void streamingService.startAnalysis(analysisId);
   });
 
   // Contest analysis (create new analysis based on feedback)
@@ -184,7 +198,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       };
 
       const newAnalysis = await storage.createAnalysis(newAnalysisData);
-      streamingService.startAnalysis(newAnalysis.id);
+      void streamingService.startAnalysis(newAnalysis.id);
       
       res.json({ analysisId: newAnalysis.id });
     } catch (error) {

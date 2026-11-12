@@ -3,7 +3,8 @@ import { Brain, MessageCircle, Pause, Play, Square } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Progress } from "@/components/ui/progress";
-import { useStreaming } from "@/hooks/use-streaming";
+import { useStreaming, type StreamData } from "@/hooks/use-streaming";
+import LiveOutputPanel, { type LiveOutputStatus } from "@/components/live-output-panel";
 
 // Strip markdown formatting from text
 function stripMarkdown(text: string): string {
@@ -74,8 +75,25 @@ export default function ResultsPanel({ analysisId, onDiscussionToggle, onNewAnal
   const [delayProgress, setDelayProgress] = useState(0);
   const [streamingContent, setStreamingContent] = useState<{[key: number]: string}>({});
   const [isStopped, setIsStopped] = useState(false);
+  const [liveOutput, setLiveOutput] = useState("");
+  const [liveStage, setLiveStage] = useState("Starting");
+  const [hasCompleted, setHasCompleted] = useState(false);
   
-  const { isStreaming, streamData, error } = useStreaming(analysisId, isPaused);
+  const { isStreaming, error, connectionState } = useStreaming(analysisId, isPaused, handleStreamEvent);
+
+  useEffect(() => {
+    setIsPaused(false);
+    setBatches([]);
+    setSummary("");
+    setStreamingContent({});
+    setCurrentBatch(1);
+    setTotalBatches(0);
+    setDelayProgress(0);
+    setIsStopped(false);
+    setLiveOutput("");
+    setLiveStage("Starting");
+    setHasCompleted(false);
+  }, [analysisId]);
 
   const handleClearAnalysis = () => {
     setBatches([]);
@@ -100,10 +118,19 @@ export default function ResultsPanel({ analysisId, onDiscussionToggle, onNewAnal
     }
   };
 
-  useEffect(() => {
-    if (streamData) {
+  function handleStreamEvent(streamData: StreamData) {
+    if (streamData && streamData.analysisId === analysisId) {
       if (streamData.type === "summary") {
         setSummary(stripMarkdown(streamData.content || ""));
+        setLiveOutput(streamData.content || "");
+        setLiveStage("Summary");
+      } else if (streamData.type === "batch") {
+        if (streamData.batchNumber) {
+          setCurrentBatch(streamData.batchNumber);
+          setTotalBatches(streamData.totalBatches || streamData.batchNumber);
+          setLiveStage(`Batch ${streamData.batchNumber}`);
+          setLiveOutput("");
+        }
       } else if (streamData.type === "raw_stream") {
         // Show pure raw streaming content immediately - NO FILTERING
         if (streamData.batchNumber && streamData.rawContent) {
@@ -112,18 +139,18 @@ export default function ResultsPanel({ analysisId, onDiscussionToggle, onNewAnal
             [streamData.batchNumber!]: stripMarkdown(streamData.rawContent!)
           }));
           setCurrentBatch(streamData.batchNumber);
+          setLiveOutput(streamData.rawContent);
+          setLiveStage(`Batch ${streamData.batchNumber}`);
           // Update total batches if we see a higher batch number
-          if (streamData.batchNumber > totalBatches) {
-            setTotalBatches(streamData.batchNumber);
-          }
+          setTotalBatches(previous => Math.max(previous, streamData.batchNumber!));
         }
       } else if (streamData.type === "batch_complete") {
         // When batch completes, keep the final raw response visible
         if (streamData.batchNumber && streamData.finalRawResponse) {
+          setLiveOutput(streamData.finalRawResponse);
+          setLiveStage(`Batch ${streamData.batchNumber}`);
           // Update total batches if needed
-          if (streamData.batchNumber > totalBatches) {
-            setTotalBatches(streamData.batchNumber);
-          }
+          setTotalBatches(previous => Math.max(previous, streamData.batchNumber!));
           setBatches(prev => {
             const batchData: BatchData = {
               batchNumber: streamData.batchNumber!,
@@ -136,7 +163,7 @@ export default function ResultsPanel({ analysisId, onDiscussionToggle, onNewAnal
               isComplete: true,
               timestamp: streamData.timestamp || new Date().toLocaleTimeString()
             };
-            return [...prev, batchData];
+            return [...prev.filter(batch => batch.batchNumber !== batchData.batchNumber), batchData];
           });
           // Clear streaming content when batch is complete
           setStreamingContent(prev => {
@@ -151,9 +178,20 @@ export default function ResultsPanel({ analysisId, onDiscussionToggle, onNewAnal
         }
       } else if (streamData.type === "stopped") {
         setIsStopped(true);
+      } else if (streamData.type === "complete") {
+        setHasCompleted(true);
       }
     }
-  }, [streamData]);
+  }
+
+  const liveStatus: LiveOutputStatus = error ? "error"
+    : isStopped ? "stopped"
+    : hasCompleted ? "complete"
+    : isPaused ? "paused"
+    : connectionState === "reconnecting" ? "reconnecting"
+    : liveOutput ? "streaming"
+    : connectionState === "open" ? "waiting"
+    : "connecting";
 
   const getScoreVariant = (score: number) => {
     if (score >= 80) return "high";
@@ -198,6 +236,13 @@ export default function ResultsPanel({ analysisId, onDiscussionToggle, onNewAnal
 
   return (
     <div className="flex flex-col bg-white" data-testid="results-panel">
+      <LiveOutputPanel
+        key={analysisId}
+        content={liveOutput}
+        stage={liveStage}
+        status={liveStatus}
+        error={error?.message}
+      />
       {/* Results Header */}
       <div className="bg-gray-50 px-6 py-4 border-b border-gray-200">
         <div className="flex items-center justify-between">
@@ -229,7 +274,12 @@ export default function ResultsPanel({ analysisId, onDiscussionToggle, onNewAnal
               <div className="flex items-center space-x-2" data-testid="streaming-status">
                 <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-primary"></div>
                 <span className="text-sm text-gray-600">
-                  {isStopped ? "Analysis stopped" : `Processing batch ${currentBatch} of ${totalBatches}`}
+                  {isStopped ? "Analysis stopped"
+                    : connectionState === "reconnecting" ? "Reconnecting to live output"
+                    : !liveOutput ? "Waiting for the model’s first words"
+                    : liveStage === "Summary" ? "Summary streaming"
+                    : totalBatches > 0 ? `Streaming batch ${currentBatch} of ${totalBatches}`
+                    : "Analysis streaming"}
                 </span>
               </div>
             )}

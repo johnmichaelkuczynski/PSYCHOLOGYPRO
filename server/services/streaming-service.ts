@@ -9,10 +9,12 @@ interface StreamCallback {
 interface ActiveStream {
   callbacks: Set<StreamCallback>;
   isActive: boolean;
+  latestEvents: Map<string, any>;
 }
 
 export class StreamingService {
   private activeStreams = new Map<string, ActiveStream>();
+  private runningAnalyses = new Set<string>();
 
   constructor(
     private llmService: LLMService,
@@ -20,45 +22,65 @@ export class StreamingService {
   ) {}
 
   async startAnalysis(analysisId: string): Promise<void> {
-    // Start the analysis processing in the background
-    this.processAnalysis(analysisId).catch(error => {
-      console.error(`Analysis ${analysisId} failed:`, error);
-      this.broadcastToStream(analysisId, {
-        type: "error",
-        error: error.message
-      });
-    });
-  }
-
-  streamAnalysis(analysisId: string, callback: StreamCallback): void {
+    if (this.runningAnalyses.has(analysisId)) return;
+    this.runningAnalyses.add(analysisId);
     if (!this.activeStreams.has(analysisId)) {
       this.activeStreams.set(analysisId, {
         callbacks: new Set(),
-        isActive: true
+        isActive: true,
+        latestEvents: new Map(),
+      });
+    }
+    try {
+      const analysis = await this.storage.getAnalysis(analysisId);
+      if (!analysis) throw new Error("Analysis not found");
+      if (analysis.status === "completed") {
+        this.broadcastToStream(analysisId, { type: "complete" });
+        return;
+      }
+      if (analysis.status === "error") {
+        const results = analysis.results as { error?: string } | null;
+        throw new Error(results?.error || "This analysis failed. Start a new analysis to retry.");
+      }
+      await this.processAnalysis(analysisId);
+    } catch (error) {
+      console.error(`Analysis ${analysisId} failed:`, error);
+      this.broadcastToStream(analysisId, {
+        type: "error",
+        error: error instanceof Error ? error.message : String(error)
+      });
+    } finally {
+      this.runningAnalyses.delete(analysisId);
+    }
+  }
+
+  streamAnalysis(analysisId: string, callback: StreamCallback): () => void {
+    if (!this.activeStreams.has(analysisId)) {
+      this.activeStreams.set(analysisId, {
+        callbacks: new Set(),
+        isActive: true,
+        latestEvents: new Map(),
       });
     }
 
     const stream = this.activeStreams.get(analysisId)!;
     stream.callbacks.add(callback);
-  }
-
-  stopStreaming(analysisId: string): void {
-    const stream = this.activeStreams.get(analysisId);
-    if (stream) {
-      stream.isActive = false;
-      stream.callbacks.clear();
-      this.activeStreams.delete(analysisId);
+    for (const event of stream.latestEvents.values()) {
+      callback(event);
     }
+    // A disconnected display is not a request to stop the model. Keep the
+    // cumulative text so reconnecting clients can immediately catch up.
+    return () => stream.callbacks.delete(callback);
   }
 
   stopAnalysis(analysisId: string): void {
     const stream = this.activeStreams.get(analysisId);
     if (stream) {
-      stream.isActive = false;
       this.broadcastToStream(analysisId, {
         type: "stopped",
         message: "Analysis stopped by user"
       });
+      stream.isActive = false;
       stream.callbacks.clear();
       this.activeStreams.delete(analysisId);
     }
@@ -67,6 +89,10 @@ export class StreamingService {
   private broadcastToStream(analysisId: string, data: any): void {
     const stream = this.activeStreams.get(analysisId);
     if (stream && stream.isActive) {
+      const key = data.type === "raw_stream" || data.type === "batch_complete"
+        ? `batch:${data.batchNumber}`
+        : ["complete", "error", "stopped"].includes(data.type) ? "terminal" : data.type;
+      stream.latestEvents.set(key, data);
       stream.callbacks.forEach(callback => {
         try {
           callback(data);
@@ -74,6 +100,14 @@ export class StreamingService {
           console.error("Stream callback error:", error);
         }
       });
+      if (["complete", "error", "stopped"].includes(data.type)) {
+        const cleanup = setTimeout(() => {
+          if (this.activeStreams.get(analysisId) === stream && stream.callbacks.size === 0) {
+            this.activeStreams.delete(analysisId);
+          }
+        }, 10 * 60 * 1000);
+        cleanup.unref();
+      }
     }
   }
 
@@ -252,22 +286,6 @@ export class StreamingService {
     return results;
   }
 
-  private async streamDelay(analysisId: string, delayMs: number): Promise<void> {
-    const interval = 100; // Update progress every 100ms
-    const steps = delayMs / interval;
-    
-    for (let step = 0; step <= steps; step++) {
-      const progress = (step / steps) * 100;
-      
-      this.broadcastToStream(analysisId, {
-        type: "delay",
-        progress: Math.round(progress)
-      });
-      
-      await new Promise(resolve => setTimeout(resolve, interval));
-    }
-  }
-
   private createBatches<T>(items: T[], batchSize: number): T[][] {
     const batches: T[][] = [];
     for (let i = 0; i < items.length; i += batchSize) {
@@ -409,9 +427,6 @@ export class StreamingService {
         return;
       }
 
-      if (i < batches.length - 1) {
-        await this.streamDelay(analysis.id, 10000);
-      }
     }
   }
 
@@ -427,6 +442,11 @@ export class StreamingService {
 
       const batch = batches[i];
       const batchNumber = i + 1;
+      this.broadcastToStream(analysis.id, {
+        type: "batch",
+        batchNumber,
+        totalBatches: batches.length,
+      });
       const batchResponse = await this.processBatch(analysis, batch, batchNumber);
       batchResults.push(batchResponse);
 
@@ -435,12 +455,43 @@ export class StreamingService {
         throw new Error("Analysis stopped by user");
       }
 
-      if (i < batches.length - 1) {
-        await this.streamDelay(analysis.id, 10000);
-      }
     }
     
     return batchResults;
+  }
+
+  private async processBatch(analysis: Analysis, questions: string[], batchNumber: number): Promise<string> {
+    const prompt = this.llmService.createScaffoldedAnalysisPrompt(
+      analysis.type,
+      analysis.textContent,
+      [
+        analysis.additionalContext,
+        `Address these questions in order:\n${questions.map((question, index) => `${index + 1}. ${question}`).join("\n")}`,
+      ].filter(Boolean).join("\n\n")
+    );
+    let fullResponse = "";
+    for await (const chunk of this.llmService.streamResponse(
+      analysis.llmProvider as any,
+      [{ role: "user", content: prompt }],
+      chunk => {
+        fullResponse += chunk;
+        this.broadcastToStream(analysis.id, {
+          type: "raw_stream",
+          batchNumber,
+          rawContent: fullResponse,
+        });
+      }
+    )) {
+      // Each provider delta is broadcast by the callback, before completion.
+    }
+    if (!fullResponse.trim()) throw new Error(`No text received for batch ${batchNumber}`);
+    this.broadcastToStream(analysis.id, {
+      type: "batch_complete",
+      batchNumber,
+      finalRawResponse: fullResponse,
+      timestamp: new Date().toLocaleTimeString(),
+    });
+    return fullResponse;
   }
 
   // Process Micro Cognitive Analysis (ultra-fast, concise responses)
@@ -582,9 +633,6 @@ export class StreamingService {
         throw new Error("Analysis stopped by user");
       }
 
-      if (i < batches.length - 1) {
-        await this.streamDelay(analysis.id, 10000);
-      }
     }
 
     // Step 3: Request final MBTI type determination
@@ -743,9 +791,6 @@ export class StreamingService {
         throw new Error("Analysis stopped by user");
       }
 
-      if (i < batches.length - 1) {
-        await this.streamDelay(analysis.id, 10000);
-      }
     }
 
     // Step 3: Request final MBTI type determination
@@ -904,9 +949,6 @@ export class StreamingService {
         throw new Error("Analysis stopped by user");
       }
 
-      if (i < batches.length - 1) {
-        await this.streamDelay(analysis.id, 10000);
-      }
     }
 
     // Step 3: Request brief final MBTI type determination
@@ -999,9 +1041,6 @@ export class StreamingService {
         throw new Error("Analysis stopped by user");
       }
 
-      if (i < batches.length - 1) {
-        await this.streamDelay(analysis.id, 10000);
-      }
     }
     
     return batchResults;
@@ -1014,10 +1053,10 @@ export class StreamingService {
     // Use appropriate micro prompt based on type
     switch (microType) {
       case 'microcognitive':
-        prompt = this.llmService.createMicrocognitivePrompt(
+        prompt = this.llmService.createScaffoldedAnalysisPrompt(
+          "microcognitive",
           analysis.textContent,
-          questions,
-          analysis.additionalContext || undefined
+          [analysis.additionalContext, questions.join("\n")].filter(Boolean).join("\n\n")
         );
         break;
       case 'micropsychological':

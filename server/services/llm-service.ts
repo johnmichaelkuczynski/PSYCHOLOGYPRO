@@ -1,4 +1,5 @@
 import type { LLMProviderType } from "../../shared/schema.js";
+import { ReplitConnectors } from "@replit/connectors-sdk";
 
 interface LLMConfig {
   apiKey: string;
@@ -7,6 +8,8 @@ interface LLMConfig {
 }
 
 export class LLMService {
+  private connectors?: ReplitConnectors;
+
   private getDefaultTreeMode() {
     return {
       enabled: true,
@@ -39,9 +42,9 @@ export class LLMService {
       model: "sonar-pro",
     },
     zhi5: {
-      apiKey: process.env.XAI_API_KEY || process.env.API_KEY || "",
+      apiKey: process.env.XAI_API_KEY || "",
       baseUrl: "https://api.x.ai/v1",
-      model: "grok-2",
+      model: process.env.XAI_MODEL || "grok-4.20-non-reasoning-latest",
     },
   };
 
@@ -52,9 +55,27 @@ export class LLMService {
   ): AsyncGenerator<string, void, unknown> {
     const config = this.configs[provider];
     
-    if (!config.apiKey) {
-      throw new Error(`API key not configured for ${provider}`);
+    if (!config.apiKey && provider !== "zhi5") {
+      const providerKeys: Record<Exclude<LLMProviderType, "zhi5">, string> = {
+        zhi1: "OPENAI_API_KEY",
+        zhi2: "ANTHROPIC_API_KEY",
+        zhi3: "DEEPSEEK_API_KEY",
+        zhi4: "PERPLEXITY_API_KEY",
+      };
+      throw new Error(`${provider.toUpperCase()} is not configured. Add ${providerKeys[provider]} to this deployment's secrets.`);
     }
+
+    const controller = new AbortController();
+    let timedOut = false;
+    let idleTimer: ReturnType<typeof setTimeout> | undefined;
+    const resetIdleTimeout = () => {
+      if (idleTimer) clearTimeout(idleTimer);
+      idleTimer = setTimeout(() => {
+        timedOut = true;
+        controller.abort();
+      }, 60000);
+    };
+    resetIdleTimeout();
 
     try {
       let headers: Record<string, string>;
@@ -73,6 +94,9 @@ export class LLMService {
             messages,
             stream: true,
           };
+          if (config.model === "gpt-6-luna") {
+            requestBody.reasoning_effort = "none";
+          }
           endpoint = `${config.baseUrl}/chat/completions`;
           break;
 
@@ -119,9 +143,11 @@ export class LLMService {
 
         case "zhi5": // Grok (xAI)
           headers = {
-            "Authorization": `Bearer ${config.apiKey}`,
             "Content-Type": "application/json",
           };
+          if (config.apiKey) {
+            headers.Authorization = `Bearer ${config.apiKey}`;
+          }
           requestBody = {
             model: config.model,
             messages,
@@ -134,11 +160,27 @@ export class LLMService {
           throw new Error(`Unsupported provider: ${provider}`);
       }
 
-      const response = await fetch(endpoint, {
+      const options = {
         method: "POST",
         headers,
         body: JSON.stringify(requestBody),
-      });
+        signal: controller.signal,
+      };
+      // Self-hosted deployments use XAI_API_KEY. In Replit, the connected xAI
+      // account supplies credentials without exposing a key to the application.
+      let response: Response;
+      if (provider === "zhi5" && !config.apiKey) {
+        try {
+          response = await (this.connectors ??= new ReplitConnectors()).proxy(
+            "xai", "/v1/chat/completions", options
+          );
+        } catch (error) {
+          if (timedOut) throw error;
+          throw new Error("ZHI 5 could not access the xAI connection. In a self-hosted Coolify deployment, set XAI_API_KEY in the app's secrets. In Replit, reconnect xAI.");
+        }
+      } else {
+        response = await fetch(endpoint, options);
+      }
 
       if (!response.ok) {
         const errorText = await response.text();
@@ -169,37 +211,28 @@ export class LLMService {
           buffer = lines.pop() || '';
 
           for (const line of lines) {
-            if (line.startsWith('data: ')) {
-              const data = line.slice(6).trim();
+            if (line.startsWith('data:')) {
+              const data = line.slice(5).trim();
+              if (!data) continue;
               if (data === '[DONE]') {
                 return;
               }
 
+              let parsed: any;
               try {
-                const parsed = JSON.parse(data);
-                
-                // Debug logging for Perplexity responses (development only)
-                if (provider === 'zhi4' && process.env.NODE_ENV === 'development') {
-                  console.log('🔍 Perplexity raw response chunk:', JSON.stringify(parsed, null, 2));
-                }
-                
-                const content = this.extractContentFromResponse(parsed, provider);
-                
-                // Debug logging for extracted content (development only)
-                if (provider === 'zhi4' && content && process.env.NODE_ENV === 'development') {
-                  console.log('✅ Perplexity extracted content:', JSON.stringify(content));
-                }
-                
-                if (content) {
-                  onChunk?.(content);
-                  yield content;
-                }
-              } catch (error) {
-                // Enhanced error logging for Perplexity
-                if (provider === 'zhi4') {
-                  console.error('❌ Perplexity JSON parse error:', error, 'Raw data:', data);
-                }
+                parsed = JSON.parse(data);
+              } catch {
+                console.error(`Invalid streaming JSON from ${provider}`);
                 continue;
+              }
+              if (parsed.error || parsed.type === "error") {
+                throw new Error(parsed.error?.message || parsed.message || "The AI provider reported a streaming error.");
+              }
+              const content = this.extractContentFromResponse(parsed, provider);
+              if (content) {
+                resetIdleTimeout();
+                onChunk?.(content);
+                yield content;
               }
             }
           }
@@ -208,8 +241,13 @@ export class LLMService {
         reader.releaseLock();
       }
     } catch (error) {
+      if (timedOut) {
+        throw new Error("The AI provider sent no new text for 60 seconds. The request was stopped instead of leaving you waiting. Try another engine.");
+      }
       console.error(`Streaming error for ${provider}:`, error);
       throw error;
+    } finally {
+      if (idleTimer) clearTimeout(idleTimer);
     }
   }
 
@@ -289,7 +327,7 @@ NO elaboration. NO scoring. Sentence + verdict for each.`;
   // Comprehensive Psychological Questions
   getComprehensivePsychologicalQuestions(): string[] {
     return [
-      ...this.getPsychologicalQuestions(),
+      ...this.getMicropsychologicalQuestions(),
       "WHAT ATTACHMENT PATTERNS ARE SUGGESTED BY THE ARGUMENTATION STYLE?",
       "DOES THE AUTHOR DISPLAY MATURE OR IMMATURE DEFENSE MECHANISMS?",
       "IS THERE EVIDENCE OF EMOTIONAL REGULATION OR DYSREGULATION?",

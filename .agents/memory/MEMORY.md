@@ -1,0 +1,3 @@
+- [Public access scope](public-access.md) — No login or paywall until the user explicitly adds them later.
+- [Streaming contract](streaming-contract.md) — Show returned words immediately; preserve early output and every stream event.
+- [Provider connections](provider-connections.md) — Keep self-hosted credentials independent of Replit connections and verify current model availability.
