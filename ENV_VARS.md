@@ -10,7 +10,9 @@ The production container listens on `0.0.0.0` and uses port `5000` unless
 | `NODE_ENV` | No | Set to `production` in the Docker image. |
 | `API_KEY` | No | Optional fallback key for the configured LLM provider. |
 | `OPENAI_API_KEY` | No | API key for the `zhi1` (OpenAI) analysis provider. |
+| `OPENAI_MODEL` | No | OpenAI model for `zhi1`; defaults to `gpt-6-luna`. |
 | `ANTHROPIC_API_KEY` | No | API key for the `zhi2` (Anthropic) analysis provider. |
+| `ANTHROPIC_MODEL` | No | Anthropic model for `zhi2`; defaults to `claude-opus-5-5`. |
 | `DEEPSEEK_API_KEY` | No | API key for the `zhi3` (DeepSeek) analysis provider. |
 | `PERPLEXITY_API_KEY` | No | API key for the `zhi4` (Perplexity) analysis provider. |
 | `XAI_API_KEY` | No | API key for the `zhi5` (xAI) analysis provider. |

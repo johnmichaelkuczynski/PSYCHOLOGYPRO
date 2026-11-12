@@ -133,14 +133,28 @@ export default function Home() {
       {/* Header */}
       <header className="bg-white shadow-sm border-b border-gray-200" data-testid="app-header">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="flex items-center justify-between h-16">
-            <div className="flex items-center space-x-3">
+          <div className="flex flex-col gap-2 py-2 sm:h-16 sm:flex-row sm:items-center sm:justify-between">
+            <div className="flex flex-wrap items-center gap-x-3 gap-y-2">
+              <a
+                href="https://zhisystems.ai"
+                aria-label="Visit Zhi Systems"
+                className="flex shrink-0 flex-col items-center justify-center gap-0.5 rounded-md px-1 text-gray-800 transition-opacity hover:opacity-80 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary"
+                data-testid="zhi-systems-link"
+              >
+                <img
+                  src="/zhi-systems-mark.png"
+                  alt=""
+                  className="h-9 w-9 object-contain"
+                  draggable={false}
+                />
+                <span className="text-[9px] font-semibold leading-none">Zhi Systems</span>
+              </a>
               <Brain className="text-primary text-2xl" data-testid="brain-icon" />
               <h1 className="text-xl font-bold text-gray-900" data-testid="app-title">Psychology Pro</h1>
-              <span className="text-sm text-gray-500" data-testid="app-subtitle">Cognitive Profiler</span>
+              <span className="hidden text-sm text-gray-500 md:inline" data-testid="app-subtitle">Cognitive Profiler</span>
               <a 
                 href="mailto:contact@zhisystems.ai" 
-                className="text-sm text-blue-600 hover:text-blue-800 underline ml-4"
+                className="text-sm text-blue-600 hover:text-blue-800 underline sm:ml-4"
                 data-testid="contact-link"
               >
                 Contact Us
@@ -149,14 +163,14 @@ export default function Home() {
                 href="https://www.youtube.com/watch?v=0hIA4NsETZw"
                 target="_blank"
                 rel="noopener noreferrer"
-                className="flex items-center gap-1 text-sm text-blue-600 hover:text-blue-800 underline ml-3"
+                className="flex items-center gap-1 text-sm text-blue-600 hover:text-blue-800 underline sm:ml-3"
                 data-testid="instructional-video-link"
               >
                 <Video className="h-3.5 w-3.5" />
                 Instructional Video
               </a>
             </div>
-            <div className="flex items-center space-x-4">
+            <div className="flex items-center justify-between gap-1 sm:justify-start sm:space-x-4 sm:gap-0">
               <Button 
                 variant={showSavedAnalyses ? "default" : "ghost"} 
                 size="sm" 

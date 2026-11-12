@@ -21,12 +21,12 @@ export class LLMService {
     zhi1: {
       apiKey: process.env.OPENAI_API_KEY || process.env.API_KEY || "",
       baseUrl: "https://api.openai.com/v1",
-      model: "gpt-4",
+      model: process.env.OPENAI_MODEL || "gpt-6-luna",
     },
     zhi2: {
       apiKey: process.env.ANTHROPIC_API_KEY || process.env.API_KEY || "",
       baseUrl: "https://api.anthropic.com", 
-      model: "claude-opus-4-1",
+      model: process.env.ANTHROPIC_MODEL || "claude-opus-5-5",
     },
     zhi3: {
       apiKey: process.env.DEEPSEEK_API_KEY || process.env.API_KEY || "",
